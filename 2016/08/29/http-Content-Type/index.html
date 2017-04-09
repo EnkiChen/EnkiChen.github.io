@@ -1,0 +1,778 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="HTTP," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="在移动端开发中 HTTP 协议经常被用到，但是在面试或者工作中问到客户端和服务器传输业务数据，使用的数据的封装格式是什么以及怎么被封装到 HTTP 协议中时，很少有人能讲明白。 在移动开发中 HTTP 协议为客户端到服务器端，提供了一条数据通道，能够将我们的业务数据传输到服务器，并且从服务器上获取响应数据。在 HTTP 协议头中的 Content-Type 字段描述了 HTTP 的 BODY 体的">
+<meta name="keywords" content="HTTP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTTP 之 Content-Type">
+<meta property="og:url" content="http://enkichen.com/2016/08/29/http-Content-Type/index.html">
+<meta property="og:site_name" content="Enki's Notes">
+<meta property="og:description" content="在移动端开发中 HTTP 协议经常被用到，但是在面试或者工作中问到客户端和服务器传输业务数据，使用的数据的封装格式是什么以及怎么被封装到 HTTP 协议中时，很少有人能讲明白。 在移动开发中 HTTP 协议为客户端到服务器端，提供了一条数据通道，能够将我们的业务数据传输到服务器，并且从服务器上获取响应数据。在 HTTP 协议头中的 Content-Type 字段描述了 HTTP 的 BODY 体的">
+<meta property="og:image" content="http://enkichen.com/uploads/http_content_type_1.png">
+<meta property="og:image" content="http://enkichen.com/uploads/http_content_type_2.png">
+<meta property="og:image" content="http://enkichen.com/uploads/http_content_type_3.png">
+<meta property="og:image" content="http://enkichen.com/uploads/http_content_type_4.png">
+<meta property="og:updated_time" content="2016-08-29T12:37:38.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HTTP 之 Content-Type">
+<meta name="twitter:description" content="在移动端开发中 HTTP 协议经常被用到，但是在面试或者工作中问到客户端和服务器传输业务数据，使用的数据的封装格式是什么以及怎么被封装到 HTTP 协议中时，很少有人能讲明白。 在移动开发中 HTTP 协议为客户端到服务器端，提供了一条数据通道，能够将我们的业务数据传输到服务器，并且从服务器上获取响应数据。在 HTTP 协议头中的 Content-Type 字段描述了 HTTP 的 BODY 体的">
+<meta name="twitter:image" content="http://enkichen.com/uploads/http_content_type_1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://enkichen.com/2016/08/29/http-Content-Type/"/>
+
+
+
+
+
+  <title> HTTP 之 Content-Type | Enki's Notes </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Enki's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2016/08/29/http-Content-Type/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Enki">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Enki's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                HTTP 之 Content-Type
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-08-29T20:27:25+08:00">
+                2016-08-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">开发笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在移动端开发中 HTTP 协议经常被用到，但是在面试或者工作中问到客户端和服务器传输业务数据，使用的数据的封装格式是什么以及怎么被封装到 HTTP 协议中时，很少有人能讲明白。</p>
+<p>在移动开发中 HTTP 协议为客户端到服务器端，提供了一条数据通道，能够将我们的业务数据传输到服务器，并且从服务器上获取响应数据。在 HTTP 协议头中的 <strong>Content-Type</strong> 字段描述了 <strong>HTTP</strong> 的 <strong>BODY</strong> 体的数据格式，而在 <strong>BODY</strong> 中可以定义我们业务数据的数据格式。<strong>Content-Type</strong> 字段可以用很多种类型，具体有哪些可以看 <a href="http://tool.oschina.net/commons" target="_blank" rel="external"><strong>这里</strong></a>，并且也可以根据自身业务来自定义，不过这种做法比较少。这次我主要讲解三种格式分别为 <strong>application/x-www-form-urlencoded</strong>、<strong>application/json</strong> 以及 <strong>multipart/form-data</strong>，其他的格式可以自己理解。</p>
+<p>下面给各位吃瓜群众介绍上述三种格式在 <strong>GET</strong> 和 <strong>POST</strong> 两种请求方法中的区别，为了更直观的看到我们的数据的组织方式，我使用了 <strong>Charles</strong> 来进行抓包分析。<br><a id="more"></a><br>我们测试的业务需求为：</p>
+<ol>
+<li>客户端发起登录请求，服务器进行响应，请求的数据为 <strong>user</strong> 字段值为 <strong>admin</strong>； <strong>pass</strong> 字段值为 <strong>123456</strong>；</li>
+<li>客户端上传一张图片到服务器，字段名为 <strong>imageFile</strong>，内容为图片的二进制数据。</li>
+</ol>
+<p>为了更好的测试，我对 Web 的请求基于 AFNetworking 2.5.0 版本做了一层简单的封装，发起请求的代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">- (void)webRequest</div><div class="line">&#123;</div><div class="line">    NSDictionary *bParams = @&#123; @&quot;user&quot; : @&quot;admin&quot;,</div><div class="line">                               @&quot;pass&quot; : @&quot;123456&quot;&#125;;</div><div class="line">    </div><div class="line">    NSDictionary *params = @&#123; kWebServiceMethod     : @&quot;POST&quot;,</div><div class="line">                              kWebServiceParams     : bParams,</div><div class="line">                              kWebServiceIdentifier : kPlatformAccountService,</div><div class="line">                              kWebServiceApiUrl     : @&quot;login&quot;&#125;;</div><div class="line">    </div><div class="line">    [CMLWebProxyService webRequestWithParam:params completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) &#123;</div><div class="line">        DDLogInfo(@&quot;responseObject:%@&quot;, responseObject);</div><div class="line">    &#125;];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>用来指定数据格式的代码封装在了叫 BaseService 的类中，方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">- (NSString *)apiContentType</div><div class="line">&#123;</div><div class="line">    return @&quot;application/x-www-form-urlencoded&quot;;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>Web 请求的封装的代码（基于 AFNetworking 2.5.0 版本）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line">+ (NSURLSessionDataTask *)webRequestWithParam:(NSDictionary *) params completionHandler:(void (^)(NSURLResponse *response, id responseObject, NSError *error)) completionHandler</div><div class="line">&#123;</div><div class="line">    id&lt;CMLService&gt; service = [[CMLServiceFactory sharedInstance] serviceWithIdentifier:params[kWebServiceIdentifier]];</div><div class="line">    NSString *urlString = [NSString stringWithFormat:@&quot;%@%@/%@&quot;, service.apiBaseUrl, service.apiVersion, params[kWebServiceApiUrl]];</div><div class="line">    AFHTTPRequestSerializer *requestSerializer = nil;</div><div class="line">    </div><div class="line">    if ( [service.apiContentType isEqualToString:@&quot;application/x-www-form-urlencoded&quot;] ) &#123;</div><div class="line">        </div><div class="line">        requestSerializer = [AFHTTPRequestSerializer serializer];</div><div class="line">        </div><div class="line">    &#125; else if ( [service.apiContentType isEqualToString:@&quot;application/json&quot;] ) &#123;</div><div class="line">        </div><div class="line">        requestSerializer = [AFJSONRequestSerializer serializer];</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    [requestSerializer setValue:@&quot;application/json&quot; forHTTPHeaderField:@&quot;Accept&quot;];</div><div class="line">    requestSerializer.timeoutInterval = kWebServiceTimeoutInterval;</div><div class="line">    </div><div class="line">    NSDictionary *headParams = params[kWebServiceHeadParams];</div><div class="line">    [headParams enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) &#123;</div><div class="line">        [requestSerializer setValue:obj forHTTPHeaderField:key];</div><div class="line">    &#125;];</div><div class="line">    </div><div class="line">    NSURLRequest *request = nil;·</div><div class="line">    NSArray *binParams = params[kWebServiceBinParams];</div><div class="line">    if ( binParams != nil &amp;&amp; binParams.count != 0 ) &#123;</div><div class="line">        request = [requestSerializer multipartFormRequestWithMethod:params[kWebServiceMethod]</div><div class="line">                                                          URLString:urlString</div><div class="line">                                                         parameters:params[kWebServiceParams]</div><div class="line">                                          constructingBodyWithBlock:^(id&lt;AFMultipartFormData&gt; formData) &#123;</div><div class="line">                                              </div><div class="line">                                              for ( NSDictionary *binData in binParams ) &#123;</div><div class="line">                                                  [formData appendPartWithFileData:binData[kWebBinData]</div><div class="line">                                                                              name:binData[kWebBinName]</div><div class="line">                                                                          fileName:binData[kWebBinFileName]</div><div class="line">                                                                          mimeType:binData[kWebBinMimeType]];</div><div class="line">                                              &#125;</div><div class="line">                                              </div><div class="line">                                          &#125; error:nil];</div><div class="line">    &#125; else &#123;</div><div class="line">        request = [requestSerializer requestWithMethod:params[kWebServiceMethod] URLString:urlString parameters:params[kWebServiceParams] error:nil];</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    NSURLSessionDataTask *dataTsk = [[CMLWebProxyService sessionManager] dataTaskWithRequest:request completionHandler:completionHandler];</div><div class="line">    </div><div class="line">    [dataTsk resume];</div><div class="line">    </div><div class="line">    return dataTsk;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="POST-下的数据组织形式"><a href="#POST-下的数据组织形式" class="headerlink" title="POST 下的数据组织形式"></a>POST 下的数据组织形式</h3><p>先看看各个格式的抓包的截图，在做对比分析。</p>
+<p><strong>application/x-www-form-urlencoded</strong> 格式的抓包截图</p>
+<p><img src="/uploads/http_content_type_1.png" alt="url 编码格式"></p>
+<p><strong>application/json</strong> 格式的抓包截图</p>
+<p><img src="/uploads/http_content_type_2.png" alt="url 编码格式"></p>
+<p><strong>multipart/form-data</strong> 格式的请求代码以及抓包的截图：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">NSDictionary *bParams = @&#123; @&quot;user&quot; : @&quot;admin&quot;,</div><div class="line">                              @&quot;pass&quot; : @&quot;123456&quot;&#125;;</div><div class="line">   </div><div class="line">   NSData *imageBin = UIImagePNGRepresentation([UIImage imageNamed:@&quot;avatar_cat&quot;]);</div><div class="line">   </div><div class="line">   NSDictionary *binPar = @&#123; kWebBinData : imageBin,</div><div class="line">                             kWebBinName : @&quot;imageFile&quot;,</div><div class="line">                             kWebBinFileName : @&quot;image.png&quot;,</div><div class="line">                             kWebBinMimeType : @&quot;image/png&quot;</div><div class="line">                            &#125;;</div><div class="line">   </div><div class="line">   NSDictionary *params = @&#123; kWebServiceMethod     : @&quot;POST&quot;,</div><div class="line">                             kWebServiceParams     : bParams,</div><div class="line">                             kWebServiceBinParams  : @[binPar],</div><div class="line">                             kWebServiceIdentifier : kPlatformAccountService,</div><div class="line">                             kWebServiceApiUrl     : @&quot;login&quot;&#125;;</div></pre></td></tr></table></figure>
+<p><img src="/uploads/http_content_type_3.png" alt="url 编码格式"></p>
+<p><strong>application/x-www-form-urlencoded</strong> 格式对请求参数进行了 <a href="http://deyimsf.iteye.com/blog/1776082" target="_blank" rel="external"><strong>URL 编码</strong></a> 并将参数放在了 <strong>BODY</strong> 中；<strong>application/json</strong> 格式是将参数进行了 <a href="http://www.w3school.com.cn/json/json_syntax.asp" target="_blank" rel="external"><strong>JSON</strong></a> 格式的转换，放在了 <strong>BODY</strong> 中；</p>
+<p>前两种都是传的普通的文本数据，如果我们需要同时传输文本数据以及二进制数据时，就得用到 <strong>multipart/form-data</strong> 编码格式了，可以从图中看到在 <strong>HTTP</strong> 的头部的 <strong>Content-Type</strong> 中多了 <strong>Boundary</strong> 字段，该字段的作用为对多项数据进行分割；截图中 3 个参数都使用了指定的字符串进行了分割，在图片的那一项中也包含了 <strong>Content-Type</strong> 字段用来描述该项的数据格式为 <strong>PNG</strong> 图片。如果没有图片参数的话，也可以直接使用 <strong>multipart/form-data</strong> 格式来进行组织。</p>
+<blockquote>
+<p>用来分割的字符串的值是每次随机生成的。不同的客户生成的字符串长度也会不一样。</p>
+</blockquote>
+<h3 id="GET-下的数据组织形式"><a href="#GET-下的数据组织形式" class="headerlink" title="GET 下的数据组织形式"></a>GET 下的数据组织形式</h3><p><strong>HTTP</strong> 的 <strong>GET</strong> 请求方式，是将我们要请求的参数放在 <strong>URL</strong> 地址后面，所以 <strong>GET</strong> 方式只支持 <strong>application/x-www-form-urlencoded</strong> 格式，而 <strong>application/json</strong> 和 <strong>multipart/form-data</strong> 不支持的，这个应该比较容易理解。下面是我抓包的截图：</p>
+<p><img src="/uploads/http_content_type_4.png" alt="url 编码格式"></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>其实抓包截图做对比就很容易理解不同的参数的意义了，在很多情况下后端和前端开发人员都是使用成熟的第三方框架来帮我们做这部分工作，对 <strong>HTTP</strong> 协议了解的还不够细致，有时候发现在调试接口无法解析数据，其实很有可能 <strong>Content-Type</strong> 类型不一致导致的。如果觉得文本协议不够精简，也可以使用二进制协议来传输 <strong>user</strong> 和 <strong>pass</strong> 字段，比如 <strong>protobuf</strong> ，只要和服务器端协商好就可以。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/HTTP/" rel="tag"># HTTP</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/02/17/protobuf-introduce/" rel="next" title="Protocol Buffer 简介与使用">
+                <i class="fa fa-chevron-left"></i> Protocol Buffer 简介与使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/22/development-of-small-notes/" rel="prev" title="两则开发小笔记">
+                两则开发小笔记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.jpg"
+               alt="Enki" />
+          <p class="site-author-name" itemprop="name">Enki</p>
+           
+              <p class="site-description motion-element" itemprop="description">说过很多潇洒的话，做过很多打脸的事</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/enkichen" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#POST-下的数据组织形式"><span class="nav-number">1.</span> <span class="nav-text">POST 下的数据组织形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GET-下的数据组织形式"><span class="nav-number">2.</span> <span class="nav-text">GET 下的数据组织形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Enki</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="powered-by">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span id="busuanzi_container_site_pv">
+    本站总访问量 <span id="busuanzi_value_site_pv"></span> 次
+    </span>
+
+    <span id="busuanzi_container_site_uv">
+    本站访客数 <span id="busuanzi_value_site_uv"></span> 人次
+    </span>
+
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

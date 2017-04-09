@@ -1,0 +1,775 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="旋转,SDWebImage,NSCache," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="起因 旋转了的图片前段时间在对程序的绘图逻辑进行了使用OpenGL做优化，但是在使用OpenGL进行绘制时发现一些图片会莫名其妙的旋转，在细看了代码之后发现问题发生在UIImage对象的imageOrientation属性。该属性为枚举类型可以有以下取值：">
+<meta name="keywords" content="旋转,SDWebImage,NSCache">
+<meta property="og:type" content="article">
+<meta property="og:title" content="优化APP时发现的SDWebImage的问题">
+<meta property="og:url" content="http://enkichen.com/2015/12/22/sdwebimage-issues/index.html">
+<meta property="og:site_name" content="Enki's Notes">
+<meta property="og:description" content="起因 旋转了的图片前段时间在对程序的绘图逻辑进行了使用OpenGL做优化，但是在使用OpenGL进行绘制时发现一些图片会莫名其妙的旋转，在细看了代码之后发现问题发生在UIImage对象的imageOrientation属性。该属性为枚举类型可以有以下取值：">
+<meta property="og:updated_time" content="2016-01-07T02:10:57.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="优化APP时发现的SDWebImage的问题">
+<meta name="twitter:description" content="起因 旋转了的图片前段时间在对程序的绘图逻辑进行了使用OpenGL做优化，但是在使用OpenGL进行绘制时发现一些图片会莫名其妙的旋转，在细看了代码之后发现问题发生在UIImage对象的imageOrientation属性。该属性为枚举类型可以有以下取值：">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://enkichen.com/2015/12/22/sdwebimage-issues/"/>
+
+
+
+
+
+  <title> 优化APP时发现的SDWebImage的问题 | Enki's Notes </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Enki's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2015/12/22/sdwebimage-issues/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Enki">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Enki's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                优化APP时发现的SDWebImage的问题
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-22T19:34:17+08:00">
+                2015-12-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">开发笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="起因-旋转了的图片"><a href="#起因-旋转了的图片" class="headerlink" title="起因 旋转了的图片"></a>起因 旋转了的图片</h3><p>前段时间在对程序的绘图逻辑进行了使用OpenGL做优化，但是在使用OpenGL进行绘制时发现一些图片会莫名其妙的旋转，在细看了代码之后发现问题发生在<strong>UIImage</strong>对象的<strong>imageOrientation</strong>属性。该属性为枚举类型可以有以下取值：<br><a id="more"></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">typedef enum &#123;</div><div class="line">    UIImageOrientationUp,            // default orientation  默认方向   </div><div class="line">    UIImageOrientationDown,          // 180 deg rotation     旋转180度    </div><div class="line">    UIImageOrientationLeft,          // 90 deg CCW           逆时针旋转90度</div><div class="line">    UIImageOrientationRight,         // 90 deg CW            顺时针旋转90度</div><div class="line">    UIImageOrientationUpMirrored,    // horizontal flip      向上水平翻转</div><div class="line">    UIImageOrientationDownMirrored,  // horizontal flip      向下水平翻转</div><div class="line">    UIImageOrientationLeftMirrored,  // vertical flip        逆时针旋转90度，垂直翻转</div><div class="line">    UIImageOrientationRightMirrored, // vertical flip        顺时针旋转90度，垂直翻转</div><div class="line">&#125; UIImageOrientation;</div></pre></td></tr></table></figure>
+<p>该属性用来记录照片的方向信息，在使用iPhone或者iPad自带的照相机拍摄出来的照片含有EXIF信息，而在使用Core Graphics进行绘制时，会进行一些转换，我在使用OpenGL绘制时直接使用的原图，转换成纹理对象时是旋转的图片对象，所以在使用OpenGL绘制会出现旋转问题。在网上找了一下代码做了调整：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div></pre></td><td class="code"><pre><div class="line">- (UIImage *)fixOrientation&#123;</div><div class="line">    </div><div class="line">    // No-op if the orientation is already correct</div><div class="line">    if (self.imageOrientation == UIImageOrientationUp)</div><div class="line">        return self;</div><div class="line">    </div><div class="line">    // We need to calculate the proper transformation to make the image upright.</div><div class="line">    // We do it in 2 steps: Rotate if Left/Right/Down, and then flip if Mirrored.</div><div class="line">    CGAffineTransform transform = CGAffineTransformIdentity;</div><div class="line">    </div><div class="line">    switch (self.imageOrientation) &#123;</div><div class="line">        case UIImageOrientationDown:</div><div class="line">        case UIImageOrientationDownMirrored:</div><div class="line">            transform = CGAffineTransformTranslate(transform, self.size.width, self.size.height);</div><div class="line">            transform = CGAffineTransformRotate(transform, M_PI);</div><div class="line">            break;</div><div class="line">            </div><div class="line">        case UIImageOrientationLeft:</div><div class="line">        case UIImageOrientationLeftMirrored:</div><div class="line">            transform = CGAffineTransformTranslate(transform, self.size.width, 0);</div><div class="line">            transform = CGAffineTransformRotate(transform, M_PI_2);</div><div class="line">            break;</div><div class="line">            </div><div class="line">        case UIImageOrientationRight:</div><div class="line">        case UIImageOrientationRightMirrored:</div><div class="line">            transform = CGAffineTransformTranslate(transform, 0, self.size.height);</div><div class="line">            transform = CGAffineTransformRotate(transform, -M_PI_2);</div><div class="line">            break;</div><div class="line">        default:</div><div class="line">            break;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    switch (self.imageOrientation) &#123;</div><div class="line">        case UIImageOrientationUpMirrored:</div><div class="line">        case UIImageOrientationDownMirrored:</div><div class="line">            transform = CGAffineTransformTranslate(transform, self.size.width, 0);</div><div class="line">            transform = CGAffineTransformScale(transform, -1, 1);</div><div class="line">            break;</div><div class="line">            </div><div class="line">        case UIImageOrientationLeftMirrored:</div><div class="line">        case UIImageOrientationRightMirrored:</div><div class="line">            transform = CGAffineTransformTranslate(transform, self.size.height, 0);</div><div class="line">            transform = CGAffineTransformScale(transform, -1, 1);</div><div class="line">            break;</div><div class="line">        default:</div><div class="line">            break;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    // Now we draw the underlying CGImage into a new context, applying the transform</div><div class="line">    // calculated above.</div><div class="line">    CGContextRef ctx = CGBitmapContextCreate(NULL, self.size.width, self.size.height,</div><div class="line">                                             CGImageGetBitsPerComponent(self.CGImage), 0,</div><div class="line">                                             CGImageGetColorSpace(self.CGImage),</div><div class="line">                                             CGImageGetBitmapInfo(self.CGImage));</div><div class="line">    CGContextConcatCTM(ctx, transform);</div><div class="line">    switch (self.imageOrientation) &#123;</div><div class="line">        case UIImageOrientationLeft:</div><div class="line">        case UIImageOrientationLeftMirrored:</div><div class="line">        case UIImageOrientationRight:</div><div class="line">        case UIImageOrientationRightMirrored:</div><div class="line">            // Grr...</div><div class="line">            CGContextDrawImage(ctx, CGRectMake(0,0,self.size.height,self.size.width), self.CGImage);</div><div class="line">            break;</div><div class="line">            </div><div class="line">        default:</div><div class="line">            CGContextDrawImage(ctx, CGRectMake(0,0,self.size.width,self.size.height), self.CGImage);</div><div class="line">            break;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    // And now we just create a new UIImage from the drawing context</div><div class="line">    CGImageRef cgimg = CGBitmapContextCreateImage(ctx);</div><div class="line">    UIImage *img = [UIImage imageWithCGImage:cgimg];</div><div class="line">    CGContextRelease(ctx);</div><div class="line">    CGImageRelease(cgimg);</div><div class="line">    return img;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="再次遇到旋转问题"><a href="#再次遇到旋转问题" class="headerlink" title="再次遇到旋转问题"></a>再次遇到旋转问题</h3><p>旋转问题得到解决之后，使用了<strong>SDWebImage</strong>自带的<strong>SDImageCache</strong>类进行了图片的缓存管理，该类能够做到内存不足时释放不需要的图片对象。类底层使用了系统的<strong>NSCache</strong>实现的，能够在系统内存不足时释放被管理的对象。   </p>
+<p>在使用<strong>SDImageCache</strong>类做缓存之后，我们的测试MM发现在一些情况下会出现图片旋转的问题。而且是 Core Graphics 和 OpenGL 两个环境下都会出现。因为有了前面的经验，很快就找到了方向，那就是<strong>UIImage</strong>对象的<strong>imageOrientation</strong>属性出问题了，经过一步步调试发现，在<strong>UIImage</strong>对象交给<strong>SDImageCache</strong>管理之后，再从缓存中拿出来时<strong>imageOrientation</strong>属性会不一致。于是找到了<strong>SDImageCache</strong>类的部分源码，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div></pre></td><td class="code"><pre><div class="line">- (void)storeImage:(UIImage *)image recalculateFromImage:(BOOL)recalculate imageData:(NSData *)imageData forKey:(NSString *)key toDisk:(BOOL)toDisk &#123;</div><div class="line">    if (!image || !key) &#123;</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    [self.memCache setObject:image forKey:key cost:image.size.height * image.size.width * image.scale * image.scale];</div><div class="line"></div><div class="line">    if (toDisk) &#123;</div><div class="line">        dispatch_async(self.ioQueue, ^&#123;</div><div class="line">            NSData *data = imageData;</div><div class="line"></div><div class="line">            if (image &amp;&amp; (recalculate || !data)) &#123;</div><div class="line">#if TARGET_OS_IPHONE</div><div class="line">                // We need to determine if the image is a PNG or a JPEG</div><div class="line">                // PNGs are easier to detect because they have a unique signature (http://www.w3.org/TR/PNG-Structure.html)</div><div class="line">                // The first eight bytes of a PNG file always contain the following (decimal) values:</div><div class="line">                // 137 80 78 71 13 10 26 10</div><div class="line"></div><div class="line">                // We assume the image is PNG, in case the imageData is nil (i.e. if trying to save a UIImage directly),</div><div class="line">                // we will consider it PNG to avoid loosing the transparency</div><div class="line">                BOOL imageIsPng = YES;</div><div class="line"></div><div class="line">                // But if we have an image data, we will look at the preffix</div><div class="line">                if ([imageData length] &gt;= [kPNGSignatureData length]) &#123;</div><div class="line">                    imageIsPng = ImageDataHasPNGPreffix(imageData);</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                if (imageIsPng) &#123;</div><div class="line">                    data = UIImagePNGRepresentation(image);</div><div class="line">                &#125;</div><div class="line">                else &#123;</div><div class="line">                    data = UIImageJPEGRepresentation(image, (CGFloat)1.0);</div><div class="line">                &#125;</div><div class="line">#else</div><div class="line">                data = [NSBitmapImageRep representationOfImageRepsInArray:image.representations usingType: NSJPEGFileType properties:nil];</div><div class="line">#endif</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            if (data) &#123;</div><div class="line">                if (![_fileManager fileExistsAtPath:_diskCachePath]) &#123;</div><div class="line">                    [_fileManager createDirectoryAtPath:_diskCachePath withIntermediateDirectories:YES attributes:nil error:NULL];</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                [_fileManager createFileAtPath:[self defaultCachePathForKey:key] contents:data attributes:nil];</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以知道<strong>UIImage</strong>对象在IO线程中直接使用<strong>UIImagePNGRepresentation</strong>或者<strong>UIImageJPEGRepresentation</strong>方法转换成<strong>NSData</strong>对象然后直接存储到文件中了。 <strong>imageData</strong>参数可以从以下两个方法知道，默认情况下是传的<strong>nil</strong>值。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">- (void)storeImage:(UIImage *)image forKey:(NSString *)key &#123;</div><div class="line">    [self storeImage:image recalculateFromImage:YES imageData:nil forKey:key toDisk:YES];</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)storeImage:(UIImage *)image forKey:(NSString *)key toDisk:(BOOL)toDisk &#123;</div><div class="line">    [self storeImage:image recalculateFromImage:YES imageData:nil forKey:key toDisk:toDisk];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>也就是说我们在使用<strong>SDImageCache</strong>做缓存时，默认会当做PNG图片存储到文件。而经过测试发现<strong>UIImagePNGRepresentation</strong>方法转换成<strong>NSData</strong>对象时，EXIF信息将会丢失，而<strong>UIImageJPEGRepresentation</strong>方法则不会。在找到原因之后，问题就可以很好的解决了，只要在加入到缓存之前，将图片恢复到正常方向，再将图片保存到缓存中即可。  </p>
+<h3 id="获取缓存失败"><a href="#获取缓存失败" class="headerlink" title="获取缓存失败"></a>获取缓存失败</h3><p>本以为问题都解决了，然而第二天我们测试发现在一些情况下，插入图片时会显示一张默认图片（图片如果加载失败会显示一张默认的小图），在跟测试MM做了一些沟通之后，走读了一下代码流程，并进行了调试，发现图片被放进缓存之后，再次进行获取时，却获取不到数据。  </p>
+<p>想不通为什么，于是看了一下<strong>SDImageCache</strong>类的源码（前面有提到），结合调试发现的一些信息，在加载iPad（我们的应用是iPad）拍摄的照片并且在插入多张图片之后才会出现这种现象，于是猜想是不是在<strong>UIImage</strong>对象在加入到缓存中之后，这时候收到内存警告或者超过设定的阀值，导致被加入的对象在IO线程还未将图片写入到磁盘之前就被释放了，这样将导致从内存和磁盘中都获取不到数据。为了验证这个猜想，修改了<strong>SDImageCache</strong>源码，设置了memCache的delegate，<strong>NSCache</strong>有个delegate，协议如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">@protocol NSCacheDelegate &lt;NSObject&gt;</div><div class="line">@optional</div><div class="line">- (void)cache:(NSCache *)cache willEvictObject:(id)obj;</div><div class="line">@end</div></pre></td></tr></table></figure>
+<p>通过该protocol便可以知道被加入缓存中的对象什么时候被释放。在delegate中、IO线程中写入文件成功之后以及获取<strong>UIImage</strong>对象时添加一些Log信息。这样便可以知道各个逻辑的执行流程。经过验证，执行流程我猜想的一样，<strong>UIImage</strong>对象在加入到缓存一小会时间之后立马被释放了，这时候IO线程还未执行完成，这时候从缓存中是获取不到缓存数据的。从而导致失败显示默认图片。  </p>
+<p>问题已经找到了，但是要解决这个问题很是蛋疼，分别有以下几种做法：</p>
+<ul>
+<li>修改上层逻辑代码等待IO线程写入成功后，才执行后续流程，这样确保一定能获取到数据。</li>
+<li>修改<strong>SDWebImage</strong>让内存数据不那么快被释放。</li>
+<li>自己重新造个轮子达到我们想要的要求。</li>
+</ul>
+<p>对于上述修改第一条有点恶心，有点打补丁的节奏。针对后两条不太实际，工作量太大，最近在<a href="http://blog.ibireme.com/" target="_blank" rel="external"><strong>ibireme</strong></a>的博客上看一个<a href="https://github.com/ibireme/YYCache" target="_blank" rel="external"><strong>YYCache</strong></a>的开源项目，看了介绍还不错，于是将项目中的缓存直接换成了<strong>YYCache</strong>，做了相同的测试，发现问题没有出现了。^o^，后续将阅读一下<strong>YYCache</strong>的源代码了，看看具体的实现方法。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>在优化的过程中发现了<strong>SDWebImage</strong>的两个问题分别为：</p>
+<ul>
+<li>在使用<strong>SDWebImage</strong>做图片缓存时，图片默认会被当做PNG格式存储，而<strong>UIImagePNGRepresentation</strong>方法转换成<strong>NSData</strong>时会丢失EXIF信息，这样当再次从磁盘读取数据时，将是丢失EXIF信息的图片，从而导致无法进行正常的图片旋转。</li>
+<li>使用<strong>SDWebImage</strong>做缓存时，当内存到达一个临界值时，加入的新的缓存对象，会在IO线程写入文件之前释放，在内存对象被释放，IO未完成写入的这段时间内，无法正确获取到缓存数据。  </li>
+</ul>
+<p><a href="https://github.com/rs/SDWebImage" target="_blank" rel="external"><strong>SDWebImage</strong></a>很多人在用，而且使用起来也很方便，尤其在加载网络图片时非常方便，项目中还将继续使用用来做网络图片的加载，不过内存缓存会使用<a href="https://github.com/ibireme/YYCache" target="_blank" rel="external"><strong>YYCache</strong></a>， 针对<a href="https://github.com/ibireme/YYCache" target="_blank" rel="external"><strong>YYCache</strong></a>这个类，还没来得及细看代码，网上评价作者代码相当工整，看过<a href="https://github.com/ibireme/YYCategories" target="_blank" rel="external"><strong>YYCategories</strong></a>部分源码实现，确实写的不错，今后多看看，向大牛们学习。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/旋转/" rel="tag"># 旋转</a>
+          
+            <a href="/tags/SDWebImage/" rel="tag"># SDWebImage</a>
+          
+            <a href="/tags/NSCache/" rel="tag"># NSCache</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/12/29/ios-xia-opengl-xu-yao-zhu-yi-de-ji-dian/" rel="next" title="iOS下使用OpenGL要注意的几点">
+                <i class="fa fa-chevron-left"></i> iOS下使用OpenGL要注意的几点
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/12/19/First-blog/" rel="prev" title="开博第一篇">
+                开博第一篇 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.jpg"
+               alt="Enki" />
+          <p class="site-author-name" itemprop="name">Enki</p>
+           
+              <p class="site-description motion-element" itemprop="description">说过很多潇洒的话，做过很多打脸的事</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/enkichen" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#起因-旋转了的图片"><span class="nav-number">1.</span> <span class="nav-text">起因 旋转了的图片</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#再次遇到旋转问题"><span class="nav-number">2.</span> <span class="nav-text">再次遇到旋转问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取缓存失败"><span class="nav-number">3.</span> <span class="nav-text">获取缓存失败</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Enki</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="powered-by">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span id="busuanzi_container_site_pv">
+    本站总访问量 <span id="busuanzi_value_site_pv"></span> 次
+    </span>
+
+    <span id="busuanzi_container_site_uv">
+    本站访客数 <span id="busuanzi_value_site_uv"></span> 人次
+    </span>
+
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

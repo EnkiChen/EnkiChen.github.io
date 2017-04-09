@@ -1,0 +1,768 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="associative,runtime," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="iOS 下有很多运行时特性，这里介绍一下 Associative(关联) 这个运行时特性，以及它一些使用场景。Associative 意思为关联，能够将两个对象建立一种关系。这种关系是一种 从属 关系，也就是说有一个 关联者 和一个 被关联者。比如说我们可以将一个 NSString 对象关联到一个 UIView 对象上。这里的 NSString 对象就是 被关联者, UIView 对象就是 关联者">
+<meta name="keywords" content="associative,runtime">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS 运行时之 Associative(关联)">
+<meta property="og:url" content="http://enkichen.com/2017/02/18/ios-associative/index.html">
+<meta property="og:site_name" content="Enki's Notes">
+<meta property="og:description" content="iOS 下有很多运行时特性，这里介绍一下 Associative(关联) 这个运行时特性，以及它一些使用场景。Associative 意思为关联，能够将两个对象建立一种关系。这种关系是一种 从属 关系，也就是说有一个 关联者 和一个 被关联者。比如说我们可以将一个 NSString 对象关联到一个 UIView 对象上。这里的 NSString 对象就是 被关联者, UIView 对象就是 关联者">
+<meta property="og:updated_time" content="2017-02-18T05:03:04.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS 运行时之 Associative(关联)">
+<meta name="twitter:description" content="iOS 下有很多运行时特性，这里介绍一下 Associative(关联) 这个运行时特性，以及它一些使用场景。Associative 意思为关联，能够将两个对象建立一种关系。这种关系是一种 从属 关系，也就是说有一个 关联者 和一个 被关联者。比如说我们可以将一个 NSString 对象关联到一个 UIView 对象上。这里的 NSString 对象就是 被关联者, UIView 对象就是 关联者">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://enkichen.com/2017/02/18/ios-associative/"/>
+
+
+
+
+
+  <title> iOS 运行时之 Associative(关联) | Enki's Notes </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Enki's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2017/02/18/ios-associative/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Enki">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Enki's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                iOS 运行时之 Associative(关联)
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-02-18T12:42:00+08:00">
+                2017-02-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/知识整理-总结/" itemprop="url" rel="index">
+                    <span itemprop="name">知识整理/总结</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>iOS 下有很多运行时特性，这里介绍一下 <code>Associative(关联)</code> 这个运行时特性，以及它一些使用场景。<code>Associative</code> 意思为关联，能够将两个对象建立一种关系。这种关系是一种 <code>从属</code> 关系，也就是说有一个 <code>关联者</code> 和一个 <code>被关联者</code>。比如说我们可以将一个 <code>NSString</code> 对象关联到一个 <code>UIView</code> 对象上。这里的 <code>NSString</code> 对象就是 <code>被关联者</code>, <code>UIView</code> 对象就是 <code>关联者</code>。</p>
+<p>在 <code>objc/runtime.h</code> 文件中，找到 <code>Associative</code> 相关的 API 定义，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line">/** </div><div class="line"> * Sets an associated value for a given object using a given key and association policy.</div><div class="line"> * </div><div class="line"> * @param object The source object for the association.</div><div class="line"> * @param key The key for the association.</div><div class="line"> * @param value The value to associate with the key key for object. Pass nil to clear an existing association.</div><div class="line"> * @param policy The policy for the association. For possible values, see “Associative Object Behaviors.”</div><div class="line"> * </div><div class="line"> * @see objc_setAssociatedObject</div><div class="line"> * @see objc_removeAssociatedObjects</div><div class="line"> */</div><div class="line">OBJC_EXPORT void objc_setAssociatedObject(id object, const void *key, id value, objc_AssociationPolicy policy)</div><div class="line">    OBJC_AVAILABLE(10.6, 3.1, 9.0, 1.0);</div><div class="line"></div><div class="line">/** </div><div class="line"> * Returns the value associated with a given object for a given key.</div><div class="line"> * </div><div class="line"> * @param object The source object for the association.</div><div class="line"> * @param key The key for the association.</div><div class="line"> * </div><div class="line"> * @return The value associated with the key \e key for \e object.</div><div class="line"> * </div><div class="line"> * @see objc_setAssociatedObject</div><div class="line"> */</div><div class="line">OBJC_EXPORT id objc_getAssociatedObject(id object, const void *key)</div><div class="line">    OBJC_AVAILABLE(10.6, 3.1, 9.0, 1.0);</div><div class="line"></div><div class="line">/** </div><div class="line"> * Removes all associations for a given object.</div><div class="line"> * </div><div class="line"> * @param object An object that maintains associated objects.</div><div class="line"> * </div><div class="line"> * @note The main purpose of this function is to make it easy to return an object </div><div class="line"> *  to a &quot;pristine state”. You should not use this function for general removal of</div><div class="line"> *  associations from objects, since it also removes associations that other clients</div><div class="line"> *  may have added to the object. Typically you should use \c objc_setAssociatedObject </div><div class="line"> *  with a nil value to clear an association.</div><div class="line"> * </div><div class="line"> * @see objc_setAssociatedObject</div><div class="line"> * @see objc_getAssociatedObject</div><div class="line"> */</div><div class="line">OBJC_EXPORT void objc_removeAssociatedObjects(id object)</div><div class="line">    OBJC_AVAILABLE(10.6, 3.1, 9.0, 1.0);</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>同时还提供以下枚举类型的定义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * Policies related to associative references.</div><div class="line"> * These are options to objc_setAssociatedObject()</div><div class="line"> */</div><div class="line">typedef OBJC_ENUM(uintptr_t, objc_AssociationPolicy) &#123;</div><div class="line">    OBJC_ASSOCIATION_ASSIGN = 0,           /**&lt; Specifies a weak reference to the associated object. */</div><div class="line">    OBJC_ASSOCIATION_RETAIN_NONATOMIC = 1, /**&lt; Specifies a strong reference to the associated object. </div><div class="line">                                            *   The association is not made atomically. */</div><div class="line">    OBJC_ASSOCIATION_COPY_NONATOMIC = 3,   /**&lt; Specifies that the associated object is copied. </div><div class="line">                                            *   The association is not made atomically. */</div><div class="line">    OBJC_ASSOCIATION_RETAIN = 01401,       /**&lt; Specifies a strong reference to the associated object.</div><div class="line">                                            *   The association is made atomically. */</div><div class="line">    OBJC_ASSOCIATION_COPY = 01403          /**&lt; Specifies that the associated object is copied.</div><div class="line">                                            *   The association is made atomically. */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h3 id="API-解析"><a href="#API-解析" class="headerlink" title="API 解析"></a>API 解析</h3><p><code>void objc_setAssociatedObject(id object, const void *key, id value, objc_AssociationPolicy policy)</code> API 为我们提供了将两个对象建立关联关系的能力，参数解析为：</p>
+<ul>
+<li><strong>id object</strong>：指定 <code>关联者</code></li>
+<li><strong>id value</strong>：指定 <code>被关联者</code></li>
+<li><strong>const void *key</strong>：<code>被关联者</code> 的 KEY 值，方便后续可以通过该 KEY 值找到该 <code>被关联者</code></li>
+<li><strong>objc_AssociationPolicy policy</strong>: 该参数作用用来表示 <code>被关联者</code> 的引用策略，也就是内存如何进行管理的，可通过上述定义的枚举类型来设置。</li>
+</ul>
+<p><code>id objc_getAssociatedObject(id object, const void *key)</code> API 可以通过之前设置的 KEY 值，来获取 <code>被关联者</code> 对象，参数解析如下：</p>
+<ul>
+<li><strong>id object</strong>：<code>关联者</code> 对象</li>
+<li><strong>const void *key</strong>：要获取的 <code>被关联者</code> 的 KEY 值，一个 <code>关联者</code> 可以被关联多对象，一个 <code>关联者</code> 也可以是 <code>被关联这</code>，可以通过不同的 KEY 来获取不同的 <code>被关联者</code> 对象。</li>
+</ul>
+<p><code>void objc_removeAssociatedObjects(id object)</code> 该 API 可以移除一个 <code>关联者</code> 对象所有的 <code>被关联者</code>。当需要移除特定的对象时，我们可以使用 <code>objc_setAssociatedObject</code> 方法并指定 <code>id value</code> 参数对象为空即可。</p>
+<p>以上就是关于 <code>Associative(关联)</code> 特性相关的 API 介绍了，下面介绍一下常用的使用场景。</p>
+<h3 id="Associative-特性的应用"><a href="#Associative-特性的应用" class="headerlink" title="Associative 特性的应用"></a>Associative 特性的应用</h3><h4 id="剪切板的信息复制"><a href="#剪切板的信息复制" class="headerlink" title="剪切板的信息复制"></a>剪切板的信息复制</h4><p>在一些时候我们希望用户可以长按文案信息，弹出系统的复制菜单，提供文案信息的复制功能，比如长按     <code>UITableViewCell</code> 提供复制详情的功能，在 iOS 下我们可以使用 <code>UIMenuController</code> 类来显示系统菜单，同时为该 <code>UITableViewCell</code> 添加长按手势，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">// 添加长按手势</div><div class="line">UILongPressGestureRecognizer *longPressGR = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];</div><div class="line">[cell addGestureRecognizer:longPressGR];</div><div class="line"></div><div class="line">// 手势处理</div><div class="line">- (void)handleLongPress:(UILongPressGestureRecognizer *) longPressGR &#123;</div><div class="line">    UIMenuController *menu = [UIMenuController sharedMenuController];</div><div class="line">    [menu setTargetRect:longPressGR.view.frame inView:self.view];</div><div class="line">    [menu setMenuVisible:YES animated:YES];</div><div class="line">&#125;</div><div class="line"></div><div class="line">// UIMenuController 相关</div><div class="line">- (BOOL)canBecomeFirstResponder &#123;</div><div class="line">    return YES;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (BOOL)canPerformAction:(SEL)action withSender:(id)sender &#123;</div><div class="line">    if ( action == @selector(copy:) ) &#123;</div><div class="line">        return YES;</div><div class="line">    &#125;</div><div class="line">    return NO;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)copy:(UIMenuController *)menu &#123;</div><div class="line">    UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>从上述代码可以看到，复制信息的逻辑处理是在 <code>copy:</code> 方法中，但是在该方法中，并不能访问到 <code>cell.detailTextLabel</code> 对象，在该场景中，我们可以使用 <code>Associative</code> 特性将 <code>UITableViewCell</code> 对象关联到 <code>UIMenuController</code> 对象中，再在 <code>copy:</code> 方法中获取到被关联对象，从而获取到 <code>UITableViewCell</code> 对象，进而访问 <code>cell.detailTextLabel.text</code>。添加代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">// 处理手势时，添加如下代码</div><div class="line">objc_setAssociatedObject(menu, @&quot;UITableViewCell&quot;, longPressGR.view, OBJC_ASSOCIATION_RETAIN_NONATOMIC);</div><div class="line"></div><div class="line">// 处理 copy 时，添加如下代码，来获取被关联的 UITableViewCell 对象</div><div class="line">objc_getAssociatedObject(menu, @&quot;UITableViewCell&quot;);</div><div class="line">pasteboard.string = cell.detailTextLabel.text;</div></pre></td></tr></table></figure>
+<p>上述场景中，并不一定非得用 <code>Associative</code> 特性来实现，还有很多可行的方法，这里为大家提供一种方法，并且该方法还算是比较优雅的。</p>
+<h4 id="其他一些应用场景"><a href="#其他一些应用场景" class="headerlink" title="其他一些应用场景"></a>其他一些应用场景</h4><p>另一个常见的应用场景就是，为一个系统类或是一个第三方的类添加一个属性时，可以结合 <strong>Category</strong> 为类添加一个属性，当然也可以使用继承来达到目的。在一些特殊场景下，比如想知道一个系统内部对象或者第三方对象是何时被释放时，我们可以为该对象关联一个自定义的对象，并且使用 <code>OBJC_ASSOCIATION_RETAIN_NONATOMIC</code> 来指定内存管理策略，当关联者被释放是，被关联者也会跟着被释放，这样可以在我们自定义的对象中，知道感兴趣的对象何时被释放的。在调试一些内存问题时，该方法还是蛮有用的。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/associative/" rel="tag"># associative</a>
+          
+            <a href="/tags/runtime/" rel="tag"># runtime</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/02/17/protobuf-introduce/" rel="prev" title="Protocol Buffer 简介与使用">
+                Protocol Buffer 简介与使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.jpg"
+               alt="Enki" />
+          <p class="site-author-name" itemprop="name">Enki</p>
+           
+              <p class="site-description motion-element" itemprop="description">说过很多潇洒的话，做过很多打脸的事</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/enkichen" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#API-解析"><span class="nav-number">1.</span> <span class="nav-text">API 解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Associative-特性的应用"><span class="nav-number">2.</span> <span class="nav-text">Associative 特性的应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#剪切板的信息复制"><span class="nav-number">2.1.</span> <span class="nav-text">剪切板的信息复制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#其他一些应用场景"><span class="nav-number">2.2.</span> <span class="nav-text">其他一些应用场景</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Enki</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="powered-by">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span id="busuanzi_container_site_pv">
+    本站总访问量 <span id="busuanzi_value_site_pv"></span> 次
+    </span>
+
+    <span id="busuanzi_container_site_uv">
+    本站访客数 <span id="busuanzi_value_site_uv"></span> 人次
+    </span>
+
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

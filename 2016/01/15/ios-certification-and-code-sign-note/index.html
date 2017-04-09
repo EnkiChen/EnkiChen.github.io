@@ -1,0 +1,875 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="开发证书,代码签名,mobileprovision,Provisioning Profiles,开发者账号," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="最近需要给iOS开发团队做一次关于iOS开发证书以及代码签名的分享，于是花了点时间把这一块的知识重新学习和整理了一遍，从而有了这篇学习笔记。其中很多一些文字都是从网站或者博客上摘抄过来，为了阅读方便也做了一些调整，说白了我只是做了一些知识的梳理和整合。   该笔记涉及到内容有：开发者账号、签名证书、标识符（Identifiers）、设备（Devices）、APP授权机制、配置文件、ipa文件的签">
+<meta name="keywords" content="开发证书,代码签名,mobileprovision,Provisioning Profiles,开发者账号">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS开发者证书以及代码签名学习笔记">
+<meta property="og:url" content="http://enkichen.com/2016/01/15/ios-certification-and-code-sign-note/index.html">
+<meta property="og:site_name" content="Enki's Notes">
+<meta property="og:description" content="最近需要给iOS开发团队做一次关于iOS开发证书以及代码签名的分享，于是花了点时间把这一块的知识重新学习和整理了一遍，从而有了这篇学习笔记。其中很多一些文字都是从网站或者博客上摘抄过来，为了阅读方便也做了一些调整，说白了我只是做了一些知识的梳理和整合。   该笔记涉及到内容有：开发者账号、签名证书、标识符（Identifiers）、设备（Devices）、APP授权机制、配置文件、ipa文件的签">
+<meta property="og:image" content="http://www.enkichen.com/uploads/3.png">
+<meta property="og:image" content="http://www.enkichen.com/uploads/4.png">
+<meta property="og:image" content="http://www.enkichen.com/uploads/1451875454246244.png">
+<meta property="og:image" content="http://www.enkichen.com/uploads/1451875469811263.png">
+<meta property="og:image" content="http://www.enkichen.com/uploads/5.png">
+<meta property="og:image" content="http://www.enkichen.com/uploads/iOS证书和校验.png">
+<meta property="og:image" content="http://www.enkichen.com/uploads/ipa组成.png">
+<meta property="og:updated_time" content="2017-02-18T01:36:24.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS开发者证书以及代码签名学习笔记">
+<meta name="twitter:description" content="最近需要给iOS开发团队做一次关于iOS开发证书以及代码签名的分享，于是花了点时间把这一块的知识重新学习和整理了一遍，从而有了这篇学习笔记。其中很多一些文字都是从网站或者博客上摘抄过来，为了阅读方便也做了一些调整，说白了我只是做了一些知识的梳理和整合。   该笔记涉及到内容有：开发者账号、签名证书、标识符（Identifiers）、设备（Devices）、APP授权机制、配置文件、ipa文件的签">
+<meta name="twitter:image" content="http://www.enkichen.com/uploads/3.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://enkichen.com/2016/01/15/ios-certification-and-code-sign-note/"/>
+
+
+
+
+
+  <title> iOS开发者证书以及代码签名学习笔记 | Enki's Notes </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Enki's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2016/01/15/ios-certification-and-code-sign-note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Enki">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Enki's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                iOS开发者证书以及代码签名学习笔记
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-01-15T17:47:06+08:00">
+                2016-01-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/知识整理-总结/" itemprop="url" rel="index">
+                    <span itemprop="name">知识整理/总结</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>最近需要给iOS开发团队做一次关于iOS开发证书以及代码签名的分享，于是花了点时间把这一块的知识重新学习和整理了一遍，从而有了这篇学习笔记。其中很多一些文字都是从网站或者博客上摘抄过来，为了阅读方便也做了一些调整，说白了我只是做了一些知识的梳理和整合。  </p>
+<p>该笔记涉及到内容有：开发者账号、签名证书、标识符（Identifiers）、设备（Devices）、APP授权机制、配置文件、ipa文件的签名和安全验证。</p>
+</blockquote>
+<a id="more"></a>
+<h3 id="开发者账号类型"><a href="#开发者账号类型" class="headerlink" title="开发者账号类型"></a>开发者账号类型</h3><p>苹果为iOS开发者提供三种账号类型，如下：</p>
+<ul>
+<li><strong>Apple Developer Program</strong> 年费 $99(或¥688) 可以在iOS App Store和Mac App Store上架应用可以以个人（Individual）或者组织（Organization）的名义加入，以组织身份加入需要提供邓白氏编码（DUNS Number），会多出Team Management功能，允许多人协作开发。在发布署名上以组织（Organization）的名义加入可以填写公司或组织信息（比如某某公司、某某工作室），而以个人（Individual）加入只能默认显示注册时填写的个人信息，并且不能修改。</li>
+<li><strong>Apple Developer Enterprise Program</strong>年费 $299，用于以InHouse方式发布企业内部应用，不能上架App Store企业证书过期则已经安装的应用无法继续运行。</li>
+<li><strong>iOS Developer University Program</strong><br>高校计划需要提供高校基本信息，免费提供。苹果为鼓励高校更多的参与到苹果开发者计划中来，特意推出这一项计划，高校计划具有在真机上测试等权限，但不能将App发布到App Store。</li>
+</ul>
+<h3 id="证书（Certificates）"><a href="#证书（Certificates）" class="headerlink" title="证书（Certificates）"></a>证书（Certificates）</h3><p>什么是证书？证书就是：证明证书拥有者有证书上所说的能力，一个证书要涉及到颁发者、拥有者、证明拥有者有了什么能力。例如，CET-4证书；颁发者：学校，拥有者：自己，证明的能力：英语达到四级水平。苹果开发者证书也是一样，颁发者：自己，拥有者：安装证书的电脑；证明的能力：可以打包某应用程序。  </p>
+<h4 id="开发者证书能力来源"><a href="#开发者证书能力来源" class="headerlink" title="开发者证书能力来源"></a>开发者证书能力来源</h4><p>向Member Center申请证书的过程，其实就是将在本地生成的<code>certSigningRequest</code>文件提交给苹果，让它进行签名授权的过程。<code>certSigningRequest</code>这个文件包含以下内容：</p>
+<ol>
+<li>申请者信息。</li>
+<li>申请者公钥，此信息是申请者使用的私钥对应的公钥。</li>
+<li>摘要算法和公钥加密算法。</li>
+<li>当前文件摘要的签名（使用的是该文件中公钥对应的私钥进行签名的）。</li>
+</ol>
+<p>当苹果用私钥对其签名（授权）之后，我们便可以获得一个证书文件。拥有该证书后，我们便可以用对应的私钥对APP签名了。当iOS设备拿到APP时便可以通过证书中的公钥来验证APP的正确性，同时iOS设备本身可以验证证书的是否被授权，因为该证书是苹果自己签名的证书。</p>
+<blockquote>
+<p>被苹果签名的证书会随APP一起打包到ipa文件中，并提交到App store中。</p>
+</blockquote>
+<p>当我们获得签名证书之后，还需要一个证书来验证证书是否被正确授权，该证书就是Worldwide Developer Relations Certificate Authority证书。该证书一般都会随Xcode一起安装到我们的电脑中，也可以从Member Center去下载。所以如果没有该证书，开发者将不能使用对应的私钥对APP的签名，因为不能确保证书是否被授权。该证书也就是网上有提到媒介证书（Intermediate Certificate）。</p>
+<h4 id="证书的类型"><a href="#证书的类型" class="headerlink" title="证书的类型"></a>证书的类型</h4><p>苹果为开发者提供三种证书类型，用来在不同环境下使用，方便开发者的调试和测试。</p>
+<ul>
+<li><strong>开发证书</strong>：平时用来进行真机调试的证书，用该证书签名的APP，只能安装在指定的设备上。</li>
+<li><strong>测试证书</strong>：不可以用来真机调试的证书，但是可以编译到指定的真机上（不可以进行调试）。主要用来提交给测试进行功能的验证，和<strong>开发证书</strong>的区别在于，它和<strong>发布证书</strong>类似处于非沙盒坏境。但是用该证书签名的APP无法提交到App store，只能安装在指定设备上。  </li>
+<li><strong>发布证书</strong>：不可以用来调试和测试，也不能安装在指定设备上，只能提交到App store。</li>
+</ul>
+<blockquote>
+<p>使用<strong>企业（Enterprise）</strong>账号下的<strong>发布证书</strong>签名的APP可以安装到所以设备上，但是不能提交到App store。</p>
+</blockquote>
+<h3 id="标识符（Identifiers）"><a href="#标识符（Identifiers）" class="headerlink" title="标识符（Identifiers）"></a>标识符（Identifiers）</h3><p>在Member Center中，Identifiers可以管理App IDs、Pass Type IDs、Website Push IDs、iCloud Containers、App Groups、Merchant IDs、这里主要介绍App IDs。  </p>
+<p>App ID其实就是一个字符串，用来做APP唯一标识的字符串，App ID是大小写敏感的。一个APP有且只能有一个ID，并且唯一。在Project中称为Bundle ID（但是会有些小差别，Bundle ID不能包含<strong>[ * ]</strong>号）。在Member Center、Project、iTunes Connect都是需要此ID去标示此App的唯一性。App ID添加之后不能进行修改和删除。</p>
+<h4 id="App-ID字符的组成和类型"><a href="#App-ID字符的组成和类型" class="headerlink" title="App ID字符的组成和类型"></a>App ID字符的组成和类型</h4><p><img src="http://www.enkichen.com/uploads/3.png" alt=""></p>
+<p>如上图所示，App ID由Apple产生的一个Team ID作为前缀，后面跟的是开发者自定义的标识符，App ID字符串中只能包含字符（A-Z，a-z，0-9），连接符（-），点（.）而且此字符串最好是reverse-DNS格式的。例如你公司的域名是cctv.com，你App的名字是Hello，那么你可以用com.cctv.Hello作为你的Bundle ID。</p>
+<p>App ID中也可以以<strong>[ .* ]</strong>来结尾，用来表示一个通配类型，如图：</p>
+<p><img src="http://www.enkichen.com/uploads/4.png" alt=""></p>
+<ul>
+<li>精准类型的App ID：在标识符中不带<strong>[ .* ]</strong>来结尾的App ID可以称作为精准类型，该类型的App ID可以用来做APP的Bundle ID。</li>
+<li>通配符类型App ID：在标识符中以<strong>[ .* ]</strong>结尾的App ID为通配符类型的App ID，该类型的App ID不能用来做APP的Bundle ID，其作用后续会讲到。</li>
+</ul>
+<blockquote>
+<p>每个APP还会对应一串数字的字符串（在<strong>itunesconnect</strong>创建之后可以得到），通过该字符串可以向Apple提供的http接口（<a href="http://itunes.apple.com/lookup?id=**），获取对应的APP在App" target="_blank" rel="external">http://itunes.apple.com/lookup?id=**），获取对应的APP在App</a> store上的信息，可以用来检测版本更新，更新的log一些其他资料。</p>
+</blockquote>
+<h4 id="App-ID的作用"><a href="#App-ID的作用" class="headerlink" title="App ID的作用"></a>App ID的作用</h4><ul>
+<li>在Xcode工程中，Bundle ID储存在Info.plist中，当你编译工程的时候，他会把此文件拷贝到你的app包中。  </li>
+<li>在iTunes Connect，用Bundle ID去标识App，在你第一次构建上传之后，你就不能在改变或者删除你的Bundle ID了。  </li>
+<li>在Member Center，你创建一个和Bundle ID相匹配的App ID。如果App ID是精准类型的，你就必须精确的去匹配你的Bundle ID。  </li>
+</ul>
+<h3 id="授权机制-Entitlements"><a href="#授权机制-Entitlements" class="headerlink" title="授权机制 (Entitlements)"></a>授权机制 (Entitlements)</h3><p>授权机制决定了哪些系统资源在什么情况下允许被一个应用使用。简单的说它就是一个沙盒的配置列表，上面列出了哪些行为被允许，哪些会被拒绝。Xcode 会将这个文件作为<code>--entitlements</code>参数的内容传给 <strong>codesign</strong>。</p>
+<p>在 Xcode 的 Capabilities 选项卡下选择一些选项之后，Xcode 就会生成这样一段 XML。 Xcode 会自动生成一个 .entitlements 文件，然后在需要的时候往里面添加条目。当构建整个应用时，这个文件也会提交给 <strong>codesign</strong> 作为应用所需要拥有哪些授权的参考。这些授权信息必须都在开发者中心的 App ID 中启用，并且包含在配置文件中。</p>
+<blockquote>
+<p>授权列表在Member Center中的<strong>App ID</strong>中配置，这样便可以对应到具体的APP。</p>
+</blockquote>
+<h3 id="设备（Devices）"><a href="#设备（Devices）" class="headerlink" title="设备（Devices）"></a>设备（Devices）</h3><p>这里的Device指的就是用来测试或者调试用的设备。可以是iPhone、iPad、iPod、Apple watch以及Apple TV，在Member Center中添加测试Device的步骤其实很简单，只要拿到对应Deveice的UDID就可以添加了。我们可以利用iTunes、iTools、Xcode这些工具都可以拿到设备的UDID。</p>
+<blockquote>
+<p>需要注意的就是，每个开发者账号，每年最多可以添加100台调试设备，而且添加之后不能更改和删除，想要修改就要等到下一年重新续费的时候才能进行修改或者删除调试设备了。</p>
+</blockquote>
+<h3 id="配置文件（Provisioning-Profiles）"><a href="#配置文件（Provisioning-Profiles）" class="headerlink" title="配置文件（Provisioning Profiles）"></a>配置文件（Provisioning Profiles）</h3><p>上述提到了证书可以证明APP的所属以及APP的完整性，保证APP的本身的安全。但是却不能细化到APP所使用的服务被苹果认可，比如APN推送服务，并且证书无法限制调试版APP的装机规模。于是苹果想出了<code>mobileprovision</code>。一个<code>mobileprovision</code>文件包含一下内容：</p>
+<ol>
+<li><strong>AppID</strong> 这里的AppId可以是精准类型的也可以是通配符类型。</li>
+<li><strong>证书列表</strong> 在多人协议开发时，一个<code>mobileprovision</code>文件中可以包含多个证书文件。</li>
+<li><strong>功能授权列表</strong></li>
+<li><strong>可安装的设备列表</strong> 测试和调试<code>mobileprovision</code>文件中包含设备列表，<code>mobileprovision</code>发布类型的文件中则不包含设备列表。</li>
+<li><strong>苹果的签名</strong></li>
+</ol>
+<blockquote>
+<p>上述提到的<strong>苹果的签名</strong>是用的苹果自己的私钥对应的公钥是Worldwide Developer Relations Certificate Authority证书（媒介证书）中的公钥，所以该文件生成后，我们是不能进行修改的，必须从Member Center中配置并生成。</p>
+</blockquote>
+<h4 id="配置文件的区分"><a href="#配置文件的区分" class="headerlink" title="配置文件的区分"></a>配置文件的区分</h4><ul>
+<li>从<code>mobileprovision</code>文件中是否包含设备列表，可以分为带device信息的描述文件和不带device信息的描述文件如图：</li>
+</ul>
+<p><img src="http://www.enkichen.com/uploads/1451875454246244.png" alt="">  </p>
+<p><img src="http://www.enkichen.com/uploads/1451875469811263.png" alt=""> </p>
+<ul>
+<li><p>也可以根据配置文件中包含的证书文件的类型来区分：<strong>开发类型</strong>、<strong>测试类型</strong>、<strong>发布类型</strong>。  </p>
+</li>
+<li><p>也可以根据配置文件中包含的App ID来做区分，如果文件中App ID是精准类型的，那么该配置只能用来对指定的APP进行使用。如果是通配类型的，那么该证书可以用来对匹配的Bundle ID的APP进行使用。如果是Company类型的开发者账号，可以生成一个供团队使用的Team Provisioning Profile，通过这个配置文件，团队内成员可以共用一个配置文件来进行开发调试，当然，App ID得指定成通配类型的。<code>mobileprovision</code>文件结构如下：</p>
+</li>
+</ul>
+<p><img src="http://www.enkichen.com/uploads/5.png" alt="">  </p>
+<p>总的来说描述文件就是整合了<strong>证书</strong>、<strong>AppID</strong>、<strong>设备</strong>以及<strong>功能授权列表</strong>，从而确定了可由哪台电脑，把哪个App，安装到哪台手机上面。</p>
+<h3 id="APP的签名和安全验证过程"><a href="#APP的签名和安全验证过程" class="headerlink" title="APP的签名和安全验证过程"></a>APP的签名和安全验证过程</h3><h4 id="ipa文件的签名过程"><a href="#ipa文件的签名过程" class="headerlink" title="ipa文件的签名过程"></a>ipa文件的签名过程</h4><p>这张图阐述了，开发iOS应用程序时，从申请证书，到打包的大致过程。</p>
+<p><img src="http://www.enkichen.com/uploads/iOS证书和校验.png" alt=""></p>
+<h4 id="ipa文件的组成"><a href="#ipa文件的组成" class="headerlink" title="ipa文件的组成"></a>ipa文件的组成</h4><p>iOS程序最终都会以.ipa文件导出，ipa文件只是一个zip包，可以直接解压，先来了解一下ipa文件的结构：</p>
+<p><img src="http://www.enkichen.com/uploads/ipa组成.png" alt=""></p>
+<p>解压后，得到上图的Payload目录，下面是个子目录，其中的内容如下：</p>
+<ul>
+<li>资源文件，例如图片、html、等等。</li>
+<li>_CodeSignature/CodeResources。这是一个plist文件，可用文本查看，其中的内容就是是程序包中（不包括Frameworks）所有文件的签名。注意这里是所有文件。意味着你的程序一旦签名，就不能更改其中任何的东西，包括资源文件和可执行文件本身。iOS系统会检查这些签名。</li>
+<li>可执行文件。此文件跟资源文件一样需要签名。</li>
+<li>一个mobileprovision文件.打包的时候使用的，从MC上生成的。</li>
+<li>Frameworks。程序引用的非系统自带的Frameworks，每个Frameworks其实就是一个app，其中的结构应该和app差不多，也包含签名信息CodeResources文件。</li>
+</ul>
+<h4 id="ipa文件的安全验证过程"><a href="#ipa文件的安全验证过程" class="headerlink" title="ipa文件的安全验证过程"></a>ipa文件的安全验证过程</h4><ol>
+<li>解压ipa文件</li>
+<li>取出embedded.mobileprovision，通过签名校验是否被篡改过 a. 其中有几个证书的公钥，其中开发证书和发布证书用于校验签名 b. BundleId c. 授权列表</li>
+<li>校验所有文件的签名，包括Frameworks</li>
+<li>比对Info.plist里面的BundleId是否符合embedded.mobileprovision文件中的</li>
+</ol>
+<h3 id="其他涉及到的问题"><a href="#其他涉及到的问题" class="headerlink" title="其他涉及到的问题"></a>其他涉及到的问题</h3><ul>
+<li>团队开发证书的管理</li>
+<li>Xcode7下的免年费的真机调试</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>当加入到苹果开发者计划之后，苹果通过证书来授权给开发者开发iOS应用，并提供了多种证书类型来满足不同的需求。为了保证APP的安全性和完整性，APP中所有的文件都将被签名。除非重新签名，否则不能对其做任何修改。</p>
+<p><code>mobileprovision</code>文件是一个配置文件，由苹果签名后发布给开发者的。其中包含了<strong>证书</strong>、<strong>App ID</strong>、<strong>设备列表</strong>、<strong>授权列表</strong>。通过这些信息从而确定了可由哪台电脑，把哪个App，安装到哪台手机上面。所以<strong>证书</strong>和<code>mobileprovision</code>文件是签名和打包的两个必要文件。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li><a href="http://www.cocoachina.com/ios/20160104/14859.html" target="_blank" rel="external"><strong>不让苹果开发者账号折磨我</strong></a>    </li>
+<li><a href="http://ryantang.me/blog/2013/09/03/apple-account-2/" target="_blank" rel="external"><strong>苹果开发者账号那些事儿</strong></a>  </li>
+<li><a href="http://www.pchou.info/ios/2015/12/14/ios-certification-and-code-sign.html" target="_blank" rel="external"><strong>漫谈iOS程序的证书和签名机制</strong></a></li>
+<li><a href="http://objccn.io/issue-17-2/" target="_blank" rel="external"><strong>代码签名探析</strong></a></li>
+<li><a href="http://www.cocoachina.com/ios/20141017/9949.html" target="_blank" rel="external"><strong>iOS Code Signing 学习笔记</strong></a></li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/开发证书/" rel="tag"># 开发证书</a>
+          
+            <a href="/tags/代码签名/" rel="tag"># 代码签名</a>
+          
+            <a href="/tags/mobileprovision/" rel="tag"># mobileprovision</a>
+          
+            <a href="/tags/Provisioning-Profiles/" rel="tag"># Provisioning Profiles</a>
+          
+            <a href="/tags/开发者账号/" rel="tag"># 开发者账号</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/02/26/digital-certificate-based/" rel="next" title="数字证书的基础知识">
+                <i class="fa fa-chevron-left"></i> 数字证书的基础知识
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/01/05/UIWindow-cannot-rotate/" rel="prev" title="无法旋转的UIWindow子类">
+                无法旋转的UIWindow子类 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.jpg"
+               alt="Enki" />
+          <p class="site-author-name" itemprop="name">Enki</p>
+           
+              <p class="site-description motion-element" itemprop="description">说过很多潇洒的话，做过很多打脸的事</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/enkichen" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#开发者账号类型"><span class="nav-number">1.</span> <span class="nav-text">开发者账号类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#证书（Certificates）"><span class="nav-number">2.</span> <span class="nav-text">证书（Certificates）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#开发者证书能力来源"><span class="nav-number">2.1.</span> <span class="nav-text">开发者证书能力来源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#证书的类型"><span class="nav-number">2.2.</span> <span class="nav-text">证书的类型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#标识符（Identifiers）"><span class="nav-number">3.</span> <span class="nav-text">标识符（Identifiers）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#App-ID字符的组成和类型"><span class="nav-number">3.1.</span> <span class="nav-text">App ID字符的组成和类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#App-ID的作用"><span class="nav-number">3.2.</span> <span class="nav-text">App ID的作用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#授权机制-Entitlements"><span class="nav-number">4.</span> <span class="nav-text">授权机制 (Entitlements)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设备（Devices）"><span class="nav-number">5.</span> <span class="nav-text">设备（Devices）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置文件（Provisioning-Profiles）"><span class="nav-number">6.</span> <span class="nav-text">配置文件（Provisioning Profiles）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置文件的区分"><span class="nav-number">6.1.</span> <span class="nav-text">配置文件的区分</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#APP的签名和安全验证过程"><span class="nav-number">7.</span> <span class="nav-text">APP的签名和安全验证过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ipa文件的签名过程"><span class="nav-number">7.1.</span> <span class="nav-text">ipa文件的签名过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ipa文件的组成"><span class="nav-number">7.2.</span> <span class="nav-text">ipa文件的组成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ipa文件的安全验证过程"><span class="nav-number">7.3.</span> <span class="nav-text">ipa文件的安全验证过程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他涉及到的问题"><span class="nav-number">8.</span> <span class="nav-text">其他涉及到的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">9.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-number">10.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Enki</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="powered-by">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span id="busuanzi_container_site_pv">
+    本站总访问量 <span id="busuanzi_value_site_pv"></span> 次
+    </span>
+
+    <span id="busuanzi_container_site_uv">
+    本站访客数 <span id="busuanzi_value_site_uv"></span> 人次
+    </span>
+
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
