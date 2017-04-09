@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+
+    
+  <url>
+    <loc>http://enkichen.com/2017/02/18/ios-associative/</loc>
+    <lastmod>2017-02-18T05:03:04.000Z</lastmod>
+    <data>
+        <display>
+        <title>iOS 运行时之 Associative(关联)</title>
+        <pubTime>2017-02-18T04:42:00.000Z</pubTime>
+        
+        <tag>associative</tag>
+         
+        <tag>runtime</tag>
+         
+         
+           
+             
+              <breadCrumb title="知识整理/总结" url="http://enkichen.com/categories/%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E6%80%BB%E7%BB%93/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://enkichen.com/2016/01/15/ios-certification-and-code-sign-note/</loc>
+    <lastmod>2017-02-18T01:36:24.000Z</lastmod>
+    <data>
+        <display>
+        <title>iOS开发者证书以及代码签名学习笔记</title>
+        <pubTime>2016-01-15T09:47:06.000Z</pubTime>
+        
+        <tag>开发证书</tag>
+         
+        <tag>代码签名</tag>
+         
+        <tag>mobileprovision</tag>
+         
+        <tag>Provisioning Profiles</tag>
+         
+        <tag>开发者账号</tag>
+         
+         
+           
+             
+              <breadCrumb title="知识整理/总结" url="http://enkichen.com/categories/%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E6%80%BB%E7%BB%93/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://enkichen.com/2017/02/17/protobuf-introduce/</loc>
+    <lastmod>2017-02-17T07:04:31.000Z</lastmod>
+    <data>
+        <display>
+        <title>Protocol Buffer 简介与使用</title>
+        <pubTime>2017-02-17T06:58:27.000Z</pubTime>
+        
+        <tag>Protobuf</tag>
+         
+         
+           
+             
+              <breadCrumb title="知识整理/总结" url="http://enkichen.com/categories/%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E6%80%BB%E7%BB%93/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://enkichen.com/2016/08/29/http-Content-Type/</loc>
+    <lastmod>2016-08-29T12:37:38.000Z</lastmod>
+    <data>
+        <display>
+        <title>HTTP 之 Content-Type</title>
+        <pubTime>2016-08-29T12:27:25.000Z</pubTime>
+        
+        <tag>HTTP</tag>
+         
+         
+           
+             
+              <breadCrumb title="开发笔记" url="http://enkichen.com/categories/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+    
+  <url>
+    <loc>http://enkichen.com/2016/07/22/development-of-small-notes/</loc>
+    <lastmod>2016-07-22T06:33:49.000Z</lastmod>
+    <data>
+        <display>
+        <title>两则开发小笔记</title>
+        <pubTime>2016-07-22T06:22:53.000Z</pubTime>
+        
+        <tag>Core Graphics</tag>
+         
+        <tag>GCDAsyncSocket</tag>
+         
+         
+           
+             
+              <breadCrumb title="开发笔记" url="http://enkichen.com/categories/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://enkichen.com/2016/04/14/git-basic-commands/</loc>
+    <lastmod>2016-04-14T04:51:10.000Z</lastmod>
+    <data>
+        <display>
+        <title>常用的Git命令</title>
+        <pubTime>2016-04-14T01:19:04.000Z</pubTime>
+        
+        <tag>Git</tag>
+         
+         
+           
+             
+              <breadCrumb title="知识整理/总结" url="http://enkichen.com/categories/%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E6%80%BB%E7%BB%93/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://enkichen.com/2016/04/12/certification-and-pki/</loc>
+    <lastmod>2016-04-12T13:33:34.000Z</lastmod>
+    <data>
+        <display>
+        <title>PKI系统与数字证书结构</title>
+        <pubTime>2016-04-12T13:24:29.000Z</pubTime>
+        
+        <tag>数字证书</tag>
+         
+        <tag>PKI</tag>
+         
+         
+           
+             
+              <breadCrumb title="知识整理/总结" url="http://enkichen.com/categories/%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E6%80%BB%E7%BB%93/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://enkichen.com/2016/02/26/digital-certificate-based/</loc>
+    <lastmod>2016-03-17T03:28:30.000Z</lastmod>
+    <data>
+        <display>
+        <title>数字证书的基础知识</title>
+        <pubTime>2016-02-26T12:38:53.000Z</pubTime>
+        
+        <tag>数字证书</tag>
+         
+        <tag>非对称加密</tag>
+         
+        <tag>RSA</tag>
+         
+        <tag>摘要算法</tag>
+         
+         
+           
+             
+              <breadCrumb title="知识整理/总结" url="http://enkichen.com/categories/%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E6%80%BB%E7%BB%93/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://enkichen.com/2015/12/19/First-blog/</loc>
+    <lastmod>2016-02-29T01:19:02.000Z</lastmod>
+    <data>
+        <display>
+        <title>开博第一篇</title>
+        <pubTime>2015-12-19T01:02:51.000Z</pubTime>
+        
+         
+           
+             
+              <breadCrumb title="default" url="http://enkichen.com/categories/default/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://enkichen.com/2015/12/29/ios-xia-opengl-xu-yao-zhu-yi-de-ji-dian/</loc>
+    <lastmod>2016-01-07T02:25:25.000Z</lastmod>
+    <data>
+        <display>
+        <title>iOS下使用OpenGL要注意的几点</title>
+        <pubTime>2015-12-29T08:59:49.000Z</pubTime>
+        
+        <tag>OpenGL</tag>
+         
+        <tag>纹理</tag>
+         
+         
+           
+             
+              <breadCrumb title="开发笔记" url="http://enkichen.com/categories/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://enkichen.com/2015/12/22/sdwebimage-issues/</loc>
+    <lastmod>2016-01-07T02:10:57.000Z</lastmod>
+    <data>
+        <display>
+        <title>优化APP时发现的SDWebImage的问题</title>
+        <pubTime>2015-12-22T11:34:17.000Z</pubTime>
+        
+        <tag>旋转</tag>
+         
+        <tag>SDWebImage</tag>
+         
+        <tag>NSCache</tag>
+         
+         
+           
+             
+              <breadCrumb title="开发笔记" url="http://enkichen.com/categories/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://enkichen.com/2016/01/05/UIWindow-cannot-rotate/</loc>
+    <lastmod>2016-01-07T02:08:00.000Z</lastmod>
+    <data>
+        <display>
+        <title>无法旋转的UIWindow子类</title>
+        <pubTime>2016-01-05T02:36:34.000Z</pubTime>
+        
+        <tag>UIWindow</tag>
+         
+        <tag>旋转</tag>
+         
+         
+           
+             
+              <breadCrumb title="开发笔记" url="http://enkichen.com/categories/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+    
+</urlset>

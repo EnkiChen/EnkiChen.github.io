@@ -1,0 +1,924 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Enki&#39;s Notes</title>
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://enkichen.com/"/>
+  <updated>2017-02-18T05:03:04.000Z</updated>
+  <id>http://enkichen.com/</id>
+  
+  <author>
+    <name>Enki</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>iOS 运行时之 Associative(关联)</title>
+    <link href="http://enkichen.com/2017/02/18/ios-associative/"/>
+    <id>http://enkichen.com/2017/02/18/ios-associative/</id>
+    <published>2017-02-18T04:42:00.000Z</published>
+    <updated>2017-02-18T05:03:04.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>iOS 下有很多运行时特性，这里介绍一下 <code>Associative(关联)</code> 这个运行时特性，以及它一些使用场景。<code>Associative</code> 意思为关联，能够将两个对象建立一种关系。这种关系是一种 <code>从属</code> 关系，也就是说有一个 <code>关联者</code> 和一个 <code>被关联者</code>。比如说我们可以将一个 <code>NSString</code> 对象关联到一个 <code>UIView</code> 对象上。这里的 <code>NSString</code> 对象就是 <code>被关联者</code>, <code>UIView</code> 对象就是 <code>关联者</code>。</p>
+<p>在 <code>objc/runtime.h</code> 文件中，找到 <code>Associative</code> 相关的 API 定义，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line">/** </div><div class="line"> * Sets an associated value for a given object using a given key and association policy.</div><div class="line"> * </div><div class="line"> * @param object The source object for the association.</div><div class="line"> * @param key The key for the association.</div><div class="line"> * @param value The value to associate with the key key for object. Pass nil to clear an existing association.</div><div class="line"> * @param policy The policy for the association. For possible values, see “Associative Object Behaviors.”</div><div class="line"> * </div><div class="line"> * @see objc_setAssociatedObject</div><div class="line"> * @see objc_removeAssociatedObjects</div><div class="line"> */</div><div class="line">OBJC_EXPORT void objc_setAssociatedObject(id object, const void *key, id value, objc_AssociationPolicy policy)</div><div class="line">    OBJC_AVAILABLE(10.6, 3.1, 9.0, 1.0);</div><div class="line"></div><div class="line">/** </div><div class="line"> * Returns the value associated with a given object for a given key.</div><div class="line"> * </div><div class="line"> * @param object The source object for the association.</div><div class="line"> * @param key The key for the association.</div><div class="line"> * </div><div class="line"> * @return The value associated with the key \e key for \e object.</div><div class="line"> * </div><div class="line"> * @see objc_setAssociatedObject</div><div class="line"> */</div><div class="line">OBJC_EXPORT id objc_getAssociatedObject(id object, const void *key)</div><div class="line">    OBJC_AVAILABLE(10.6, 3.1, 9.0, 1.0);</div><div class="line"></div><div class="line">/** </div><div class="line"> * Removes all associations for a given object.</div><div class="line"> * </div><div class="line"> * @param object An object that maintains associated objects.</div><div class="line"> * </div><div class="line"> * @note The main purpose of this function is to make it easy to return an object </div><div class="line"> *  to a &quot;pristine state”. You should not use this function for general removal of</div><div class="line"> *  associations from objects, since it also removes associations that other clients</div><div class="line"> *  may have added to the object. Typically you should use \c objc_setAssociatedObject </div><div class="line"> *  with a nil value to clear an association.</div><div class="line"> * </div><div class="line"> * @see objc_setAssociatedObject</div><div class="line"> * @see objc_getAssociatedObject</div><div class="line"> */</div><div class="line">OBJC_EXPORT void objc_removeAssociatedObjects(id object)</div><div class="line">    OBJC_AVAILABLE(10.6, 3.1, 9.0, 1.0);</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>同时还提供以下枚举类型的定义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * Policies related to associative references.</div><div class="line"> * These are options to objc_setAssociatedObject()</div><div class="line"> */</div><div class="line">typedef OBJC_ENUM(uintptr_t, objc_AssociationPolicy) &#123;</div><div class="line">    OBJC_ASSOCIATION_ASSIGN = 0,           /**&lt; Specifies a weak reference to the associated object. */</div><div class="line">    OBJC_ASSOCIATION_RETAIN_NONATOMIC = 1, /**&lt; Specifies a strong reference to the associated object. </div><div class="line">                                            *   The association is not made atomically. */</div><div class="line">    OBJC_ASSOCIATION_COPY_NONATOMIC = 3,   /**&lt; Specifies that the associated object is copied. </div><div class="line">                                            *   The association is not made atomically. */</div><div class="line">    OBJC_ASSOCIATION_RETAIN = 01401,       /**&lt; Specifies a strong reference to the associated object.</div><div class="line">                                            *   The association is made atomically. */</div><div class="line">    OBJC_ASSOCIATION_COPY = 01403          /**&lt; Specifies that the associated object is copied.</div><div class="line">                                            *   The association is made atomically. */</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h3 id="API-解析"><a href="#API-解析" class="headerlink" title="API 解析"></a>API 解析</h3><p><code>void objc_setAssociatedObject(id object, const void *key, id value, objc_AssociationPolicy policy)</code> API 为我们提供了将两个对象建立关联关系的能力，参数解析为：</p>
+<ul>
+<li><strong>id object</strong>：指定 <code>关联者</code></li>
+<li><strong>id value</strong>：指定 <code>被关联者</code></li>
+<li><strong>const void *key</strong>：<code>被关联者</code> 的 KEY 值，方便后续可以通过该 KEY 值找到该 <code>被关联者</code></li>
+<li><strong>objc_AssociationPolicy policy</strong>: 该参数作用用来表示 <code>被关联者</code> 的引用策略，也就是内存如何进行管理的，可通过上述定义的枚举类型来设置。</li>
+</ul>
+<p><code>id objc_getAssociatedObject(id object, const void *key)</code> API 可以通过之前设置的 KEY 值，来获取 <code>被关联者</code> 对象，参数解析如下：</p>
+<ul>
+<li><strong>id object</strong>：<code>关联者</code> 对象</li>
+<li><strong>const void *key</strong>：要获取的 <code>被关联者</code> 的 KEY 值，一个 <code>关联者</code> 可以被关联多对象，一个 <code>关联者</code> 也可以是 <code>被关联这</code>，可以通过不同的 KEY 来获取不同的 <code>被关联者</code> 对象。</li>
+</ul>
+<p><code>void objc_removeAssociatedObjects(id object)</code> 该 API 可以移除一个 <code>关联者</code> 对象所有的 <code>被关联者</code>。当需要移除特定的对象时，我们可以使用 <code>objc_setAssociatedObject</code> 方法并指定 <code>id value</code> 参数对象为空即可。</p>
+<p>以上就是关于 <code>Associative(关联)</code> 特性相关的 API 介绍了，下面介绍一下常用的使用场景。</p>
+<h3 id="Associative-特性的应用"><a href="#Associative-特性的应用" class="headerlink" title="Associative 特性的应用"></a>Associative 特性的应用</h3><h4 id="剪切板的信息复制"><a href="#剪切板的信息复制" class="headerlink" title="剪切板的信息复制"></a>剪切板的信息复制</h4><p>在一些时候我们希望用户可以长按文案信息，弹出系统的复制菜单，提供文案信息的复制功能，比如长按     <code>UITableViewCell</code> 提供复制详情的功能，在 iOS 下我们可以使用 <code>UIMenuController</code> 类来显示系统菜单，同时为该 <code>UITableViewCell</code> 添加长按手势，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">// 添加长按手势</div><div class="line">UILongPressGestureRecognizer *longPressGR = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];</div><div class="line">[cell addGestureRecognizer:longPressGR];</div><div class="line"></div><div class="line">// 手势处理</div><div class="line">- (void)handleLongPress:(UILongPressGestureRecognizer *) longPressGR &#123;</div><div class="line">    UIMenuController *menu = [UIMenuController sharedMenuController];</div><div class="line">    [menu setTargetRect:longPressGR.view.frame inView:self.view];</div><div class="line">    [menu setMenuVisible:YES animated:YES];</div><div class="line">&#125;</div><div class="line"></div><div class="line">// UIMenuController 相关</div><div class="line">- (BOOL)canBecomeFirstResponder &#123;</div><div class="line">    return YES;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (BOOL)canPerformAction:(SEL)action withSender:(id)sender &#123;</div><div class="line">    if ( action == @selector(copy:) ) &#123;</div><div class="line">        return YES;</div><div class="line">    &#125;</div><div class="line">    return NO;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)copy:(UIMenuController *)menu &#123;</div><div class="line">    UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>从上述代码可以看到，复制信息的逻辑处理是在 <code>copy:</code> 方法中，但是在该方法中，并不能访问到 <code>cell.detailTextLabel</code> 对象，在该场景中，我们可以使用 <code>Associative</code> 特性将 <code>UITableViewCell</code> 对象关联到 <code>UIMenuController</code> 对象中，再在 <code>copy:</code> 方法中获取到被关联对象，从而获取到 <code>UITableViewCell</code> 对象，进而访问 <code>cell.detailTextLabel.text</code>。添加代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">// 处理手势时，添加如下代码</div><div class="line">objc_setAssociatedObject(menu, @&quot;UITableViewCell&quot;, longPressGR.view, OBJC_ASSOCIATION_RETAIN_NONATOMIC);</div><div class="line"></div><div class="line">// 处理 copy 时，添加如下代码，来获取被关联的 UITableViewCell 对象</div><div class="line">objc_getAssociatedObject(menu, @&quot;UITableViewCell&quot;);</div><div class="line">pasteboard.string = cell.detailTextLabel.text;</div></pre></td></tr></table></figure>
+<p>上述场景中，并不一定非得用 <code>Associative</code> 特性来实现，还有很多可行的方法，这里为大家提供一种方法，并且该方法还算是比较优雅的。</p>
+<h4 id="其他一些应用场景"><a href="#其他一些应用场景" class="headerlink" title="其他一些应用场景"></a>其他一些应用场景</h4><p>另一个常见的应用场景就是，为一个系统类或是一个第三方的类添加一个属性时，可以结合 <strong>Category</strong> 为类添加一个属性，当然也可以使用继承来达到目的。在一些特殊场景下，比如想知道一个系统内部对象或者第三方对象是何时被释放时，我们可以为该对象关联一个自定义的对象，并且使用 <code>OBJC_ASSOCIATION_RETAIN_NONATOMIC</code> 来指定内存管理策略，当关联者被释放是，被关联者也会跟着被释放，这样可以在我们自定义的对象中，知道感兴趣的对象何时被释放的。在调试一些内存问题时，该方法还是蛮有用的。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;iOS 下有很多运行时特性，这里介绍一下 &lt;code&gt;Associative(关联)&lt;/code&gt; 这个运行时特性，以及它一些使用场景。&lt;code&gt;Associative&lt;/code&gt; 意思为关联，能够将两个对象建立一种关系。这种关系是一种 &lt;code&gt;从属&lt;/code&gt; 关系，也就是说有一个 &lt;code&gt;关联者&lt;/code&gt; 和一个 &lt;code&gt;被关联者&lt;/code&gt;。比如说我们可以将一个 &lt;code&gt;NSString&lt;/code&gt; 对象关联到一个 &lt;code&gt;UIView&lt;/code&gt; 对象上。这里的 &lt;code&gt;NSString&lt;/code&gt; 对象就是 &lt;code&gt;被关联者&lt;/code&gt;, &lt;code&gt;UIView&lt;/code&gt; 对象就是 &lt;code&gt;关联者&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;在 &lt;code&gt;objc/runtime.h&lt;/code&gt; 文件中，找到 &lt;code&gt;Associative&lt;/code&gt; 相关的 API 定义，如下：&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;8&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;9&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;10&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;11&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;12&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;13&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;14&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;15&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;16&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;17&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;18&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;19&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;20&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;21&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;22&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;23&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;24&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;25&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;26&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;27&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;28&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;29&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;30&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;31&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;32&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;33&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;34&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;35&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;36&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;37&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;38&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;39&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;40&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;41&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;42&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;43&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;/** &lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * Sets an associated value for a given object using a given key and association policy.&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * &lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * @param object The source object for the association.&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * @param key The key for the association.&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * @param value The value to associate with the key key for object. Pass nil to clear an existing association.&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * @param policy The policy for the association. For possible values, see “Associative Object Behaviors.”&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * &lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * @see objc_setAssociatedObject&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * @see objc_removeAssociatedObjects&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; */&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;OBJC_EXPORT void objc_setAssociatedObject(id object, const void *key, id value, objc_AssociationPolicy policy)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    OBJC_AVAILABLE(10.6, 3.1, 9.0, 1.0);&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;/** &lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * Returns the value associated with a given object for a given key.&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * &lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * @param object The source object for the association.&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * @param key The key for the association.&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * &lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * @return The value associated with the key \e key for \e object.&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * &lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * @see objc_setAssociatedObject&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; */&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;OBJC_EXPORT id objc_getAssociatedObject(id object, const void *key)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    OBJC_AVAILABLE(10.6, 3.1, 9.0, 1.0);&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;/** &lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * Removes all associations for a given object.&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * &lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * @param object An object that maintains associated objects.&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * &lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * @note The main purpose of this function is to make it easy to return an object &lt;/div&gt;&lt;div class=&quot;line&quot;&gt; *  to a &amp;quot;pristine state”. You should not use this function for general removal of&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; *  associations from objects, since it also removes associations that other clients&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; *  may have added to the object. Typically you should use \c objc_setAssociatedObject &lt;/div&gt;&lt;div class=&quot;line&quot;&gt; *  with a nil value to clear an association.&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * &lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * @see objc_setAssociatedObject&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; * @see objc_getAssociatedObject&lt;/div&gt;&lt;div class=&quot;line&quot;&gt; */&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;OBJC_EXPORT void objc_removeAssociatedObjects(id object)&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    OBJC_AVAILABLE(10.6, 3.1, 9.0, 1.0);&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+    
+    </summary>
+    
+      <category term="知识整理/总结" scheme="http://enkichen.com/categories/%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E6%80%BB%E7%BB%93/"/>
+    
+    
+      <category term="associative" scheme="http://enkichen.com/tags/associative/"/>
+    
+      <category term="runtime" scheme="http://enkichen.com/tags/runtime/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Protocol Buffer 简介与使用</title>
+    <link href="http://enkichen.com/2017/02/17/protobuf-introduce/"/>
+    <id>http://enkichen.com/2017/02/17/protobuf-introduce/</id>
+    <published>2017-02-17T06:58:27.000Z</published>
+    <updated>2017-02-17T07:04:31.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>Protocol Buffer(简称Protobuf或PB)是由 Google 开发的，原本用来解决索引服务器的请求、响应协议，后面才对外使用和开源的，它是一种数据交换格式，与 XML 和 JSON 相比 ，它是一种二进制格式，避免了各种文本格式转换的问题，并且更体积更小、速度更快使用更简单方便，还自带部分数据压缩功能，在网络传输时可以减少数据流量。同时它也是与平台和语言无关的，尤其在网络数据交换方面，使得它越来越流行。</p>
+<p>Protobuf 是一个开源项目，项目托管在 GitHub 上，链接为:<a href="https://github.com/google/protobuf" target="_blank" rel="external">https://github.com/google/protobuf</a>，源码包含两部分内容：</p>
+<ul>
+<li><strong>PB基础库</strong>：用来完成对象模型与数据模型之前的转换</li>
+<li><strong>PB编译器</strong>：源码生成器，用来将 <em>.proto</em> 文件转换成对应语言的对象模型的源码</li>
+</ul>
+<p>Protobuf 截止目前最新版本为 <code>3.2.0-alpha-1</code> 版本，在 <code>3.0.0</code> 版本之前也就是 <code>2.6.1</code> 版本时官方只支持 <code>C++/Java/Python</code> 三种语言，<code>3.0.0</code> 版本之后才逐步支持其他语言。在这之前如果其他语言需要用到 Protobuf 都是通过第三方扩展来实现的，目前官方以及支持以下编程语言：</p>
+<a id="more"></a>
+<table>
+<thead>
+<tr>
+<th>Language</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C++ (include C++ runtime and protoc)</td>
+<td><a href="https://github.com/google/protobuf/blob/master/src" target="_blank" rel="external">src</a></td>
+</tr>
+<tr>
+<td>Java</td>
+<td><a href="https://github.com/google/protobuf/blob/master/java" target="_blank" rel="external">java</a></td>
+</tr>
+<tr>
+<td>Python</td>
+<td><a href="https://github.com/google/protobuf/blob/master/python" target="_blank" rel="external">python</a></td>
+</tr>
+<tr>
+<td>Objective-C</td>
+<td><a href="https://github.com/google/protobuf/blob/master/objectivec" target="_blank" rel="external">objectivec</a></td>
+</tr>
+<tr>
+<td>C#</td>
+<td><a href="https://github.com/google/protobuf/blob/master/csharp" target="_blank" rel="external">csharp</a></td>
+</tr>
+<tr>
+<td>JavaNano</td>
+<td><a href="https://github.com/google/protobuf/blob/master/javanano" target="_blank" rel="external">javanano</a></td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td><a href="https://github.com/google/protobuf/blob/master/js" target="_blank" rel="external">js</a></td>
+</tr>
+<tr>
+<td>Ruby</td>
+<td><a href="https://github.com/google/protobuf/blob/master/ruby" target="_blank" rel="external">ruby</a></td>
+</tr>
+<tr>
+<td>Go</td>
+<td><a href="https://github.com/golang/protobuf" target="_blank" rel="external">golang/protobuf</a></td>
+</tr>
+<tr>
+<td>PHP</td>
+<td><a href="https://github.com/google/protobuf/blob/master/php" target="_blank" rel="external">php</a></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>备注：后续将使用最新版本<code>3.2.0-alpha-1</code>以及 Objective-C 语言作为示例</p>
+</blockquote>
+<h3 id="Protobuf-编译器"><a href="#Protobuf-编译器" class="headerlink" title="Protobuf 编译器"></a>Protobuf 编译器</h3><p>Protobuf 编译器在于将 <em>.proto</em> 文件转成对应语言的对象模型的源代码，可以从 GitHub 上下载源代码在本地进行编译，然后生成 Protobuf 编译器，也可以从 GitHub 上下载已经编译好的编译器。</p>
+<p>下载链接为：<a href="https://github.com/google/protobuf/releases" target="_blank" rel="external">https://github.com/google/protobuf/releases</a></p>
+<p>如果是源码的话执行以下命令进行编译：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">cd Source code 目录</div><div class="line">./configure</div><div class="line">make</div><div class="line">make check</div><div class="line">sudo make install</div></pre></td></tr></table></figure>
+<p>如果编译成功，就可以使用 <code>proto</code> 命令了，如果是直接下载的 <code>proto</code> 文件，就不需要编译可直接运行。我们可以创建一个 <em>.proto</em> 文件来测试一下环境是否搭建好，样例文件如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">message User</div><div class="line">&#123;</div><div class="line">  required int32 uid = 1;        // 用户唯一标识</div><div class="line">  required string nickname = 2;  // 用户昵称</div><div class="line">  required int32 age = 3;        // 用户年龄</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>如果需要生成 Objective-C 源文件的话，执行以下命令即可：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">protoc --objc_out=./ ./test.proto</div></pre></td></tr></table></figure>
+<p>如果环境正常的话，可以在当前目录下生成 <em>Test.pbobjc.h</em> 和 <em>Test.pbobjc.m</em> 两个文件，由于 Protobuf 编译器生成的 Objective-C 源文件是基于 MRC 的，所以如果在 ARC 工程成需要添加 <code>-fno-objc-arc</code> 标签，否则无法通过编译。</p>
+<h3 id="Protobuf-基础库"><a href="#Protobuf-基础库" class="headerlink" title="Protobuf 基础库"></a>Protobuf 基础库</h3><p>Protobuf 基础库是用来做对象的序列化以及反序列化用的库，也可以从以下地址下载基础库的载源码：</p>
+<p>下载链接为：<a href="https://github.com/google/protobuf/releases" target="_blank" rel="external">https://github.com/google/protobuf/releases</a></p>
+<p>将下载好的源码拖到对应的工程中即可，同样需要注意的是基础库的源码也是基于 MRC 的，所以也得添加 <code>-fno-objc-arc</code> 标签。同时必须保证基础库和编译器的版本一致，否则也会导致工程无法正常编译。</p>
+<p>基础库在 iOS 项目中也可以使用 <strong>cocoapods</strong> 方式引入，只要在 <code>Podfile</code> 中添加：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"># 当前工程支持的 SDK 版本</div><div class="line">platform :ios, &apos;7.1&apos;</div><div class="line">pod &apos;Protobuf&apos;, &apos;~&gt; 3.1.0&apos;</div></pre></td></tr></table></figure>
+<h3 id="在项目中使用-Protobuf"><a href="#在项目中使用-Protobuf" class="headerlink" title="在项目中使用 Protobuf"></a>在项目中使用 Protobuf</h3><p>将编译器生成的对象的源文件以及基础库导入到工程后，我们就可以使用它们了，示例如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">// 创建一个 User 对象</div><div class="line">User *user = [[User alloc] init];</div><div class="line">user.uid = 10086;</div><div class="line">user.nickname = @&quot;EnkiChen&quot;;</div><div class="line">user.age = 28;</div><div class="line">    </div><div class="line">// 序列化为 Data</div><div class="line">NSData *data = [user data];</div><div class="line">    </div><div class="line">// 反序列化为对象</div><div class="line">User *us = [User parseFromData:data error:NULL];</div><div class="line">NSLog(@&quot;uid:%d nickname:%@ age:%d&quot;, us.uid, us.nickname, us.age);</div></pre></td></tr></table></figure>
+<h3 id="Protobuf-的优缺点"><a href="#Protobuf-的优缺点" class="headerlink" title="Protobuf 的优缺点"></a>Protobuf 的优缺点</h3><h4 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h4><ul>
+<li><strong>性能好/效率高</strong>： 相比于 XML 和 JSON 而言，Protobuf 序列化反序列化速度很快，生成的数据体积更小，适合网络传输</li>
+<li><strong>有代码生成机制</strong>：可以由编译器自动生成对应语言的类对象文件，无需自己编写解析代码</li>
+<li><strong>支持向后/向前兼容</strong>：所谓的“向后兼容”（backward compatible），就是说，当模块 B 升级了之后，它能够正确识别模块 A 发出的老版本的协议。 所谓的“向前兼容”（forward compatible），就是说，当模块A升级了之后，模块 B 能够正常识别模块 A 发出的新版本的协议。</li>
+<li><strong>支持多种语言跨平台</strong>：如上文所提到，官方已经支持多种主流语言，并且跨平台</li>
+</ul>
+<h4 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h4><ul>
+<li><strong>可读性差</strong>：相对于 XML 和 JSON 而言，对象序列化后生成的数据可读性差（二进制格式）</li>
+<li><strong>缺乏自描述</strong>：XML 和 JSON 是自描述的，而 Protobuf 格式则不是。一段 Protobuf 格式的二进制数据内容，不配合 <em>.proto</em> 文件结构体是看不出来什么作用的。</li>
+</ul>
+<p>对于 <em>.proto</em> 文件的编写规则及语法等内容就不介绍了，后续有时间再补上。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Protocol Buffer(简称Protobuf或PB)是由 Google 开发的，原本用来解决索引服务器的请求、响应协议，后面才对外使用和开源的，它是一种数据交换格式，与 XML 和 JSON 相比 ，它是一种二进制格式，避免了各种文本格式转换的问题，并且更体积更小、速度更快使用更简单方便，还自带部分数据压缩功能，在网络传输时可以减少数据流量。同时它也是与平台和语言无关的，尤其在网络数据交换方面，使得它越来越流行。&lt;/p&gt;
+&lt;p&gt;Protobuf 是一个开源项目，项目托管在 GitHub 上，链接为:&lt;a href=&quot;https://github.com/google/protobuf&quot;&gt;https://github.com/google/protobuf&lt;/a&gt;，源码包含两部分内容：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;PB基础库&lt;/strong&gt;：用来完成对象模型与数据模型之前的转换&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PB编译器&lt;/strong&gt;：源码生成器，用来将 &lt;em&gt;.proto&lt;/em&gt; 文件转换成对应语言的对象模型的源码&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Protobuf 截止目前最新版本为 &lt;code&gt;3.2.0-alpha-1&lt;/code&gt; 版本，在 &lt;code&gt;3.0.0&lt;/code&gt; 版本之前也就是 &lt;code&gt;2.6.1&lt;/code&gt; 版本时官方只支持 &lt;code&gt;C++/Java/Python&lt;/code&gt; 三种语言，&lt;code&gt;3.0.0&lt;/code&gt; 版本之后才逐步支持其他语言。在这之前如果其他语言需要用到 Protobuf 都是通过第三方扩展来实现的，目前官方以及支持以下编程语言：&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="知识整理/总结" scheme="http://enkichen.com/categories/%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E6%80%BB%E7%BB%93/"/>
+    
+    
+      <category term="Protobuf" scheme="http://enkichen.com/tags/Protobuf/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>HTTP 之 Content-Type</title>
+    <link href="http://enkichen.com/2016/08/29/http-Content-Type/"/>
+    <id>http://enkichen.com/2016/08/29/http-Content-Type/</id>
+    <published>2016-08-29T12:27:25.000Z</published>
+    <updated>2016-08-29T12:37:38.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>在移动端开发中 HTTP 协议经常被用到，但是在面试或者工作中问到客户端和服务器传输业务数据，使用的数据的封装格式是什么以及怎么被封装到 HTTP 协议中时，很少有人能讲明白。</p>
+<p>在移动开发中 HTTP 协议为客户端到服务器端，提供了一条数据通道，能够将我们的业务数据传输到服务器，并且从服务器上获取响应数据。在 HTTP 协议头中的 <strong>Content-Type</strong> 字段描述了 <strong>HTTP</strong> 的 <strong>BODY</strong> 体的数据格式，而在 <strong>BODY</strong> 中可以定义我们业务数据的数据格式。<strong>Content-Type</strong> 字段可以用很多种类型，具体有哪些可以看 <a href="http://tool.oschina.net/commons" target="_blank" rel="external"><strong>这里</strong></a>，并且也可以根据自身业务来自定义，不过这种做法比较少。这次我主要讲解三种格式分别为 <strong>application/x-www-form-urlencoded</strong>、<strong>application/json</strong> 以及 <strong>multipart/form-data</strong>，其他的格式可以自己理解。</p>
+<p>下面给各位吃瓜群众介绍上述三种格式在 <strong>GET</strong> 和 <strong>POST</strong> 两种请求方法中的区别，为了更直观的看到我们的数据的组织方式，我使用了 <strong>Charles</strong> 来进行抓包分析。<br><a id="more"></a><br>我们测试的业务需求为：</p>
+<ol>
+<li>客户端发起登录请求，服务器进行响应，请求的数据为 <strong>user</strong> 字段值为 <strong>admin</strong>； <strong>pass</strong> 字段值为 <strong>123456</strong>；</li>
+<li>客户端上传一张图片到服务器，字段名为 <strong>imageFile</strong>，内容为图片的二进制数据。</li>
+</ol>
+<p>为了更好的测试，我对 Web 的请求基于 AFNetworking 2.5.0 版本做了一层简单的封装，发起请求的代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">- (void)webRequest</div><div class="line">&#123;</div><div class="line">    NSDictionary *bParams = @&#123; @&quot;user&quot; : @&quot;admin&quot;,</div><div class="line">                               @&quot;pass&quot; : @&quot;123456&quot;&#125;;</div><div class="line">    </div><div class="line">    NSDictionary *params = @&#123; kWebServiceMethod     : @&quot;POST&quot;,</div><div class="line">                              kWebServiceParams     : bParams,</div><div class="line">                              kWebServiceIdentifier : kPlatformAccountService,</div><div class="line">                              kWebServiceApiUrl     : @&quot;login&quot;&#125;;</div><div class="line">    </div><div class="line">    [CMLWebProxyService webRequestWithParam:params completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) &#123;</div><div class="line">        DDLogInfo(@&quot;responseObject:%@&quot;, responseObject);</div><div class="line">    &#125;];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>用来指定数据格式的代码封装在了叫 BaseService 的类中，方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">- (NSString *)apiContentType</div><div class="line">&#123;</div><div class="line">    return @&quot;application/x-www-form-urlencoded&quot;;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>Web 请求的封装的代码（基于 AFNetworking 2.5.0 版本）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line">+ (NSURLSessionDataTask *)webRequestWithParam:(NSDictionary *) params completionHandler:(void (^)(NSURLResponse *response, id responseObject, NSError *error)) completionHandler</div><div class="line">&#123;</div><div class="line">    id&lt;CMLService&gt; service = [[CMLServiceFactory sharedInstance] serviceWithIdentifier:params[kWebServiceIdentifier]];</div><div class="line">    NSString *urlString = [NSString stringWithFormat:@&quot;%@%@/%@&quot;, service.apiBaseUrl, service.apiVersion, params[kWebServiceApiUrl]];</div><div class="line">    AFHTTPRequestSerializer *requestSerializer = nil;</div><div class="line">    </div><div class="line">    if ( [service.apiContentType isEqualToString:@&quot;application/x-www-form-urlencoded&quot;] ) &#123;</div><div class="line">        </div><div class="line">        requestSerializer = [AFHTTPRequestSerializer serializer];</div><div class="line">        </div><div class="line">    &#125; else if ( [service.apiContentType isEqualToString:@&quot;application/json&quot;] ) &#123;</div><div class="line">        </div><div class="line">        requestSerializer = [AFJSONRequestSerializer serializer];</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    [requestSerializer setValue:@&quot;application/json&quot; forHTTPHeaderField:@&quot;Accept&quot;];</div><div class="line">    requestSerializer.timeoutInterval = kWebServiceTimeoutInterval;</div><div class="line">    </div><div class="line">    NSDictionary *headParams = params[kWebServiceHeadParams];</div><div class="line">    [headParams enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) &#123;</div><div class="line">        [requestSerializer setValue:obj forHTTPHeaderField:key];</div><div class="line">    &#125;];</div><div class="line">    </div><div class="line">    NSURLRequest *request = nil;·</div><div class="line">    NSArray *binParams = params[kWebServiceBinParams];</div><div class="line">    if ( binParams != nil &amp;&amp; binParams.count != 0 ) &#123;</div><div class="line">        request = [requestSerializer multipartFormRequestWithMethod:params[kWebServiceMethod]</div><div class="line">                                                          URLString:urlString</div><div class="line">                                                         parameters:params[kWebServiceParams]</div><div class="line">                                          constructingBodyWithBlock:^(id&lt;AFMultipartFormData&gt; formData) &#123;</div><div class="line">                                              </div><div class="line">                                              for ( NSDictionary *binData in binParams ) &#123;</div><div class="line">                                                  [formData appendPartWithFileData:binData[kWebBinData]</div><div class="line">                                                                              name:binData[kWebBinName]</div><div class="line">                                                                          fileName:binData[kWebBinFileName]</div><div class="line">                                                                          mimeType:binData[kWebBinMimeType]];</div><div class="line">                                              &#125;</div><div class="line">                                              </div><div class="line">                                          &#125; error:nil];</div><div class="line">    &#125; else &#123;</div><div class="line">        request = [requestSerializer requestWithMethod:params[kWebServiceMethod] URLString:urlString parameters:params[kWebServiceParams] error:nil];</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    NSURLSessionDataTask *dataTsk = [[CMLWebProxyService sessionManager] dataTaskWithRequest:request completionHandler:completionHandler];</div><div class="line">    </div><div class="line">    [dataTsk resume];</div><div class="line">    </div><div class="line">    return dataTsk;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="POST-下的数据组织形式"><a href="#POST-下的数据组织形式" class="headerlink" title="POST 下的数据组织形式"></a>POST 下的数据组织形式</h3><p>先看看各个格式的抓包的截图，在做对比分析。</p>
+<p><strong>application/x-www-form-urlencoded</strong> 格式的抓包截图</p>
+<p><img src="/uploads/http_content_type_1.png" alt="url 编码格式"></p>
+<p><strong>application/json</strong> 格式的抓包截图</p>
+<p><img src="/uploads/http_content_type_2.png" alt="url 编码格式"></p>
+<p><strong>multipart/form-data</strong> 格式的请求代码以及抓包的截图：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">NSDictionary *bParams = @&#123; @&quot;user&quot; : @&quot;admin&quot;,</div><div class="line">                              @&quot;pass&quot; : @&quot;123456&quot;&#125;;</div><div class="line">   </div><div class="line">   NSData *imageBin = UIImagePNGRepresentation([UIImage imageNamed:@&quot;avatar_cat&quot;]);</div><div class="line">   </div><div class="line">   NSDictionary *binPar = @&#123; kWebBinData : imageBin,</div><div class="line">                             kWebBinName : @&quot;imageFile&quot;,</div><div class="line">                             kWebBinFileName : @&quot;image.png&quot;,</div><div class="line">                             kWebBinMimeType : @&quot;image/png&quot;</div><div class="line">                            &#125;;</div><div class="line">   </div><div class="line">   NSDictionary *params = @&#123; kWebServiceMethod     : @&quot;POST&quot;,</div><div class="line">                             kWebServiceParams     : bParams,</div><div class="line">                             kWebServiceBinParams  : @[binPar],</div><div class="line">                             kWebServiceIdentifier : kPlatformAccountService,</div><div class="line">                             kWebServiceApiUrl     : @&quot;login&quot;&#125;;</div></pre></td></tr></table></figure>
+<p><img src="/uploads/http_content_type_3.png" alt="url 编码格式"></p>
+<p><strong>application/x-www-form-urlencoded</strong> 格式对请求参数进行了 <a href="http://deyimsf.iteye.com/blog/1776082" target="_blank" rel="external"><strong>URL 编码</strong></a> 并将参数放在了 <strong>BODY</strong> 中；<strong>application/json</strong> 格式是将参数进行了 <a href="http://www.w3school.com.cn/json/json_syntax.asp" target="_blank" rel="external"><strong>JSON</strong></a> 格式的转换，放在了 <strong>BODY</strong> 中；</p>
+<p>前两种都是传的普通的文本数据，如果我们需要同时传输文本数据以及二进制数据时，就得用到 <strong>multipart/form-data</strong> 编码格式了，可以从图中看到在 <strong>HTTP</strong> 的头部的 <strong>Content-Type</strong> 中多了 <strong>Boundary</strong> 字段，该字段的作用为对多项数据进行分割；截图中 3 个参数都使用了指定的字符串进行了分割，在图片的那一项中也包含了 <strong>Content-Type</strong> 字段用来描述该项的数据格式为 <strong>PNG</strong> 图片。如果没有图片参数的话，也可以直接使用 <strong>multipart/form-data</strong> 格式来进行组织。</p>
+<blockquote>
+<p>用来分割的字符串的值是每次随机生成的。不同的客户生成的字符串长度也会不一样。</p>
+</blockquote>
+<h3 id="GET-下的数据组织形式"><a href="#GET-下的数据组织形式" class="headerlink" title="GET 下的数据组织形式"></a>GET 下的数据组织形式</h3><p><strong>HTTP</strong> 的 <strong>GET</strong> 请求方式，是将我们要请求的参数放在 <strong>URL</strong> 地址后面，所以 <strong>GET</strong> 方式只支持 <strong>application/x-www-form-urlencoded</strong> 格式，而 <strong>application/json</strong> 和 <strong>multipart/form-data</strong> 不支持的，这个应该比较容易理解。下面是我抓包的截图：</p>
+<p><img src="/uploads/http_content_type_4.png" alt="url 编码格式"></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>其实抓包截图做对比就很容易理解不同的参数的意义了，在很多情况下后端和前端开发人员都是使用成熟的第三方框架来帮我们做这部分工作，对 <strong>HTTP</strong> 协议了解的还不够细致，有时候发现在调试接口无法解析数据，其实很有可能 <strong>Content-Type</strong> 类型不一致导致的。如果觉得文本协议不够精简，也可以使用二进制协议来传输 <strong>user</strong> 和 <strong>pass</strong> 字段，比如 <strong>protobuf</strong> ，只要和服务器端协商好就可以。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;在移动端开发中 HTTP 协议经常被用到，但是在面试或者工作中问到客户端和服务器传输业务数据，使用的数据的封装格式是什么以及怎么被封装到 HTTP 协议中时，很少有人能讲明白。&lt;/p&gt;
+&lt;p&gt;在移动开发中 HTTP 协议为客户端到服务器端，提供了一条数据通道，能够将我们的业务数据传输到服务器，并且从服务器上获取响应数据。在 HTTP 协议头中的 &lt;strong&gt;Content-Type&lt;/strong&gt; 字段描述了 &lt;strong&gt;HTTP&lt;/strong&gt; 的 &lt;strong&gt;BODY&lt;/strong&gt; 体的数据格式，而在 &lt;strong&gt;BODY&lt;/strong&gt; 中可以定义我们业务数据的数据格式。&lt;strong&gt;Content-Type&lt;/strong&gt; 字段可以用很多种类型，具体有哪些可以看 &lt;a href=&quot;http://tool.oschina.net/commons&quot;&gt;&lt;strong&gt;这里&lt;/strong&gt;&lt;/a&gt;，并且也可以根据自身业务来自定义，不过这种做法比较少。这次我主要讲解三种格式分别为 &lt;strong&gt;application/x-www-form-urlencoded&lt;/strong&gt;、&lt;strong&gt;application/json&lt;/strong&gt; 以及 &lt;strong&gt;multipart/form-data&lt;/strong&gt;，其他的格式可以自己理解。&lt;/p&gt;
+&lt;p&gt;下面给各位吃瓜群众介绍上述三种格式在 &lt;strong&gt;GET&lt;/strong&gt; 和 &lt;strong&gt;POST&lt;/strong&gt; 两种请求方法中的区别，为了更直观的看到我们的数据的组织方式，我使用了 &lt;strong&gt;Charles&lt;/strong&gt; 来进行抓包分析。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="开发笔记" scheme="http://enkichen.com/categories/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0/"/>
+    
+    
+      <category term="HTTP" scheme="http://enkichen.com/tags/HTTP/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>两则开发小笔记</title>
+    <link href="http://enkichen.com/2016/07/22/development-of-small-notes/"/>
+    <id>http://enkichen.com/2016/07/22/development-of-small-notes/</id>
+    <published>2016-07-22T06:22:53.000Z</published>
+    <updated>2016-07-22T06:33:49.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>好久没有写博客了，介绍一下项目中一个 Core Graphics 绘制图片时的效率优化方法，以及记录一下 GCDAsyncSocket 框架在读取网络数据要注意的一个点。</p>
+<h3 id="Core-Graphics-绘图性能对比"><a href="#Core-Graphics-绘图性能对比" class="headerlink" title="Core Graphics 绘图性能对比"></a>Core Graphics 绘图性能对比</h3><p>Core Graphics 框架为我们提供了 2D 绘图能力，在使用 Core Graphics 绘制图片时，不同的实现方法使得渲染图片的效率有很大差异，下面是提供两种不同实现方式的对比，看看 Core Graphics 在绘制图片时效率上的差异。</p>
+<p>测试方法为自定义一个 <code>UIView</code>，重写<code>- (void)drawRect:(CGRect)rect</code> 方法，在该方法中使用 Core Graphics 方式绘制图片。然后在开启一个定时器不断的调用 <code>- (void)setNeedsDisplay;</code> 方法来计算绘图所使用的时间。<br><a id="more"></a></p>
+<h4 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">- (void)awakeFromNib &#123;</div><div class="line">    self.coreImage = [UIImage imageNamed:@&quot;IMG_0079.png&quot;];</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)drawRect:(CGRect)rect &#123;</div><div class="line">    struct timeval start , end ;</div><div class="line">    gettimeofday(&amp;start, NULL);</div><div class="line">    [self.coreImage drawAtPoint:CGPointZero];</div><div class="line">    // [self.coreImage drawInRect:CGRectMake(0, 0, 512, 512)];</div><div class="line">    gettimeofday(&amp;end, NULL);</div><div class="line">    long cost = ((end.tv_sec - start.tv_sec) * 1000000 + end.tv_usec - start.tv_usec ) / 1000 ;</div><div class="line"></div><div class="line">    NSLog(@&quot;cost:%ld&quot;, cost);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">- (void)awakeFromNib &#123;</div><div class="line">    self.coreImage = [UIImage imageNamed:@&quot;IMG_0079.png&quot;];</div><div class="line">    CGSize size = self.frame.size;</div><div class="line">    UIGraphicsBeginImageContextWithOptions(size, NO, 0.0);</div><div class="line">    [self.coreImage drawInRect:CGRectMake(0, 0, size.width, size.height)];</div><div class="line">    self.coreImage = UIGraphicsGetImageFromCurrentImageContext();</div><div class="line">    UIGraphicsEndImageContext();</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)drawRect:(CGRect)rect &#123;</div><div class="line">    struct timeval start , end ;</div><div class="line">    gettimeofday(&amp;start, NULL);</div><div class="line">    [self.coreImage drawAtPoint:CGPointZero];</div><div class="line">    // [self.coreImage drawInRect:CGRectMake(0, 0, 512, 512)];</div><div class="line">    gettimeofday(&amp;end, NULL);</div><div class="line">    long cost = ((end.tv_sec - start.tv_sec) * 1000000 + end.tv_usec - start.tv_usec ) / 1000 ;</div><div class="line"></div><div class="line">    NSLog(@&quot;cost:%ld&quot;, cost);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>使用 <code>[self.coreImage drawInRect:CGRectMake(0, 0, 512, 512)];</code> 方法来进行图片的缩放，大小可自定义，只要跟图片本身大小不一致即可。</p>
+</blockquote>
+<h4 id="对比结果"><a href="#对比结果" class="headerlink" title="对比结果"></a>对比结果</h4><table>
+<thead>
+<tr>
+<th style="text-align:center">方法</th>
+<th style="text-align:center">是否缩放</th>
+<th style="text-align:center">耗时时间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">方法一</td>
+<td style="text-align:center">NO</td>
+<td style="text-align:center">10ms ~ 20ms</td>
+</tr>
+<tr>
+<td style="text-align:center">方法一</td>
+<td style="text-align:center">YES</td>
+<td style="text-align:center">100ms ~ 120ms</td>
+</tr>
+<tr>
+<td style="text-align:center">方法二</td>
+<td style="text-align:center">NO</td>
+<td style="text-align:center">1ms ~ 2ms</td>
+</tr>
+<tr>
+<td style="text-align:center">方法二</td>
+<td style="text-align:center">YES</td>
+<td style="text-align:center">30ms ~ 40ms</td>
+</tr>
+</tbody>
+</table>
+<p>我测试的手机为 iPhone 6 机型，图片为 iPhone 拍摄的照片，上表的中耗时时间跟图片以及机器有关，看对比结果即可；从对比结果可以知道如果在绘制时绘制的大小跟图片本身大小不一致时，系统会对其进行缩放，从而导致绘制效率变低，如果我们提前将图片缩放到指定大小，从而可以提高在绘制时的效率；使用 <code>UIGraphicsGetImageFromCurrentImageContext</code> 之前有看到过一篇文章提到，该方法会将图片缓存到显存中，从而使得绘制效率的提高，不过这篇文章已经找不到了。</p>
+<p>在实际项目中可选择合适的方法的进行优化，比如图片过大可以使用方法二进行缩放，同时可以放到子线程中进行处理，从而提供绘制时的效率。我在实际项目中的需求为图片可能进行缩放，所以我针对图片做了两级缓存，缩放后在子线程中生成缩放后的图片，同时在缩放的过程中使用了 OpenGL 进行渲染。</p>
+<h3 id="GCDAsyncSocket-读取数据的注意事项"><a href="#GCDAsyncSocket-读取数据的注意事项" class="headerlink" title="GCDAsyncSocket 读取数据的注意事项"></a>GCDAsyncSocket 读取数据的注意事项</h3><p>今天一同事使用 GCDAsyncSocket 在测试一个网络程序，发现使用我给的代码，无法接收到数据。代码大概如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">- (void)push &#123;</div><div class="line">    if (!self.asyncSocket) &#123;</div><div class="line">        self.asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    if (!self.bufferData) &#123;</div><div class="line">        self.bufferData = [[NSMutableData alloc] init];</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    NSError *err = nil;</div><div class="line">    if (![self.asyncSocket connectToHost:PUSH_HOST onPort:PUSH_PORT error:&amp;err]) &#123;</div><div class="line">        NSLog(@&quot;I goofed: %@&quot;, err);</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)socket:(GCDAsyncSocket *)sender didConnectToHost:(NSString *)host port:(UInt16)port &#123;</div><div class="line">    NSString *contentString = @&quot;data&quot;</div><div class="line">    NSData *data = [contentString dataUsingEncoding:NSUTF8StringEncoding];</div><div class="line">    [self.asyncSocket writeData:data withTimeout:-1 tag:PUSH_DATA_TAG];</div><div class="line">    [self.asyncSocket readDataToLength:100 withTimeout:-1 buffer:self.bufferData bufferOffset:0 tag:PUSH_DATA_TAG];</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err &#123;</div><div class="line">    DDLogWarn(@&quot;SocketDidDisconnect:WithError: %@&quot;, err);</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag &#123;</div><div class="line">    DDLogWarn(@&quot;socket:didReadData: %ld&quot;, tag);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>代码流程很简单，客户端在连接上服务器上之后，会给服务器发送一段数据，服务器接收到数据后，在返回一个状态码给到客户端，方法使用上都是正常的；服务器在响应客户端之后，会直接断开连接，上述代码在客户端的实际表现为发送数据到服务器之后，直接就收到断开的回调消息了，并没有接收到服务器响应的数据。</p>
+<p>经过测试后发现，<code>- (void)readDataToLength:(NSUInteger)length withTimeout:(NSTimeInterval)timeout buffer:(NSMutableData *)buffer bufferOffset:(NSUInteger)offset tag:(long)tag;</code> 一定要接收到指定数据长度后，才会回调对应的方法，而实际服务器返回给到客户端的数据只有两个字节，导致接收数据的方法无法得到回调，就算是连接被断开后也是无法被回调的，导致上层是没办法获取到对应的数据，针对该问题我们可以使用 <code>- (void)readDataWithTimeout:(NSTimeInterval)timeout buffer:(NSMutableData *)buffer bufferOffset:(NSUInteger)offset tag:(long)tag;</code> 来解决该问题。</p>
+<p>所以在使用 <code>GCDAsyncSocket</code> 时得要注意使用合适的方法来获取数据，否则会导致特定情况下无法接收数据回调。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;好久没有写博客了，介绍一下项目中一个 Core Graphics 绘制图片时的效率优化方法，以及记录一下 GCDAsyncSocket 框架在读取网络数据要注意的一个点。&lt;/p&gt;
+&lt;h3 id=&quot;Core-Graphics-绘图性能对比&quot;&gt;&lt;a href=&quot;#Core-Graphics-绘图性能对比&quot; class=&quot;headerlink&quot; title=&quot;Core Graphics 绘图性能对比&quot;&gt;&lt;/a&gt;Core Graphics 绘图性能对比&lt;/h3&gt;&lt;p&gt;Core Graphics 框架为我们提供了 2D 绘图能力，在使用 Core Graphics 绘制图片时，不同的实现方法使得渲染图片的效率有很大差异，下面是提供两种不同实现方式的对比，看看 Core Graphics 在绘制图片时效率上的差异。&lt;/p&gt;
+&lt;p&gt;测试方法为自定义一个 &lt;code&gt;UIView&lt;/code&gt;，重写&lt;code&gt;- (void)drawRect:(CGRect)rect&lt;/code&gt; 方法，在该方法中使用 Core Graphics 方式绘制图片。然后在开启一个定时器不断的调用 &lt;code&gt;- (void)setNeedsDisplay;&lt;/code&gt; 方法来计算绘图所使用的时间。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="开发笔记" scheme="http://enkichen.com/categories/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0/"/>
+    
+    
+      <category term="Core Graphics" scheme="http://enkichen.com/tags/Core-Graphics/"/>
+    
+      <category term="GCDAsyncSocket" scheme="http://enkichen.com/tags/GCDAsyncSocket/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>常用的Git命令</title>
+    <link href="http://enkichen.com/2016/04/14/git-basic-commands/"/>
+    <id>http://enkichen.com/2016/04/14/git-basic-commands/</id>
+    <published>2016-04-14T01:19:04.000Z</published>
+    <updated>2016-04-14T04:51:10.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>1年多以前从SVN阵营转向Git，SVN用的最多就是图行化工具，刚转到Git时也是喜欢用图形化工具和XCode自带Git管理工具的，但是在使用XCode自带Git管理工具出过几次问题后，逐渐转向使用命令。现在基本上是使用<code>SourceTree</code>来做一些浏览性的工作比如commit改动、分支走向等，其他的基本上使用命令来操作。Git的好我就不多说，先看下面一张图了解一下Git的一些名词，在看看常用的Git命令。</p>
+<h3 id="Git图解"><a href="#Git图解" class="headerlink" title="Git图解"></a>Git图解</h3><p><img src="/uploads/gitframe.png" alt=""></p>
+<ul>
+<li><strong>Workspace</strong>：工作区</li>
+<li><strong>Index / Stage</strong>：暂存区</li>
+<li><strong>Repository</strong>：仓库区（或本地仓库）</li>
+<li><strong>Remote</strong>：远程仓库</li>
+</ul>
+<a id="more"></a> 
+<h3 id="新建代码库"><a href="#新建代码库" class="headerlink" title="新建代码库"></a>新建代码库</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"># 在当前目录新建一个Git代码库</div><div class="line">$ git init</div><div class="line"></div><div class="line"># 新建一个目录，将其初始化为Git代码库</div><div class="line">$ git init [project-name]</div><div class="line"></div><div class="line"># 下载一个项目和它的整个代码历史</div><div class="line">$ git clone [url]</div></pre></td></tr></table></figure>
+<h3 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h3><p>Git的设置文件为<code>.gitconfig</code>，它可以在用户主目录下（全局配置），也可以在项目目录下（项目配置）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"># 显示当前的Git配置</div><div class="line">$ git config --list</div><div class="line"></div><div class="line"># 编辑Git配置文件</div><div class="line">$ git config -e [--global]</div><div class="line"></div><div class="line"># 设置提交代码时的用户信息</div><div class="line">$ git config [--global] user.name &quot;[name]&quot;</div><div class="line">$ git config [--global] user.email &quot;[email address]&quot;</div></pre></td></tr></table></figure>
+<h3 id="增加-删除文件"><a href="#增加-删除文件" class="headerlink" title="增加/删除文件"></a>增加/删除文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"># 添加指定文件到暂存区</div><div class="line">$ git add [file1] [file2] ...</div><div class="line"></div><div class="line"># 添加指定目录到暂存区，包括子目录</div><div class="line">$ git add [dir]</div><div class="line"></div><div class="line"># 添加当前目录的所有文件到暂存区</div><div class="line">$ git add .</div><div class="line"></div><div class="line"># 删除工作区文件，并且将这次删除放入暂存区</div><div class="line">$ git rm [file1] [file2] ...</div><div class="line"></div><div class="line"># 停止追踪指定文件，但该文件会保留在工作区</div><div class="line">$ git rm --cached [file]</div><div class="line"></div><div class="line"># 改名文件，并且将这个改名放入暂存区</div><div class="line">$ git mv [file-original] [file-renamed]</div></pre></td></tr></table></figure>
+<h3 id="代码提交"><a href="#代码提交" class="headerlink" title="代码提交"></a>代码提交</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"># 提交暂存区到仓库区</div><div class="line">$ git commit -m [message]</div><div class="line"></div><div class="line"># 提交暂存区的指定文件到仓库区</div><div class="line">$ git commit [file1] [file2] ... -m [message]</div><div class="line"></div><div class="line"># 提交工作区自上次commit之后的变化，直接到仓库区</div><div class="line">$ git commit -a</div><div class="line"></div><div class="line"># 提交时显示所有diff信息</div><div class="line">$ git commit -v</div><div class="line"></div><div class="line"># 使用一次新的commit，替代上一次提交</div><div class="line"># 如果代码没有任何新变化，则用来改写上一次commit的提交信息</div><div class="line">$ git commit --amend -m [message]</div><div class="line"></div><div class="line"># 重做上一次commit，并包括指定文件的新变化</div><div class="line">$ git commit --amend [file1] [file2] ...</div></pre></td></tr></table></figure>
+<h3 id="暂存区"><a href="#暂存区" class="headerlink" title="暂存区"></a>暂存区</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"># 将工作区内容转存到暂存区</div><div class="line">$ git stash</div><div class="line"></div><div class="line"># 列所有stash</div><div class="line">$ git stash list</div><div class="line"></div><div class="line"># 删除暂存区</div><div class="line">$ git stash drop</div><div class="line"></div><div class="line"># 将暂存区内容放到工作区</div><div class="line">$ git stash apply</div></pre></td></tr></table></figure>
+<h3 id="分支操作"><a href="#分支操作" class="headerlink" title="分支操作"></a>分支操作</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div></pre></td><td class="code"><pre><div class="line"># 列出所有本地分支</div><div class="line">$ git branch</div><div class="line"></div><div class="line"># 列出所有远程分支</div><div class="line">$ git branch -r</div><div class="line"></div><div class="line"># 列出所有本地分支和远程分支</div><div class="line">$ git branch -a</div><div class="line"></div><div class="line"># 新建一个分支，但依然停留在当前分支</div><div class="line">$ git branch [branch-name]</div><div class="line"></div><div class="line"># 新建一个分支，并切换到该分支</div><div class="line">$ git checkout -b [branch]</div><div class="line"></div><div class="line"># 重远程仓库新建一个分支，并切换到该分支</div><div class="line">$ git checkout -b [branch-name] origin/[branch]</div><div class="line"></div><div class="line"># 新建一个分支，指向指定commit</div><div class="line">$ git branch [branch] [commit]</div><div class="line"></div><div class="line"># 新建一个分支，与指定的远程分支建立追踪关系</div><div class="line">$ git branch --track [branch] [remote-branch]</div><div class="line"></div><div class="line"># 切换到指定分支，并更新工作区</div><div class="line">$ git checkout [branch-name]</div><div class="line"></div><div class="line"># 建立追踪关系，在现有分支与指定的远程分支之间</div><div class="line">$ git branch --set-upstream [branch] [remote-branch]</div><div class="line"></div><div class="line"># 合并指定分支到当前分支（快进式合并）</div><div class="line">$ git merge [branch]</div><div class="line"></div><div class="line"># 合并指定分支，并将当前操作当成一次commit（会在分支上生成一个新节点）</div><div class="line">$ git merge --no-ff [branch]</div><div class="line"></div><div class="line"># 查看已经被合并到当前分支的分支</div><div class="line">$ git branch --merged</div><div class="line"></div><div class="line"># 查看尚未被合并到当前分支的分支</div><div class="line">$ git br --no-merged</div><div class="line"></div><div class="line"># 合并指定分支到当前分支，同时删除分支</div><div class="line">$ git rebase [branch]</div><div class="line"></div><div class="line"># 选择一个commit，合并进当前分支</div><div class="line">$ git cherry-pick [commit]</div><div class="line"></div><div class="line"># 删除分支</div><div class="line">$ git branch -d [branch-name]</div><div class="line"></div><div class="line"># 删除远程分支</div><div class="line">$ git push origin --delete [branch-name]</div><div class="line">$ git branch -dr [remote/branch]</div><div class="line"></div><div class="line"># 删除不存在对应远程分支的本地分支</div><div class="line">$ git remote show origin</div><div class="line">$ git remote prune origin</div><div class="line"></div><div class="line"># 更简单的方法是使用这个命令，它在fetch之后删除掉没有与远程分支对应的本地分支</div><div class="line">$ git fetch -p</div></pre></td></tr></table></figure>
+<h3 id="标签"><a href="#标签" class="headerlink" title="标签"></a>标签</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"># 列出所有tag</div><div class="line">$ git tag</div><div class="line"></div><div class="line"># 新建一个tag在当前commit</div><div class="line">$ git tag [tag]</div><div class="line"></div><div class="line"># 新建一个tag在指定commit</div><div class="line">$ git tag [tag] [commit]</div><div class="line"></div><div class="line"># 查看tag信息</div><div class="line">$ git show [tag]</div><div class="line"></div><div class="line"># 提交指定tag</div><div class="line">$ git push [remote] [tag]</div><div class="line"></div><div class="line"># 提交所有tag</div><div class="line">$ git push [remote] --tags</div><div class="line"></div><div class="line"># 新建一个分支，指向某个tag</div><div class="line">$ git checkout -b [branch] [tag]</div></pre></td></tr></table></figure>
+<h3 id="查看信息"><a href="#查看信息" class="headerlink" title="查看信息"></a>查看信息</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line"># 显示有变更的文件</div><div class="line">$ git status</div><div class="line"></div><div class="line"># 显示当前分支的版本历史</div><div class="line">$ git log</div><div class="line"></div><div class="line"># 显示commit历史，以及每次commit发生变更的文件</div><div class="line">$ git log --stat</div><div class="line"></div><div class="line"># 显示某个文件的版本历史，包括文件改名</div><div class="line">$ git log --follow [file]</div><div class="line">$ git whatchanged [file]</div><div class="line"></div><div class="line"># 显示指定文件相关的每一次diff</div><div class="line">$ git log -p [file]</div><div class="line"></div><div class="line"># 显示指定文件是什么人在什么时间修改过</div><div class="line">$ git blame [file]</div><div class="line"></div><div class="line"># 显示暂存区和工作区的差异</div><div class="line">$ git diff</div><div class="line"></div><div class="line"># 显示暂存区和上一个commit的差异</div><div class="line">$ git diff --cached [file]</div><div class="line"></div><div class="line"># 显示工作区与当前分支最新commit之间的差异</div><div class="line">$ git diff HEAD</div><div class="line"></div><div class="line"># 显示两次提交之间的差异</div><div class="line">$ git diff [first-branch]...[second-branch]</div><div class="line"></div><div class="line"># 显示某次提交的元数据和内容变化</div><div class="line">$ git show [commit]</div><div class="line"></div><div class="line"># 显示某次提交发生变化的文件</div><div class="line">$ git show --name-only [commit]</div><div class="line"></div><div class="line"># 显示某次提交时，某个文件的内容</div><div class="line">$ git show [commit]:[filename]</div><div class="line"></div><div class="line"># 显示当前分支的最近几次提交（如果没有push到远程，就执行了reset，那这个绝对是救命用的了）</div><div class="line">$ git reflog</div></pre></td></tr></table></figure>
+<h3 id="远程同步"><a href="#远程同步" class="headerlink" title="远程同步"></a>远程同步</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"># 下载远程仓库的所有变动</div><div class="line">$ git fetch [remote]</div><div class="line"></div><div class="line"># 显示所有远程仓库</div><div class="line">$ git remote -v</div><div class="line"></div><div class="line"># 显示某个远程仓库的信息</div><div class="line">$ git remote show [remote]</div><div class="line"></div><div class="line"># 增加一个新的远程仓库，并命名</div><div class="line">$ git remote add [shortname] [url]</div><div class="line"></div><div class="line"># 取回远程仓库的变化，并与本地分支合并</div><div class="line">$ git pull [remote] [branch]</div><div class="line"></div><div class="line"># 上传本地指定分支到远程仓库</div><div class="line">$ git push [remote] [branch]</div><div class="line"></div><div class="line"># 强行推送当前分支到远程仓库，即使有冲突</div><div class="line">$ git push [remote] --force</div><div class="line"></div><div class="line"># 推送所有分支到远程仓库</div><div class="line">$ git push [remote] --all</div></pre></td></tr></table></figure>
+<h3 id="撤销"><a href="#撤销" class="headerlink" title="撤销"></a>撤销</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"># 恢复暂存区的指定文件到工作区</div><div class="line">$ git checkout [file]</div><div class="line"></div><div class="line"># 恢复某个commit的指定文件到工作区</div><div class="line">$ git checkout [commit] [file]</div><div class="line"></div><div class="line"># 恢复上一个commit的所有文件到工作区</div><div class="line">$ git checkout .</div><div class="line"></div><div class="line"># 重置暂存区的指定文件，与上一次commit保持一致，但工作区不变</div><div class="line">$ git reset [file]</div><div class="line"></div><div class="line"># 重置暂存区与工作区，与上一次commit保持一致</div><div class="line">$ git reset --hard</div><div class="line"></div><div class="line"># 重置当前分支的指针为指定commit，同时重置暂存区，但工作区不变</div><div class="line">$ git reset [commit]</div><div class="line"></div><div class="line"># 重置当前分支的HEAD为指定commit，同时重置暂存区和工作区，与指定commit一致</div><div class="line">$ git reset --hard [commit]</div><div class="line"></div><div class="line"># 重置当前HEAD为指定commit，但保持暂存区和工作区不变</div><div class="line">$ git reset --keep [commit]</div><div class="line"></div><div class="line"># 新建一个commit，用来撤销指定commit</div><div class="line"># 后者的所有变化都将被前者抵消，并且应用到当前分支</div><div class="line">$ git revert [commit]</div></pre></td></tr></table></figure>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"># 生成一个可供发布的压缩包</div><div class="line">$ git archive</div></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;1年多以前从SVN阵营转向Git，SVN用的最多就是图行化工具，刚转到Git时也是喜欢用图形化工具和XCode自带Git管理工具的，但是在使用XCode自带Git管理工具出过几次问题后，逐渐转向使用命令。现在基本上是使用&lt;code&gt;SourceTree&lt;/code&gt;来做一些浏览性的工作比如commit改动、分支走向等，其他的基本上使用命令来操作。Git的好我就不多说，先看下面一张图了解一下Git的一些名词，在看看常用的Git命令。&lt;/p&gt;
+&lt;h3 id=&quot;Git图解&quot;&gt;&lt;a href=&quot;#Git图解&quot; class=&quot;headerlink&quot; title=&quot;Git图解&quot;&gt;&lt;/a&gt;Git图解&lt;/h3&gt;&lt;p&gt;&lt;img src=&quot;/uploads/gitframe.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Workspace&lt;/strong&gt;：工作区&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Index / Stage&lt;/strong&gt;：暂存区&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Repository&lt;/strong&gt;：仓库区（或本地仓库）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Remote&lt;/strong&gt;：远程仓库&lt;/li&gt;
+&lt;/ul&gt;
+    
+    </summary>
+    
+      <category term="知识整理/总结" scheme="http://enkichen.com/categories/%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E6%80%BB%E7%BB%93/"/>
+    
+    
+      <category term="Git" scheme="http://enkichen.com/tags/Git/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>PKI系统与数字证书结构</title>
+    <link href="http://enkichen.com/2016/04/12/certification-and-pki/"/>
+    <id>http://enkichen.com/2016/04/12/certification-and-pki/</id>
+    <published>2016-04-12T13:24:29.000Z</published>
+    <updated>2016-04-12T13:33:34.000Z</updated>
+    
+    <content type="html"><![CDATA[<blockquote>
+<p>在上一篇<a href="http://www.enkichen.com/2016/02/26/digital-certificate-based/" target="_blank" rel="external">《数字证书的基础知识》</a>中介绍了数字证书的一些基础知识以及数字证书的作用，但是并没有提到数字证书的管理，比如数字证书的申请，数字证书的文件格式等知识。这里为大家整理和总结这些相关知识点。</p>
+</blockquote>
+<p>PKI（Public Key Infrastructure）翻译过来就是公钥基础设施，可以理解为利用公钥技术为网络应用提供加密和数字签名等密码服务以及必需的密钥和证书管理体系。它是一个提供安全服务的基础设施，PKI技术是信息安全技术的核心，同时也是电子商务的关键和基础技术。</p>
+<blockquote>
+<p>PKI既不是一个协议，也不是一个软件，它是一个标准，在这个标准之下发展出的为了实现安全基础服务目的的技术统称为PKI。  </p>
+</blockquote>
+<h3 id="PKI的组成"><a href="#PKI的组成" class="headerlink" title="PKI的组成"></a>PKI的组成</h3><a id="more"></a> 
+<p>PKI是一个标准，它包括一些基本的组件，不同的组件提供不同的服务，主要由一下几个组件组成：</p>
+<ol>
+<li><strong>认证中心CA(证书签发)</strong>：CA机构，又称为证书授证 (Certificate Authority) 中心，是PKI的”核心”，即数字证书的申请及签发机关，CA必须具备权威性的特征，它负责管理PKI结构下的所有用户(包括各种应用程序)的证书，把用户的公钥和用户的其他信息捆绑在一起，在网上验证用户的身份，CA还要负责用户证书的黑名单登记和黑名单发布。</li>
+<li><strong>X.500目录服务器(证书保存)</strong>：X.500目录服务器用于”发布”用户的证书和黑名单信息，用户可通过标准的LDAP协议查询自己或其他人的证书和下载黑名单信息。</li>
+<li><strong>具有高强度密码算法(SSL)的安全WWW服务器(即配置了HTTPS的apache)</strong>：Secure socket layer(SSL)协议最初由Netscape 企业发展，现已成为网络用来鉴别网站和网页浏览者身份，以及在浏览器使用者及网页服务器之间进行加密通讯的全球化标准。</li>
+<li><strong>Web(安全通信平台)</strong>：Web有Web Client端和Web Server端两部分，分别安装在客户端和服务器端，通过具有高强度密码算法的SSL 协议保证客户端和服务器端数据的机密性、完整性、身份验证。</li>
+<li><strong>自开发安全应用系统</strong>：自开发安全应用系统是指各行业自开发的各种具体应用系统，例如银行、证券的应用系统等。</li>
+</ol>
+<h3 id="CA机构"><a href="#CA机构" class="headerlink" title="CA机构"></a>CA机构</h3><p>CA 机构，又称为证书授证 (Certificate Authority) 中心，是一个负责发放和管理数字证书的权威机构 , 它作为电子商务交易中受信任的第三方，承担公钥体系中公钥的合法性检验的责任。 CA 中心为每个使用公开密钥的用户发放一个数字证书，以实现公钥的分发并证明其合法性。数字证书是一个经证书授权中心数字签名的包含公开密钥拥有者信息以及公开密钥的文件 , 作用是证明证书中列出的用户合法拥有证书中列出的公开密钥。 CA 机构的数字签名使得攻击者不能伪造和篡改证书。在 SET 交易中， CA 不仅对持卡人、商户发放证书，还要对获款的银行、网关发放证书。它负责产生、分配并管理所有参与网上交易的个体所需的数字证书，因此是安全电子交易的核心环节。认证中心CA作为PKI的核心部分，CA实现了PKI 中一些很重要的功能：</p>
+<ol>
+<li>接收验证最终用户数字证书的申请</li>
+<li>确定是否接受最终用户数字证书的申请-证书的审批</li>
+<li>向申请者颁发、拒绝颁发数字证书-证书的发放</li>
+<li>接收、处理最终用户的数字证书更新请求-证书的更新</li>
+<li>接收最终用户数字证书的查询、撤销</li>
+<li>产生和发布证书废止列表(CRL)</li>
+<li>数字证书的归档</li>
+<li>密钥归档</li>
+<li>历史数据归档</li>
+</ol>
+<h3 id="X-509标准"><a href="#X-509标准" class="headerlink" title="X.509标准"></a>X.509标准</h3><p>X.509是一种非常通用的证书格式。所有的证书都符合ITU-T X.509国际标准；因此(理论上)为一种应用创建的证书可以用于任何其他符合X.509标准的应用。在一份证书中，必须证明公钥及其所有者的姓名是一致的。对X.509证书来说，认证者总是 CA或由CA指定的人，一份X.509证书是一些标准字段的集合，这些字段包含有关用户或设备及其相应公钥的信息。X.509标准定义了证书中应该包含哪些信息，并描述了这些信息是如何编码的(即数据格式)，所有的X.509证书包含以下数据。</p>
+<ul>
+<li><strong>版本号：</strong>指出该证书使用了哪种版本的X.509标准（版本1、版本2或是版本3），版本号会影响证书中的一些特定信息，目前的版本为3</li>
+<li><strong>序列号：</strong>  标识证书的唯一整数，由证书颁发者分配的本证书的唯一标识符</li>
+<li><strong>签名算法标识符：</strong> 用于签证书的算法标识，由对象标识符加上相关的参数组成，用于说明本证书所用的数字签名算法。例如，SHA-1和RSA的对象标识符就用来说明该数字签名是利用RSA对SHA-1杂凑加密</li>
+<li><strong>认证机构的数字签名：</strong>这是使用发布者私钥生成的签名，以确保这个证书在发放之后没有被撰改过</li>
+<li><strong>认证机构：</strong> 证书颁发者的可识别名（DN），是签发该证书的实体唯一的CA的X.500名字。使用该证书意味着信任签发证书的实体。(注意：在某些情况下，比如根或顶级CA证书，发布者自己签发证书) </li>
+<li><strong>有效期限：</strong> 证书起始日期和时间以及终止日期和时间；指明证书在这两个时间内有效</li>
+<li><strong>主题信息：</strong>证书持有人唯一的标识符(或称DN-distinguished name)这个名字在 Internet上应该是唯一的</li>
+<li><strong>公钥信息：</strong> 包括证书持有人的公钥、算法(指明密钥属于哪种密码系统)的标识符和其他相关的密钥参数</li>
+<li><strong>颁发者唯一标识符：</strong>标识符—证书颁发者的唯一标识符，仅在版本2和版本3中有要求，属于可选项</li>
+</ul>
+<h4 id="X-509证书扩展部分"><a href="#X-509证书扩展部分" class="headerlink" title="X.509证书扩展部分"></a>X.509证书扩展部分</h4><p>可选的标准和专用的扩展（仅在版本2和版本3中使用），扩展部分的元素都有这样的结构：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">　　Extension ::= SEQUENCE &#123;</div><div class="line"></div><div class="line">　　extnID OBJECT IDENTIFIER,</div><div class="line"></div><div class="line">　　critical BOOLEAN DEFAULT FALSE,</div><div class="line"></div><div class="line">　　extnValue OCTET STRING &#125;</div><div class="line"></div><div class="line">　　extnID：表示一个扩展元素的OID</div><div class="line"></div><div class="line">　　critical：表示这个扩展元素是否极重要</div><div class="line"></div><div class="line">　　extnValue：表示这个扩展元素的值，字符串类型。</div></pre></td></tr></table></figure>
+<p>扩展部分包括：</p>
+<ul>
+<li><strong>发行者密钥标识符：</strong>证书所含密钥的唯一标识符，用来区分同一证书拥有者的多对密钥。</li>
+<li><strong>密钥使用：</strong>一个比特串，指明（限定）证书的公钥可以完成的功能或服务，如：证书签名、数据加密等。如果某一证书将 KeyUsage 扩展标记为“极重要”，而且设置为“keyCertSign”，则在 SSL 通信期间该证书出现时将被拒绝，因为该证书扩展表示相关私钥应只用于签写证书，而不应该用于 SSL。</li>
+<li><strong>CRL分布点：</strong>指明CRL的分布地点</li>
+<li><strong>私钥的使用期：</strong>指明证书中与公钥相联系的私钥的使用期限，它也有Not Before和Not After组成。若此项不存在时，公私钥的使用期是一样的。</li>
+<li><strong>证书策略：</strong>由对象标识符和限定符组成，这些对象标识符说明证书的颁发和使用策略有关。</li>
+<li><strong>策略映射：</strong>表明两个CA域之间的一个或多个策略对象标识符的等价关系，仅在CA证书里存在</li>
+<li><strong>主体别名：</strong>指出证书拥有者的别名，如电子邮件地址、IP地址等，别名是和DN绑定在一起的。</li>
+<li><strong>颁发者别名：</strong>指出证书颁发者的别名，如电子邮件地址、IP地址等，但颁发者的DN必须出现在证书的颁发者字段。</li>
+<li><strong>主体目录属性：</strong>指出证书拥有者的一系列属性。可以使用这一项来传递访问控制信息。</li>
+</ul>
+<p>百度的SSL数字证书：</p>
+<p><img src="/uploads/baidudigitalcertificate.png" alt="百度的SSL数字证书"></p>
+<h4 id="数字证书格式"><a href="#数字证书格式" class="headerlink" title="数字证书格式"></a>数字证书格式</h4><p>数字证书体现为一个或一系列相关经过加密的数据文件。常见格式有：  </p>
+<ul>
+<li>符合PKI ITU-T X509标准，传统标准（.DER .PEM .CER .CRT）  </li>
+<li>符合PKCS#7 加密消息语法标准(.P7B .P7C .SPC .P7R)  </li>
+<li>符合PKCS#10 证书请求标准(.p10)  </li>
+<li>符合PKCS#12 个人信息交换标准（.pfx *.p12）  </li>
+</ul>
+<p>当然，这只是常用的几种标准，其中，X509证书还分两种编码形式：  </p>
+<ul>
+<li>X.509 DER(Distinguished Encoding Rules)编码，后缀为：.DER .CER .CRT  </li>
+<li>X.509 BASE64编码，后缀为：.PEM .CER .CRT  </li>
+</ul>
+<p>X509是数字证书的基本规范，而P7和P12则是两个实现规范，P7用于数字信封，P12则是带有私钥的证书实现规范。采用的标准不同，生成的数字证书，包含内容也可能不同。下面就证书包含/可能包含的内容做个汇总，一般证书特性有：</p>
+<ul>
+<li>存储格式：二进制还是ASCII</li>
+<li>是否包含公钥、私钥</li>
+<li>包含一个还是多个证书</li>
+<li>是否支持密码保护（针对当前证书）</li>
+</ul>
+<p>其中：</p>
+<ul>
+<li>DER、CER、CRT以二进制形式存放证书，只有公钥，不包含私钥</li>
+<li>CSR证书请求</li>
+<li>PEM以Base64编码形式存放证书，以”—–BEGIN CERTIFICATE—–” 和 “—–END CERTIFICATE—–”封装，只有公钥</li>
+<li>PFX、P12也是以二进制形式存放证书，包含公钥、私钥，包含保护密码。PFX和P12存储格式完全相同只是扩展名不同</li>
+<li>P10证书请求</li>
+<li>P7R是CA对证书请求回复，一般做数字信封</li>
+<li>P7B/P7C证书链，可包含一个或多个证书</li>
+</ul>
+<p>理解关键点：凡是包含私钥的，一律必须添加密码保护（加密私钥），因为按照习惯，公钥是可以公开的，私钥必须保护，所以明码证书以及未加保护的证书都不可能包含私钥，只有公钥，不用加密。  </p>
+<p>上文描述中，DER均表示证书且有签名，实际使用中，还有DER编码的私钥不用签名，实际上只是个“中间件”。另外：证书请求一般采用CSR扩展名，但是其格式有可能是PEM也可能是DER格式，但都代表证书请求，只有经过CA签发后才能得到真正的证书。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a href="http://www.enkichen.com/2016/02/26/digital-certificate-based/" target="_blank" rel="external">数字证书的基础知识</a><br><a href="http://www.360doc.com/content/10/0401/23/633992_21238907.shtml" target="_blank" rel="external">X.509标准</a><br><a href="http://www.cnblogs.com/watertao/archive/2012/04/08/2437720.html" target="_blank" rel="external">X.509 数字证书结构简介</a><br><a href="http://kb.cnblogs.com/page/194742/" target="_blank" rel="external">数字证书及CA的扫盲介绍</a><br><a href="http://www.cnblogs.com/littlehann/p/3738141.html" target="_blank" rel="external">openSSL命令、PKI、CA、SSL证书原理</a>  </p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;blockquote&gt;
+&lt;p&gt;在上一篇&lt;a href=&quot;http://www.enkichen.com/2016/02/26/digital-certificate-based/&quot;&gt;《数字证书的基础知识》&lt;/a&gt;中介绍了数字证书的一些基础知识以及数字证书的作用，但是并没有提到数字证书的管理，比如数字证书的申请，数字证书的文件格式等知识。这里为大家整理和总结这些相关知识点。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;PKI（Public Key Infrastructure）翻译过来就是公钥基础设施，可以理解为利用公钥技术为网络应用提供加密和数字签名等密码服务以及必需的密钥和证书管理体系。它是一个提供安全服务的基础设施，PKI技术是信息安全技术的核心，同时也是电子商务的关键和基础技术。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;PKI既不是一个协议，也不是一个软件，它是一个标准，在这个标准之下发展出的为了实现安全基础服务目的的技术统称为PKI。  &lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&quot;PKI的组成&quot;&gt;&lt;a href=&quot;#PKI的组成&quot; class=&quot;headerlink&quot; title=&quot;PKI的组成&quot;&gt;&lt;/a&gt;PKI的组成&lt;/h3&gt;
+    
+    </summary>
+    
+      <category term="知识整理/总结" scheme="http://enkichen.com/categories/%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E6%80%BB%E7%BB%93/"/>
+    
+    
+      <category term="数字证书" scheme="http://enkichen.com/tags/%E6%95%B0%E5%AD%97%E8%AF%81%E4%B9%A6/"/>
+    
+      <category term="PKI" scheme="http://enkichen.com/tags/PKI/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>数字证书的基础知识</title>
+    <link href="http://enkichen.com/2016/02/26/digital-certificate-based/"/>
+    <id>http://enkichen.com/2016/02/26/digital-certificate-based/</id>
+    <published>2016-02-26T12:38:53.000Z</published>
+    <updated>2016-03-17T03:28:30.000Z</updated>
+    
+    <content type="html"><![CDATA[<blockquote>
+<p>在之前的<a href="http://www.enkichen.com/2016/01/15/ios-certification-and-code-sign-note/" target="_blank" rel="external">《iOS开发者证书以及代码签名学习笔记》</a>博文中介绍了iOS开发证书以及代码签名相关的知识点，为了更好理解其中证书的特性，这里对数字证书以及相关的知识进行了整理和总结。</p>
+</blockquote>
+<p>在讲数字证书之前必须要讲<strong>非对称加密算法</strong>和<strong>摘要算法</strong>，因为数字证书的基础就是各种加解密算法（非对称加密、摘要算法），而其中的核心就是非对称加密算法了。目前而言加密方法可以分为两大类。一类是<strong>单钥加密</strong>（private key cryptography）也可以称为对称加密，还有一类叫做<strong>双钥加密</strong>（public key cryptography）也可称为非对称加密。前者的加密和解密过程都用同一套密码，后者的加密和解密过程用的是不同的密码。下面来看看对称加密、非对称加密以及摘要算法，他们是怎样应用在数字证书中的。<br><a id="more"></a></p>
+<h3 id="对称加密"><a href="#对称加密" class="headerlink" title="对称加密"></a>对称加密</h3><p>对称加密(也叫私钥加密)指加密和解密使用相同密钥的加密算法。有时又叫传统密码算法，就是加密密钥能够从解密密钥中推算出来，同时解密密钥也可以从加密密钥中推算出来。而在大多数的对称算法中，加密密钥和解密密钥是相同的，所以也称这种加密算法为秘密密钥算法或单密钥算法。</p>
+<p>在应用该算法时，它要求发送方和接收方在安全通信之前，商定一个密钥。对称算法的安全性依赖于密钥，泄漏密钥就意味着任何人都可以对他们发送或接收的消息解密，所以密钥的保密性对通信性至关重要。对称加密算法的特点是算法公开、计算量小、加密速度快、加密效率高。对称加密有很多种算法，由于它效率很高，所以被广泛使用在很多加密协议的核心当中。不足之处是，交易双方都使用同样钥匙，安全性得不到保证。</p>
+<h4 id="常见的对称加密算法"><a href="#常见的对称加密算法" class="headerlink" title="常见的对称加密算法"></a>常见的对称加密算法</h4><ul>
+<li><p><strong>DES</strong>：数据加密标准（DES，Data Encryption Standard）是一种使用密钥加密的块密码，它基于使用<strong>56位密钥</strong>的对称算法，这个算法因为包含一些机密设计元素，相对短的密钥长度以及被怀疑内含美国国家安全局（NSA）的后门而在开始时是有争议的，DES现在已经不被视为一种安全的加密算法，主要因为它使用的56位密钥过短，导致容易被破解。为了提供实用所需的安全性，可以使用DES的派生算法3DES来进行加密，虽然3DES也存在理论上的攻击方法。</p>
+</li>
+<li><p><strong>AES</strong>：高级加密标准（英语：Advanced Encryption Standard，缩写：AES），这个标准用来替代原先的DES，已经被多方分析且广为全世界所使用，2006年，高级加密标准已然成为对称密钥加密中最流行的算法之一。AES的区块长度固定为128比特，<strong>密钥长度则可以是128，192或256比特</strong>。</p>
+</li>
+<li><p><strong>RC4</strong>：RC4加密算法是大名鼎鼎的RSA三人组中的头号人物Ronald Rivest在1987年设计的密钥长度可变的流加密算法簇。该算法的速度可以达到DES加密的10倍左右，且具有很高级别的非线性。RC4起初是用于保护商业机密的。但是在1994年9月，它的算法被发布在互联网上，也就不再有什么商业机密了。</p>
+</li>
+<li><p><strong>IDEA</strong>：是旅居瑞士中国青年学者来学嘉和著名密码专家J.Massey于1990年提出的。它在1990年正式公布并在以后得到增强。这种算法是在DES算法的基础上发展出来的，类似于三重DES，和DES一样IDEA也是属于对称密钥算法。发展IDEA也是因为感到DES具有密钥太短等缺点，已经过时。<strong>IDEA的密钥为128位</strong>，这么长的密钥在今后若干年内应该是安全的。</p>
+</li>
+</ul>
+<h3 id="非对称加密"><a href="#非对称加密" class="headerlink" title="非对称加密"></a>非对称加密</h3><p>与对称加密算法不同，非对称加密算法需要两个密钥：公开密钥（publickey）和私有密钥（privatekey）；并且加密密钥和解密密钥是成对出现的。非对称加密算法在加密和解密过程使用了不同的密钥，非对称加密也称为公钥加密，在密钥对中，其中一个密钥是对外公开的，所有人都可以获取到，称为公钥，其中一个密钥是不公开的称为私钥。</p>
+<h4 id="非对称加密的特性"><a href="#非对称加密的特性" class="headerlink" title="非对称加密的特性"></a>非对称加密的特性</h4><ul>
+<li>对于一个公钥，有且只有一个对应的私钥。</li>
+<li>公钥是公开的，并且不能通过公钥反推出私钥。</li>
+<li>通过私钥加密的密文只能通过公钥能解密，通过公钥加密的密文也只能通过私钥能解密。</li>
+</ul>
+<blockquote>
+<p>通过公钥是极难推算出私钥的，只能通过穷举，所以只要密钥足够长，要想从公钥推算出私钥几乎不可能的。</p>
+</blockquote>
+<h4 id="非对称加密的主要用途"><a href="#非对称加密的主要用途" class="headerlink" title="非对称加密的主要用途"></a>非对称加密的主要用途</h4><ul>
+<li><strong>对信息保密，防止中间人攻击</strong>：将明文使用公钥加密，传输给接收者，这样确保信息只能被有私钥的拥有者解密，其他人无法获得明文信息，因为没有私钥无法进行解密。该方法一般用于交换<strong><code>对称密钥</code></strong>。</li>
+<li><strong>身份验证和防止信息篡改</strong>：私钥拥有者使用私钥加密一段授权明文，并将授权明文和加密后的密文，以及公钥一并发送出来，接收方只需要通过公钥将密文解密后与授权明文对比是否一致，就可以判断明文在中途是否被篡改过。此方法用于<strong><code>数字签名</code></strong>。</li>
+</ul>
+<h4 id="常见的非对称加密算法"><a href="#常见的非对称加密算法" class="headerlink" title="常见的非对称加密算法"></a>常见的非对称加密算法</h4><ul>
+<li><p><strong>RSA</strong>：1977年，三位数学家Rivest、Shamir 和 Adleman 设计了一种算法，可以实现非对称加密。这种算法用他们三个人的名字命名，叫做RSA算法。从那时直到现在，RSA算法一直是最广为使用的”非对称加密算法”。毫不夸张地说，只要有计算机网络的地方，就有RSA算法。这种算法非常可靠，密钥越长，它就越难破解。根据已经披露的文献，目前被破解的最长RSA密钥是768个二进制位。也就是说，长度超过768位的密钥，还无法破解（至少没人公开宣布）。因此可以认为，<strong>1024位的RSA密钥基本安全，2048位的密钥极其安全</strong>。适用于数字签名和密钥交换。 该算法是目前应用最广泛的公钥加密算法，特别适用于通过 Internet 传送的数据。  </p>
+</li>
+<li><p><strong>DSA</strong>：数字签名算法 (Digital Signature Algorithm, DSA) 由美国国家安全署 (United States National Security Agency, NSA) 发明，已作为数字签名的标准。在DSA数字签名和认证中，发送者使用自己的私钥对文件或消息进行签名，接受者收到消息后使用发送者的公钥来验证签名的真实性。DSA只是一种算法，和RSA不同之处在于它不能用作加密和解密，也不能进行密钥交换，只用于签名，它比RSA要快很多。DSA 算法的安全性取决于自计算离散算法的困难。这种算法，不适用于数据加密，仅适用于数字签名。  </p>
+</li>
+<li><p><strong>Diffie-Hellman</strong>：一种确保共享KEY安全穿越不安全网络的方法。Whitefield与Martin Hellman在1976年提出了一个奇妙的密钥交换协议，称为Diffie-Hellman密钥交换协议/算法(Diffie-Hellman Key Exchange/Agreement Algorithm)。这个机制的巧妙在于需要安全通信的双方可以用这个方法确定对称密钥。然后可以用这个密钥进行加密和解密。但是注意，这个密钥交换协议/算法只能用于密钥的交换，而不能进行消息的加密和解密。双方确定要用的密钥后，要使用其他对称密钥操作加密算法实际加密和解密消息。该算法仅适用于密钥交换。</p>
+</li>
+<li><strong>ECC</strong>：椭圆加密算法（ECC）是一种公钥加密体制，最初由Koblitz和Miller两人于1985年提出，与经典的RSA，DSA等公钥密码体制相比，椭圆密码体制有以下优点：160位的椭圆密钥与1024位的RSA密钥安全性相同；在私钥的加密解密速度上，ECC算法比RSA、DSA速度更快；存储空间占用小；带宽要求低；ECC算法的数学理论非常深奥和复杂，在工程应用中比较难于实现，但它的单位安全强度相对较高。</li>
+</ul>
+<p>非对称加密算法可能是世界上最重要的算法，它是当今电子商务等领域的基石。非对称加密算法如此强大可靠，却有一个弊端，就是加解密比较耗时。因此，在实际使用中，往往与对称加密和摘要算法结合使用。列如在实体之间交换对称密钥时，或者在签署一封邮件的散列时（数字签名）。</p>
+<blockquote>
+<p>散列是通过应用一种单向数学函数获得的一个定长结果，对于数据而言，叫做散列算法。</p>
+</blockquote>
+<h3 id="摘要算法"><a href="#摘要算法" class="headerlink" title="摘要算法"></a>摘要算法</h3><p>摘要算法是一个神奇的算法，也称为散列或者散列值。是一种与基于密钥（对称密钥或公钥）的加密不同的数据转换类型。散列就是通过把一个叫做散列算法的单向数学函数应用于数据，将任意长度的一块数据转换为一个定长的、不可逆转的数字，其长度通常在128～256位之间。所产生的散列值的长度应足够长，因此使找到两块具有相同散列值的数据的机会很少。</p>
+<h4 id="摘要算法具有以下特性："><a href="#摘要算法具有以下特性：" class="headerlink" title="摘要算法具有以下特性："></a>摘要算法具有以下特性：</h4><ul>
+<li>只要源文本不同，计算得到的结果，必然不同（或者说机会很少）。</li>
+<li>无法从结果反推出源数据（那是当然的，不然就能量不守恒了）。</li>
+</ul>
+<h4 id="常见的摘要算法："><a href="#常见的摘要算法：" class="headerlink" title="常见的摘要算法："></a>常见的摘要算法：</h4><ul>
+<li><strong>MD5</strong>：是RSA数据安全公司开发的一种单向散列算法，MD5被广泛使用，可以用来把不同长度的数据块进行暗码运算成一个固定位位的数值（通常是128位）。</li>
+<li><strong>SHA-1</strong>：与 DSA 公钥算法相似，安全散列算法1（SHA-1）也是由 NSA 设计的，并由 NIST 将其收录到 FIPS 中，作为散列数据的标准。它可产生一个 160 位的散列值。SHA-1 是流行的用于创建数字签名的单向散列算法。</li>
+<li><strong>MAC（Message Authentication Code）</strong>：消息认证代码，是一种使用密钥的单向函数，可以用它们在系统上或用户之间认证文件或消息，常见的是HMAC（用于消息认证的密钥散列算法）。</li>
+<li><strong>CRC（Cyclic Redundancy Check）</strong>：循环冗余校验码，CRC校验由于实现简单，检错能力强，被广泛使用在各种数据校验应用中。占用系统资源少，用软硬件均能实现，是进行数据传输差错检测地一种很好的手段（CRC 并不是严格意义上的散列算法，但它的作用与散列算法大致相同，所以归于此类）。</li>
+</ul>
+<p>摘要算法用于对比信息源是否一致，因为只要源数据发生变化，得到的摘要必然不同。因为通常结果比源数据要短很多，所以称为“摘要”。</p>
+<p>应用场景，如发件人生成邮件的散列值并加密它，然后将它与邮件本身一起发送。而收件人同时解密邮件和散列值，并由接收到的邮件产生另外一个散列值，然后将两个散列值进行比较。如果两者相同，邮件极有可能在传输期间没有发生任何改变。</p>
+<h3 id="数字签名"><a href="#数字签名" class="headerlink" title="数字签名"></a>数字签名</h3><p>数字签名就是对非对称加密和摘要算法的一种应用，能够确保信息在发布后不会被篡改（摘要算法特性），保证数据的完整性和可信性；同时也可以防止数据被他人伪造（非对称加密算法特性）；列如，我们有一段授权文本需要发布时，为了防止中途篡改发布的内容，保证发布文本的完整性，以及文本是由指定的发布者发布的。那么，可以通过摘要算法得到发布内容的摘要，得到摘要之后，发布者使用私钥加密得到密文（签名），这时候将源文本、密文（签名）以及公钥一起发布出去即可。  </p>
+<p>验证过程为：首先验证公钥是否是发布者的公钥，然后用公钥对密文进行解密，得到摘要，使用发布者对文本同样的摘要算法得到摘要文本，比对摘要是否一致即可确认信息是否被篡改或者是指定发布者发布的。</p>
+<p><img src="/uploads/数字签名.jpg" alt="数字签名"></p>
+<p>数字签名可以快速验证文本的完整性和合法性，已广泛应用于各个领域。</p>
+<blockquote>
+<p>公钥的验证在后续数字证书的授权链中提到验证方法。</p>
+</blockquote>
+<h3 id="数字证书"><a href="#数字证书" class="headerlink" title="数字证书"></a>数字证书</h3><h4 id="现实生活中的证书"><a href="#现实生活中的证书" class="headerlink" title="现实生活中的证书"></a>现实生活中的证书</h4><p>在现实生活中，证书顾名思义，就是权限机构颁发的证明。比如英语6级证书，就是教育部门颁发给通过了6级考核的个人的证明，证明这个人的英语能力。我们来看一下这个证书的组成：</p>
+<ul>
+<li>被证明人：老王</li>
+<li>内容：通过了英语六级</li>
+<li>盖章：教育部门的公章或钢印</li>
+</ul>
+<p>当老王用这张证书找工作时，用人单位会通过查看证书的各项内容（尤其是公章），来验证证书的合法性和老王的能力。在现实生活中经常有假的6级证书，这些假证书最重要的就是有一个假公章。现实生活中使用法律法规来约束私刻假公章的行为，但是用人单位可能不能十分准确的判断公章是真是假。而数字签字可以来解决该类问题。</p>
+<h4 id="数字证书-1"><a href="#数字证书-1" class="headerlink" title="数字证书"></a>数字证书</h4><p>数字证书就是通过数字签名实现的数字化的证书，在现实生活中公章可以被伪造，但是在计算数字世界中，数字签名是没办法被伪造的，比如上述证书中，在一个证书文件中写明了证书内容，颁发证书时，教育部门用他们的私钥对文件的摘要信息进行签名，将签名和证书文件一起发布，这样就能确保该证书无法被伪造。验证证书是否合法时，首先用教育部门的公钥（公钥是公开的谁都可以获取到）对签名进行解密得到一个摘要信息，使用教育部门同样的摘要算法得到证书的另一个摘要信息，对比两个摘要信息是否一致就能确定该证书是否合法。在一般的证书组成中部分中，还加入了一些其他信息，比如证书的有效期。</p>
+<p>数字证书也有很多的签发机构，不同的签发机构签发的证书，用途也是不一样的，比如iOS开发中，使用到的ipa文件签名证书，需要到苹果申请。而在Web访问中为了防止Web内容在网络中安全传输，需要用到的SSL证书则需要向几家公认的机构签发。这些签发机构统称为CA（Certificate Authority）。</p>
+<p>Web访问相关的证书可以向国际公认的几个机构：</p>
+<ol>
+<li><a href="http://www.webtrust.net/" target="_blank" rel="external"><strong>WebTrust</strong></a>   </li>
+<li><a href="http://cn.globalsign.com/" target="_blank" rel="external"><strong>GlobalSign</strong></a>  </li>
+<li><a href="http://certificate.fyicenter.com/335_Root_CA_GTE_CyberTrust_Global_Root_GTE_CyberTrust_Solutions.html" target="_blank" rel="external"><strong>GTE</strong></a></li>
+<li><a href="http://www.nortel.com/" target="_blank" rel="external"><strong>Nortel</strong></a></li>
+<li><a href="http://www.verisign.com/" target="_blank" rel="external"><strong>Verisign</strong></a></li>
+</ol>
+<h4 id="数字证书的验证"><a href="#数字证书的验证" class="headerlink" title="数字证书的验证"></a>数字证书的验证</h4><p>申请证书是为了验证，比如Web应用相关的SSL证书验证方是浏览器，iOS各种证书的验证方是iOS设备。因为数字证书是基于数字签名的，所有数字证书的合法性验证就是验证数字证书的签名是否正确，对于签名的验证在是需要签发机构的公钥才能验证；</p>
+<p>对于iOS开发证书来说，申请完签名证书后，还需要安装苹果的公钥证书（XCode安装后会自动安装），这样才能确保我们申请的证书是可以被验证通过的（合法的），可用来进行ipa文件签名的。对于Web相关的证书签名的验证，则是由浏览器来验证，对于国际公认的几个证书签发机构浏览器会内置其公钥证书，用来验证数字证书的可信性。</p>
+<p>当数字证书通过验证后，便可以用数字证书做对应的事情，iOS开发证书可以用来对APP进行签名，SSL证书可以用来做Web内容加密处理相关的事情。所以有了这些证书之后，能保证在数据的传输过程中，数据是不会被篡改的，并且信息来源也是不能不修改的，从而确保信息安全。</p>
+<blockquote>
+<p>对于iOS，iOS系统已经将这个验证过程固化在系统中了，除非越狱，否则无法绕过</p>
+</blockquote>
+<h4 id="数字证书的授权链"><a href="#数字证书的授权链" class="headerlink" title="数字证书的授权链"></a>数字证书的授权链</h4><p>数字证书还包含一个授权链信息，举个例子：如果你要申请休假1周，需要你的上司审批，你的上司需要他的上司同意，最终需要大老板同意，那么这一层层的授权，形成了一个授权链，大老板是授权链的根(root)，中间这些环节分别是被更接近root的人授权的。  </p>
+<p>比如苹果开发者的APP签名证书，该证书可以用来对APP进行签名，该证书实际上是由苹果的Worldwide Developer Relations Certificate Authority（WDRCA）授权签名的，而它是由Apple Certificate Authority授权签名的。在这个关系链中苹果的CA是根。 苹果CA根证书默认是内置在苹果系统中的，所以WDRCA的可信性可以由苹果内置的CA根证书来验证其可信性。</p>
+<p>Web相关的SSL证书顶部CA根，则就是上述提到的几家公认的签发机构，当我们需要Web做SSL的证书时，便可以向上述机构申请，通常向根机构申请费用都会比较高，也可以向一些二级授权机构进行申请，选择根机构证书签发的好处就是目前大多数的浏览器都会预装内置了这些权威CA的公钥证书，这样，在使用这些权威CA签发过的证书的时候，浏览器一般不会报风险提示。</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>数字证书签名的基础是非对称加密算法，利用了非对称加密的身份验证和防止信息篡改的特性来实现的，在一些其他方面比如HTTPS中密钥交换用的就是非对称加密的保密特性来实现的，在非对称加密算法中RSA应用最广。非对称加密虽好，但却有一个弊端，就是加解密比较耗时，所以一般都是配合对称加密一起使用。</p>
+<blockquote>
+<p>本文只是对数字证书做了概要的介绍，很多细节都未涉及到，如果各位对一些细节感兴趣可以根据本文涉及的知识点进入更深入的学习。同时本文也未涉及到数字证书的管理以及数字证书的格式等知识的介绍，这些内容将在后续文章中为大家整理和介绍。</p>
+</blockquote>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a href="http://www.cnblogs.com/vamei/p/3480994.html" target="_blank" rel="external">RSA加密与破解</a><br><a href="http://www.ruanyifeng.com/blog/2013/06/rsa_algorithm_part_one.html" target="_blank" rel="external">RSA算法原理</a><br><a href="http://www.pchou.info/ios/2015/12/14/ios-certification-and-code-sign.html" target="_blank" rel="external">漫谈iOS程序的证书和签名机制</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;blockquote&gt;
+&lt;p&gt;在之前的&lt;a href=&quot;http://www.enkichen.com/2016/01/15/ios-certification-and-code-sign-note/&quot;&gt;《iOS开发者证书以及代码签名学习笔记》&lt;/a&gt;博文中介绍了iOS开发证书以及代码签名相关的知识点，为了更好理解其中证书的特性，这里对数字证书以及相关的知识进行了整理和总结。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;在讲数字证书之前必须要讲&lt;strong&gt;非对称加密算法&lt;/strong&gt;和&lt;strong&gt;摘要算法&lt;/strong&gt;，因为数字证书的基础就是各种加解密算法（非对称加密、摘要算法），而其中的核心就是非对称加密算法了。目前而言加密方法可以分为两大类。一类是&lt;strong&gt;单钥加密&lt;/strong&gt;（private key cryptography）也可以称为对称加密，还有一类叫做&lt;strong&gt;双钥加密&lt;/strong&gt;（public key cryptography）也可称为非对称加密。前者的加密和解密过程都用同一套密码，后者的加密和解密过程用的是不同的密码。下面来看看对称加密、非对称加密以及摘要算法，他们是怎样应用在数字证书中的。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="知识整理/总结" scheme="http://enkichen.com/categories/%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E6%80%BB%E7%BB%93/"/>
+    
+    
+      <category term="数字证书" scheme="http://enkichen.com/tags/%E6%95%B0%E5%AD%97%E8%AF%81%E4%B9%A6/"/>
+    
+      <category term="非对称加密" scheme="http://enkichen.com/tags/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/"/>
+    
+      <category term="RSA" scheme="http://enkichen.com/tags/RSA/"/>
+    
+      <category term="摘要算法" scheme="http://enkichen.com/tags/%E6%91%98%E8%A6%81%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>iOS开发者证书以及代码签名学习笔记</title>
+    <link href="http://enkichen.com/2016/01/15/ios-certification-and-code-sign-note/"/>
+    <id>http://enkichen.com/2016/01/15/ios-certification-and-code-sign-note/</id>
+    <published>2016-01-15T09:47:06.000Z</published>
+    <updated>2017-02-18T01:36:24.000Z</updated>
+    
+    <content type="html"><![CDATA[<blockquote>
+<p>最近需要给iOS开发团队做一次关于iOS开发证书以及代码签名的分享，于是花了点时间把这一块的知识重新学习和整理了一遍，从而有了这篇学习笔记。其中很多一些文字都是从网站或者博客上摘抄过来，为了阅读方便也做了一些调整，说白了我只是做了一些知识的梳理和整合。  </p>
+<p>该笔记涉及到内容有：开发者账号、签名证书、标识符（Identifiers）、设备（Devices）、APP授权机制、配置文件、ipa文件的签名和安全验证。</p>
+</blockquote>
+<a id="more"></a>
+<h3 id="开发者账号类型"><a href="#开发者账号类型" class="headerlink" title="开发者账号类型"></a>开发者账号类型</h3><p>苹果为iOS开发者提供三种账号类型，如下：</p>
+<ul>
+<li><strong>Apple Developer Program</strong> 年费 $99(或¥688) 可以在iOS App Store和Mac App Store上架应用可以以个人（Individual）或者组织（Organization）的名义加入，以组织身份加入需要提供邓白氏编码（DUNS Number），会多出Team Management功能，允许多人协作开发。在发布署名上以组织（Organization）的名义加入可以填写公司或组织信息（比如某某公司、某某工作室），而以个人（Individual）加入只能默认显示注册时填写的个人信息，并且不能修改。</li>
+<li><strong>Apple Developer Enterprise Program</strong>年费 $299，用于以InHouse方式发布企业内部应用，不能上架App Store企业证书过期则已经安装的应用无法继续运行。</li>
+<li><strong>iOS Developer University Program</strong><br>高校计划需要提供高校基本信息，免费提供。苹果为鼓励高校更多的参与到苹果开发者计划中来，特意推出这一项计划，高校计划具有在真机上测试等权限，但不能将App发布到App Store。</li>
+</ul>
+<h3 id="证书（Certificates）"><a href="#证书（Certificates）" class="headerlink" title="证书（Certificates）"></a>证书（Certificates）</h3><p>什么是证书？证书就是：证明证书拥有者有证书上所说的能力，一个证书要涉及到颁发者、拥有者、证明拥有者有了什么能力。例如，CET-4证书；颁发者：学校，拥有者：自己，证明的能力：英语达到四级水平。苹果开发者证书也是一样，颁发者：自己，拥有者：安装证书的电脑；证明的能力：可以打包某应用程序。  </p>
+<h4 id="开发者证书能力来源"><a href="#开发者证书能力来源" class="headerlink" title="开发者证书能力来源"></a>开发者证书能力来源</h4><p>向Member Center申请证书的过程，其实就是将在本地生成的<code>certSigningRequest</code>文件提交给苹果，让它进行签名授权的过程。<code>certSigningRequest</code>这个文件包含以下内容：</p>
+<ol>
+<li>申请者信息。</li>
+<li>申请者公钥，此信息是申请者使用的私钥对应的公钥。</li>
+<li>摘要算法和公钥加密算法。</li>
+<li>当前文件摘要的签名（使用的是该文件中公钥对应的私钥进行签名的）。</li>
+</ol>
+<p>当苹果用私钥对其签名（授权）之后，我们便可以获得一个证书文件。拥有该证书后，我们便可以用对应的私钥对APP签名了。当iOS设备拿到APP时便可以通过证书中的公钥来验证APP的正确性，同时iOS设备本身可以验证证书的是否被授权，因为该证书是苹果自己签名的证书。</p>
+<blockquote>
+<p>被苹果签名的证书会随APP一起打包到ipa文件中，并提交到App store中。</p>
+</blockquote>
+<p>当我们获得签名证书之后，还需要一个证书来验证证书是否被正确授权，该证书就是Worldwide Developer Relations Certificate Authority证书。该证书一般都会随Xcode一起安装到我们的电脑中，也可以从Member Center去下载。所以如果没有该证书，开发者将不能使用对应的私钥对APP的签名，因为不能确保证书是否被授权。该证书也就是网上有提到媒介证书（Intermediate Certificate）。</p>
+<h4 id="证书的类型"><a href="#证书的类型" class="headerlink" title="证书的类型"></a>证书的类型</h4><p>苹果为开发者提供三种证书类型，用来在不同环境下使用，方便开发者的调试和测试。</p>
+<ul>
+<li><strong>开发证书</strong>：平时用来进行真机调试的证书，用该证书签名的APP，只能安装在指定的设备上。</li>
+<li><strong>测试证书</strong>：不可以用来真机调试的证书，但是可以编译到指定的真机上（不可以进行调试）。主要用来提交给测试进行功能的验证，和<strong>开发证书</strong>的区别在于，它和<strong>发布证书</strong>类似处于非沙盒坏境。但是用该证书签名的APP无法提交到App store，只能安装在指定设备上。  </li>
+<li><strong>发布证书</strong>：不可以用来调试和测试，也不能安装在指定设备上，只能提交到App store。</li>
+</ul>
+<blockquote>
+<p>使用<strong>企业（Enterprise）</strong>账号下的<strong>发布证书</strong>签名的APP可以安装到所以设备上，但是不能提交到App store。</p>
+</blockquote>
+<h3 id="标识符（Identifiers）"><a href="#标识符（Identifiers）" class="headerlink" title="标识符（Identifiers）"></a>标识符（Identifiers）</h3><p>在Member Center中，Identifiers可以管理App IDs、Pass Type IDs、Website Push IDs、iCloud Containers、App Groups、Merchant IDs、这里主要介绍App IDs。  </p>
+<p>App ID其实就是一个字符串，用来做APP唯一标识的字符串，App ID是大小写敏感的。一个APP有且只能有一个ID，并且唯一。在Project中称为Bundle ID（但是会有些小差别，Bundle ID不能包含<strong>[ * ]</strong>号）。在Member Center、Project、iTunes Connect都是需要此ID去标示此App的唯一性。App ID添加之后不能进行修改和删除。</p>
+<h4 id="App-ID字符的组成和类型"><a href="#App-ID字符的组成和类型" class="headerlink" title="App ID字符的组成和类型"></a>App ID字符的组成和类型</h4><p><img src="http://www.enkichen.com/uploads/3.png" alt=""></p>
+<p>如上图所示，App ID由Apple产生的一个Team ID作为前缀，后面跟的是开发者自定义的标识符，App ID字符串中只能包含字符（A-Z，a-z，0-9），连接符（-），点（.）而且此字符串最好是reverse-DNS格式的。例如你公司的域名是cctv.com，你App的名字是Hello，那么你可以用com.cctv.Hello作为你的Bundle ID。</p>
+<p>App ID中也可以以<strong>[ .* ]</strong>来结尾，用来表示一个通配类型，如图：</p>
+<p><img src="http://www.enkichen.com/uploads/4.png" alt=""></p>
+<ul>
+<li>精准类型的App ID：在标识符中不带<strong>[ .* ]</strong>来结尾的App ID可以称作为精准类型，该类型的App ID可以用来做APP的Bundle ID。</li>
+<li>通配符类型App ID：在标识符中以<strong>[ .* ]</strong>结尾的App ID为通配符类型的App ID，该类型的App ID不能用来做APP的Bundle ID，其作用后续会讲到。</li>
+</ul>
+<blockquote>
+<p>每个APP还会对应一串数字的字符串（在<strong>itunesconnect</strong>创建之后可以得到），通过该字符串可以向Apple提供的http接口（<a href="http://itunes.apple.com/lookup?id=**），获取对应的APP在App" target="_blank" rel="external">http://itunes.apple.com/lookup?id=**），获取对应的APP在App</a> store上的信息，可以用来检测版本更新，更新的log一些其他资料。</p>
+</blockquote>
+<h4 id="App-ID的作用"><a href="#App-ID的作用" class="headerlink" title="App ID的作用"></a>App ID的作用</h4><ul>
+<li>在Xcode工程中，Bundle ID储存在Info.plist中，当你编译工程的时候，他会把此文件拷贝到你的app包中。  </li>
+<li>在iTunes Connect，用Bundle ID去标识App，在你第一次构建上传之后，你就不能在改变或者删除你的Bundle ID了。  </li>
+<li>在Member Center，你创建一个和Bundle ID相匹配的App ID。如果App ID是精准类型的，你就必须精确的去匹配你的Bundle ID。  </li>
+</ul>
+<h3 id="授权机制-Entitlements"><a href="#授权机制-Entitlements" class="headerlink" title="授权机制 (Entitlements)"></a>授权机制 (Entitlements)</h3><p>授权机制决定了哪些系统资源在什么情况下允许被一个应用使用。简单的说它就是一个沙盒的配置列表，上面列出了哪些行为被允许，哪些会被拒绝。Xcode 会将这个文件作为<code>--entitlements</code>参数的内容传给 <strong>codesign</strong>。</p>
+<p>在 Xcode 的 Capabilities 选项卡下选择一些选项之后，Xcode 就会生成这样一段 XML。 Xcode 会自动生成一个 .entitlements 文件，然后在需要的时候往里面添加条目。当构建整个应用时，这个文件也会提交给 <strong>codesign</strong> 作为应用所需要拥有哪些授权的参考。这些授权信息必须都在开发者中心的 App ID 中启用，并且包含在配置文件中。</p>
+<blockquote>
+<p>授权列表在Member Center中的<strong>App ID</strong>中配置，这样便可以对应到具体的APP。</p>
+</blockquote>
+<h3 id="设备（Devices）"><a href="#设备（Devices）" class="headerlink" title="设备（Devices）"></a>设备（Devices）</h3><p>这里的Device指的就是用来测试或者调试用的设备。可以是iPhone、iPad、iPod、Apple watch以及Apple TV，在Member Center中添加测试Device的步骤其实很简单，只要拿到对应Deveice的UDID就可以添加了。我们可以利用iTunes、iTools、Xcode这些工具都可以拿到设备的UDID。</p>
+<blockquote>
+<p>需要注意的就是，每个开发者账号，每年最多可以添加100台调试设备，而且添加之后不能更改和删除，想要修改就要等到下一年重新续费的时候才能进行修改或者删除调试设备了。</p>
+</blockquote>
+<h3 id="配置文件（Provisioning-Profiles）"><a href="#配置文件（Provisioning-Profiles）" class="headerlink" title="配置文件（Provisioning Profiles）"></a>配置文件（Provisioning Profiles）</h3><p>上述提到了证书可以证明APP的所属以及APP的完整性，保证APP的本身的安全。但是却不能细化到APP所使用的服务被苹果认可，比如APN推送服务，并且证书无法限制调试版APP的装机规模。于是苹果想出了<code>mobileprovision</code>。一个<code>mobileprovision</code>文件包含一下内容：</p>
+<ol>
+<li><strong>AppID</strong> 这里的AppId可以是精准类型的也可以是通配符类型。</li>
+<li><strong>证书列表</strong> 在多人协议开发时，一个<code>mobileprovision</code>文件中可以包含多个证书文件。</li>
+<li><strong>功能授权列表</strong></li>
+<li><strong>可安装的设备列表</strong> 测试和调试<code>mobileprovision</code>文件中包含设备列表，<code>mobileprovision</code>发布类型的文件中则不包含设备列表。</li>
+<li><strong>苹果的签名</strong></li>
+</ol>
+<blockquote>
+<p>上述提到的<strong>苹果的签名</strong>是用的苹果自己的私钥对应的公钥是Worldwide Developer Relations Certificate Authority证书（媒介证书）中的公钥，所以该文件生成后，我们是不能进行修改的，必须从Member Center中配置并生成。</p>
+</blockquote>
+<h4 id="配置文件的区分"><a href="#配置文件的区分" class="headerlink" title="配置文件的区分"></a>配置文件的区分</h4><ul>
+<li>从<code>mobileprovision</code>文件中是否包含设备列表，可以分为带device信息的描述文件和不带device信息的描述文件如图：</li>
+</ul>
+<p><img src="http://www.enkichen.com/uploads/1451875454246244.png" alt="">  </p>
+<p><img src="http://www.enkichen.com/uploads/1451875469811263.png" alt=""> </p>
+<ul>
+<li><p>也可以根据配置文件中包含的证书文件的类型来区分：<strong>开发类型</strong>、<strong>测试类型</strong>、<strong>发布类型</strong>。  </p>
+</li>
+<li><p>也可以根据配置文件中包含的App ID来做区分，如果文件中App ID是精准类型的，那么该配置只能用来对指定的APP进行使用。如果是通配类型的，那么该证书可以用来对匹配的Bundle ID的APP进行使用。如果是Company类型的开发者账号，可以生成一个供团队使用的Team Provisioning Profile，通过这个配置文件，团队内成员可以共用一个配置文件来进行开发调试，当然，App ID得指定成通配类型的。<code>mobileprovision</code>文件结构如下：</p>
+</li>
+</ul>
+<p><img src="http://www.enkichen.com/uploads/5.png" alt="">  </p>
+<p>总的来说描述文件就是整合了<strong>证书</strong>、<strong>AppID</strong>、<strong>设备</strong>以及<strong>功能授权列表</strong>，从而确定了可由哪台电脑，把哪个App，安装到哪台手机上面。</p>
+<h3 id="APP的签名和安全验证过程"><a href="#APP的签名和安全验证过程" class="headerlink" title="APP的签名和安全验证过程"></a>APP的签名和安全验证过程</h3><h4 id="ipa文件的签名过程"><a href="#ipa文件的签名过程" class="headerlink" title="ipa文件的签名过程"></a>ipa文件的签名过程</h4><p>这张图阐述了，开发iOS应用程序时，从申请证书，到打包的大致过程。</p>
+<p><img src="http://www.enkichen.com/uploads/iOS证书和校验.png" alt=""></p>
+<h4 id="ipa文件的组成"><a href="#ipa文件的组成" class="headerlink" title="ipa文件的组成"></a>ipa文件的组成</h4><p>iOS程序最终都会以.ipa文件导出，ipa文件只是一个zip包，可以直接解压，先来了解一下ipa文件的结构：</p>
+<p><img src="http://www.enkichen.com/uploads/ipa组成.png" alt=""></p>
+<p>解压后，得到上图的Payload目录，下面是个子目录，其中的内容如下：</p>
+<ul>
+<li>资源文件，例如图片、html、等等。</li>
+<li>_CodeSignature/CodeResources。这是一个plist文件，可用文本查看，其中的内容就是是程序包中（不包括Frameworks）所有文件的签名。注意这里是所有文件。意味着你的程序一旦签名，就不能更改其中任何的东西，包括资源文件和可执行文件本身。iOS系统会检查这些签名。</li>
+<li>可执行文件。此文件跟资源文件一样需要签名。</li>
+<li>一个mobileprovision文件.打包的时候使用的，从MC上生成的。</li>
+<li>Frameworks。程序引用的非系统自带的Frameworks，每个Frameworks其实就是一个app，其中的结构应该和app差不多，也包含签名信息CodeResources文件。</li>
+</ul>
+<h4 id="ipa文件的安全验证过程"><a href="#ipa文件的安全验证过程" class="headerlink" title="ipa文件的安全验证过程"></a>ipa文件的安全验证过程</h4><ol>
+<li>解压ipa文件</li>
+<li>取出embedded.mobileprovision，通过签名校验是否被篡改过 a. 其中有几个证书的公钥，其中开发证书和发布证书用于校验签名 b. BundleId c. 授权列表</li>
+<li>校验所有文件的签名，包括Frameworks</li>
+<li>比对Info.plist里面的BundleId是否符合embedded.mobileprovision文件中的</li>
+</ol>
+<h3 id="其他涉及到的问题"><a href="#其他涉及到的问题" class="headerlink" title="其他涉及到的问题"></a>其他涉及到的问题</h3><ul>
+<li>团队开发证书的管理</li>
+<li>Xcode7下的免年费的真机调试</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>当加入到苹果开发者计划之后，苹果通过证书来授权给开发者开发iOS应用，并提供了多种证书类型来满足不同的需求。为了保证APP的安全性和完整性，APP中所有的文件都将被签名。除非重新签名，否则不能对其做任何修改。</p>
+<p><code>mobileprovision</code>文件是一个配置文件，由苹果签名后发布给开发者的。其中包含了<strong>证书</strong>、<strong>App ID</strong>、<strong>设备列表</strong>、<strong>授权列表</strong>。通过这些信息从而确定了可由哪台电脑，把哪个App，安装到哪台手机上面。所以<strong>证书</strong>和<code>mobileprovision</code>文件是签名和打包的两个必要文件。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li><a href="http://www.cocoachina.com/ios/20160104/14859.html" target="_blank" rel="external"><strong>不让苹果开发者账号折磨我</strong></a>    </li>
+<li><a href="http://ryantang.me/blog/2013/09/03/apple-account-2/" target="_blank" rel="external"><strong>苹果开发者账号那些事儿</strong></a>  </li>
+<li><a href="http://www.pchou.info/ios/2015/12/14/ios-certification-and-code-sign.html" target="_blank" rel="external"><strong>漫谈iOS程序的证书和签名机制</strong></a></li>
+<li><a href="http://objccn.io/issue-17-2/" target="_blank" rel="external"><strong>代码签名探析</strong></a></li>
+<li><a href="http://www.cocoachina.com/ios/20141017/9949.html" target="_blank" rel="external"><strong>iOS Code Signing 学习笔记</strong></a></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;blockquote&gt;
+&lt;p&gt;最近需要给iOS开发团队做一次关于iOS开发证书以及代码签名的分享，于是花了点时间把这一块的知识重新学习和整理了一遍，从而有了这篇学习笔记。其中很多一些文字都是从网站或者博客上摘抄过来，为了阅读方便也做了一些调整，说白了我只是做了一些知识的梳理和整合。  &lt;/p&gt;
+&lt;p&gt;该笔记涉及到内容有：开发者账号、签名证书、标识符（Identifiers）、设备（Devices）、APP授权机制、配置文件、ipa文件的签名和安全验证。&lt;/p&gt;
+&lt;/blockquote&gt;
+    
+    </summary>
+    
+      <category term="知识整理/总结" scheme="http://enkichen.com/categories/%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E6%80%BB%E7%BB%93/"/>
+    
+    
+      <category term="开发证书" scheme="http://enkichen.com/tags/%E5%BC%80%E5%8F%91%E8%AF%81%E4%B9%A6/"/>
+    
+      <category term="代码签名" scheme="http://enkichen.com/tags/%E4%BB%A3%E7%A0%81%E7%AD%BE%E5%90%8D/"/>
+    
+      <category term="mobileprovision" scheme="http://enkichen.com/tags/mobileprovision/"/>
+    
+      <category term="Provisioning Profiles" scheme="http://enkichen.com/tags/Provisioning-Profiles/"/>
+    
+      <category term="开发者账号" scheme="http://enkichen.com/tags/%E5%BC%80%E5%8F%91%E8%80%85%E8%B4%A6%E5%8F%B7/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>无法旋转的UIWindow子类</title>
+    <link href="http://enkichen.com/2016/01/05/UIWindow-cannot-rotate/"/>
+    <id>http://enkichen.com/2016/01/05/UIWindow-cannot-rotate/</id>
+    <published>2016-01-05T02:36:34.000Z</published>
+    <updated>2016-01-07T02:08:00.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>项目中一直用了两个<strong>UIWindow</strong>，一个是框架默认的，另一个是用来显示调试信息的<strong>UIWindow</strong>。至于为什么要用一个<strong>UIWindow</strong>，而不是用<strong>UIView</strong>呢，是因为<strong>UIView</strong>旋转控制太麻烦了，如果用<strong>UIView</strong>加一个<strong>UIViewController</strong>会方便很多，而且也不用考虑系统版本的区别。<br><a id="more"></a><br>最近一个同事用同样的方法使用<strong>UIWindow</strong>子类做一个提示框的公用组件，但发现<code>rootViewController</code>无法自动旋转。于是我对比了两个<strong>UIWindow</strong>的子类，发现代码并没什么区别，只是多了一些公用方法和一个<code>delegate</code>。但就是不能支持旋转，而我的都正常，试过好多方法，都没找到原因。最后只好一部分一部分注释掉一些代码。当我把一个<code>delegate</code>的属性注释掉以后，神奇的事情发生了，竟然可以旋转了！！！！ 于是把所有改动都还原了，然后只注释掉<code>delegate</code>属性（改一个名称也一样），发现旋转一切正常了。于是在我之前的<strong>UIWindow</strong>子类中添加<code>delegate</code>属性，发现也不能进行旋转。  </p>
+<p>猜想是不是子类<code>delegate</code>属性覆盖了父类的<code>delegate</code>属性，而<strong>UIWindow</strong>在控制旋转的逻辑跟<code>delegate</code>属性有关。至少有一下两种方式进行调试：  </p>
+<ul>
+<li>子类<strong>UIWindow</strong>中添加<code>delegate</code>属性，然后在setDelegate方法中添加日志。</li>
+<li>使用Category为<strong>UIWindow</strong>添加一个<code>delegate</code>属性声明，然后打印<code>delegate</code>属性</li>
+</ul>
+<p>通过上述方法可以发现，<strong>UIWindow</strong>内部实现是存在一个<code>delegate</code>属性的，根据日志可以确定该属性是指向<code>rootViewController</code>对象。也就是说如果我们在<strong>UIWindow</strong>子类添加<code>delegate</code>属性就会影响到<strong>UIWindow</strong>对旋转的控制。  </p>
+<p>后续调试发现旋转的相关方法在<code>rootViewController</code>中都会正常被调用，但就是没办法进行旋转，也就是说在<strong>UIWindow</strong>子类中添加<code>delegate</code>属性和没有添加该属性，对应我们应用来说，该走的方法都会按照正常流程跑完，但就是不能进行旋转。具体原因还未知，后续有新发现将会更新，如果有人知道，还请告知，谢谢，以下我的调试环境：  </p>
+<blockquote>
+<p>OSX版本为：10.10.5 (14F27)<br>Xcode 版本为：7.2 (7C68)<br>SDK：iOS 9.2  </p>
+</blockquote>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;项目中一直用了两个&lt;strong&gt;UIWindow&lt;/strong&gt;，一个是框架默认的，另一个是用来显示调试信息的&lt;strong&gt;UIWindow&lt;/strong&gt;。至于为什么要用一个&lt;strong&gt;UIWindow&lt;/strong&gt;，而不是用&lt;strong&gt;UIView&lt;/strong&gt;呢，是因为&lt;strong&gt;UIView&lt;/strong&gt;旋转控制太麻烦了，如果用&lt;strong&gt;UIView&lt;/strong&gt;加一个&lt;strong&gt;UIViewController&lt;/strong&gt;会方便很多，而且也不用考虑系统版本的区别。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="开发笔记" scheme="http://enkichen.com/categories/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0/"/>
+    
+    
+      <category term="UIWindow" scheme="http://enkichen.com/tags/UIWindow/"/>
+    
+      <category term="旋转" scheme="http://enkichen.com/tags/%E6%97%8B%E8%BD%AC/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>iOS下使用OpenGL要注意的几点</title>
+    <link href="http://enkichen.com/2015/12/29/ios-xia-opengl-xu-yao-zhu-yi-de-ji-dian/"/>
+    <id>http://enkichen.com/2015/12/29/ios-xia-opengl-xu-yao-zhu-yi-de-ji-dian/</id>
+    <published>2015-12-29T08:59:49.000Z</published>
+    <updated>2016-01-07T02:25:25.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>因为项目中使用到了OpenGL ES做绘图，记录一下一些要注意的点：  </p>
+<ul>
+<li><em>glGenTextures()</em>方法申请到的纹理对象ID，会由系统控制其对象的释放（也可以使用<em>glDeleteTextures()</em>进行手动释放），所以在使用之前需要使用<em>glIsTexture()</em>来检测该纹理ID是否可用，当为false时，需要重新生成纹理对象ID，如果继续使用该纹理ID，会无法绘制从而导致绘制时为纯白色。  <a id="more"></a></li>
+<li>iOS下不同的硬件设备，最大的纹理大小是有限制的，如下表（来源于网络）：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">1024 x 1024</th>
+<th style="text-align:center">2048 x 2048</th>
+<th style="text-align:center">4096 x 4096</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">iPhone 2G</td>
+<td style="text-align:center">iPhone 3gs</td>
+<td style="text-align:center">iPhone 4s</td>
+</tr>
+<tr>
+<td style="text-align:center">iPhone 3G</td>
+<td style="text-align:center">iPhone 4</td>
+<td style="text-align:center">iPad 2</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td style="text-align:center">iPad</td>
+<td style="text-align:center">iPad 3</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>我在最新的iPad Air上测试发现最大也支持4096x4096，所以结合上表来看，从iPhone4S和iPad2开始，到最新的iPhone6s以及最新的iPad Air最大也只能支持4096x4096的大小。所以在使用时要注意，否则会导致无法渲染而变成纯白色。  </li>
+<li>在使用OpenGL时纹理图片的宽高都需要是2的N次方，在一些平台下（PC平台）下没有这样的限制。并且纹理图片不需要非得是正方形的。所以在使用一些不符合大小时，需要手动对图片进行拉伸，然后复制到显存中进行关联，在进行绘制时按对应的坐标进行转换，所以并不用担心图片在渲染时会被拉伸的问题。</li>
+</ul>
+<blockquote>
+<p>我使用的是OpenGL ES 1.x的版本，第一条我在网上没找到太多的资料，都是通过测试发现的，如果有什么不对，还请指正，谢谢。</p>
+</blockquote>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;因为项目中使用到了OpenGL ES做绘图，记录一下一些要注意的点：  &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;glGenTextures()&lt;/em&gt;方法申请到的纹理对象ID，会由系统控制其对象的释放（也可以使用&lt;em&gt;glDeleteTextures()&lt;/em&gt;进行手动释放），所以在使用之前需要使用&lt;em&gt;glIsTexture()&lt;/em&gt;来检测该纹理ID是否可用，当为false时，需要重新生成纹理对象ID，如果继续使用该纹理ID，会无法绘制从而导致绘制时为纯白色。
+    
+    </summary>
+    
+      <category term="开发笔记" scheme="http://enkichen.com/categories/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0/"/>
+    
+    
+      <category term="OpenGL" scheme="http://enkichen.com/tags/OpenGL/"/>
+    
+      <category term="纹理" scheme="http://enkichen.com/tags/%E7%BA%B9%E7%90%86/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>优化APP时发现的SDWebImage的问题</title>
+    <link href="http://enkichen.com/2015/12/22/sdwebimage-issues/"/>
+    <id>http://enkichen.com/2015/12/22/sdwebimage-issues/</id>
+    <published>2015-12-22T11:34:17.000Z</published>
+    <updated>2016-01-07T02:10:57.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="起因-旋转了的图片"><a href="#起因-旋转了的图片" class="headerlink" title="起因 旋转了的图片"></a>起因 旋转了的图片</h3><p>前段时间在对程序的绘图逻辑进行了使用OpenGL做优化，但是在使用OpenGL进行绘制时发现一些图片会莫名其妙的旋转，在细看了代码之后发现问题发生在<strong>UIImage</strong>对象的<strong>imageOrientation</strong>属性。该属性为枚举类型可以有以下取值：<br><a id="more"></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">typedef enum &#123;</div><div class="line">    UIImageOrientationUp,            // default orientation  默认方向   </div><div class="line">    UIImageOrientationDown,          // 180 deg rotation     旋转180度    </div><div class="line">    UIImageOrientationLeft,          // 90 deg CCW           逆时针旋转90度</div><div class="line">    UIImageOrientationRight,         // 90 deg CW            顺时针旋转90度</div><div class="line">    UIImageOrientationUpMirrored,    // horizontal flip      向上水平翻转</div><div class="line">    UIImageOrientationDownMirrored,  // horizontal flip      向下水平翻转</div><div class="line">    UIImageOrientationLeftMirrored,  // vertical flip        逆时针旋转90度，垂直翻转</div><div class="line">    UIImageOrientationRightMirrored, // vertical flip        顺时针旋转90度，垂直翻转</div><div class="line">&#125; UIImageOrientation;</div></pre></td></tr></table></figure>
+<p>该属性用来记录照片的方向信息，在使用iPhone或者iPad自带的照相机拍摄出来的照片含有EXIF信息，而在使用Core Graphics进行绘制时，会进行一些转换，我在使用OpenGL绘制时直接使用的原图，转换成纹理对象时是旋转的图片对象，所以在使用OpenGL绘制会出现旋转问题。在网上找了一下代码做了调整：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div></pre></td><td class="code"><pre><div class="line">- (UIImage *)fixOrientation&#123;</div><div class="line">    </div><div class="line">    // No-op if the orientation is already correct</div><div class="line">    if (self.imageOrientation == UIImageOrientationUp)</div><div class="line">        return self;</div><div class="line">    </div><div class="line">    // We need to calculate the proper transformation to make the image upright.</div><div class="line">    // We do it in 2 steps: Rotate if Left/Right/Down, and then flip if Mirrored.</div><div class="line">    CGAffineTransform transform = CGAffineTransformIdentity;</div><div class="line">    </div><div class="line">    switch (self.imageOrientation) &#123;</div><div class="line">        case UIImageOrientationDown:</div><div class="line">        case UIImageOrientationDownMirrored:</div><div class="line">            transform = CGAffineTransformTranslate(transform, self.size.width, self.size.height);</div><div class="line">            transform = CGAffineTransformRotate(transform, M_PI);</div><div class="line">            break;</div><div class="line">            </div><div class="line">        case UIImageOrientationLeft:</div><div class="line">        case UIImageOrientationLeftMirrored:</div><div class="line">            transform = CGAffineTransformTranslate(transform, self.size.width, 0);</div><div class="line">            transform = CGAffineTransformRotate(transform, M_PI_2);</div><div class="line">            break;</div><div class="line">            </div><div class="line">        case UIImageOrientationRight:</div><div class="line">        case UIImageOrientationRightMirrored:</div><div class="line">            transform = CGAffineTransformTranslate(transform, 0, self.size.height);</div><div class="line">            transform = CGAffineTransformRotate(transform, -M_PI_2);</div><div class="line">            break;</div><div class="line">        default:</div><div class="line">            break;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    switch (self.imageOrientation) &#123;</div><div class="line">        case UIImageOrientationUpMirrored:</div><div class="line">        case UIImageOrientationDownMirrored:</div><div class="line">            transform = CGAffineTransformTranslate(transform, self.size.width, 0);</div><div class="line">            transform = CGAffineTransformScale(transform, -1, 1);</div><div class="line">            break;</div><div class="line">            </div><div class="line">        case UIImageOrientationLeftMirrored:</div><div class="line">        case UIImageOrientationRightMirrored:</div><div class="line">            transform = CGAffineTransformTranslate(transform, self.size.height, 0);</div><div class="line">            transform = CGAffineTransformScale(transform, -1, 1);</div><div class="line">            break;</div><div class="line">        default:</div><div class="line">            break;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    // Now we draw the underlying CGImage into a new context, applying the transform</div><div class="line">    // calculated above.</div><div class="line">    CGContextRef ctx = CGBitmapContextCreate(NULL, self.size.width, self.size.height,</div><div class="line">                                             CGImageGetBitsPerComponent(self.CGImage), 0,</div><div class="line">                                             CGImageGetColorSpace(self.CGImage),</div><div class="line">                                             CGImageGetBitmapInfo(self.CGImage));</div><div class="line">    CGContextConcatCTM(ctx, transform);</div><div class="line">    switch (self.imageOrientation) &#123;</div><div class="line">        case UIImageOrientationLeft:</div><div class="line">        case UIImageOrientationLeftMirrored:</div><div class="line">        case UIImageOrientationRight:</div><div class="line">        case UIImageOrientationRightMirrored:</div><div class="line">            // Grr...</div><div class="line">            CGContextDrawImage(ctx, CGRectMake(0,0,self.size.height,self.size.width), self.CGImage);</div><div class="line">            break;</div><div class="line">            </div><div class="line">        default:</div><div class="line">            CGContextDrawImage(ctx, CGRectMake(0,0,self.size.width,self.size.height), self.CGImage);</div><div class="line">            break;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    // And now we just create a new UIImage from the drawing context</div><div class="line">    CGImageRef cgimg = CGBitmapContextCreateImage(ctx);</div><div class="line">    UIImage *img = [UIImage imageWithCGImage:cgimg];</div><div class="line">    CGContextRelease(ctx);</div><div class="line">    CGImageRelease(cgimg);</div><div class="line">    return img;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="再次遇到旋转问题"><a href="#再次遇到旋转问题" class="headerlink" title="再次遇到旋转问题"></a>再次遇到旋转问题</h3><p>旋转问题得到解决之后，使用了<strong>SDWebImage</strong>自带的<strong>SDImageCache</strong>类进行了图片的缓存管理，该类能够做到内存不足时释放不需要的图片对象。类底层使用了系统的<strong>NSCache</strong>实现的，能够在系统内存不足时释放被管理的对象。   </p>
+<p>在使用<strong>SDImageCache</strong>类做缓存之后，我们的测试MM发现在一些情况下会出现图片旋转的问题。而且是 Core Graphics 和 OpenGL 两个环境下都会出现。因为有了前面的经验，很快就找到了方向，那就是<strong>UIImage</strong>对象的<strong>imageOrientation</strong>属性出问题了，经过一步步调试发现，在<strong>UIImage</strong>对象交给<strong>SDImageCache</strong>管理之后，再从缓存中拿出来时<strong>imageOrientation</strong>属性会不一致。于是找到了<strong>SDImageCache</strong>类的部分源码，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div></pre></td><td class="code"><pre><div class="line">- (void)storeImage:(UIImage *)image recalculateFromImage:(BOOL)recalculate imageData:(NSData *)imageData forKey:(NSString *)key toDisk:(BOOL)toDisk &#123;</div><div class="line">    if (!image || !key) &#123;</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    [self.memCache setObject:image forKey:key cost:image.size.height * image.size.width * image.scale * image.scale];</div><div class="line"></div><div class="line">    if (toDisk) &#123;</div><div class="line">        dispatch_async(self.ioQueue, ^&#123;</div><div class="line">            NSData *data = imageData;</div><div class="line"></div><div class="line">            if (image &amp;&amp; (recalculate || !data)) &#123;</div><div class="line">#if TARGET_OS_IPHONE</div><div class="line">                // We need to determine if the image is a PNG or a JPEG</div><div class="line">                // PNGs are easier to detect because they have a unique signature (http://www.w3.org/TR/PNG-Structure.html)</div><div class="line">                // The first eight bytes of a PNG file always contain the following (decimal) values:</div><div class="line">                // 137 80 78 71 13 10 26 10</div><div class="line"></div><div class="line">                // We assume the image is PNG, in case the imageData is nil (i.e. if trying to save a UIImage directly),</div><div class="line">                // we will consider it PNG to avoid loosing the transparency</div><div class="line">                BOOL imageIsPng = YES;</div><div class="line"></div><div class="line">                // But if we have an image data, we will look at the preffix</div><div class="line">                if ([imageData length] &gt;= [kPNGSignatureData length]) &#123;</div><div class="line">                    imageIsPng = ImageDataHasPNGPreffix(imageData);</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                if (imageIsPng) &#123;</div><div class="line">                    data = UIImagePNGRepresentation(image);</div><div class="line">                &#125;</div><div class="line">                else &#123;</div><div class="line">                    data = UIImageJPEGRepresentation(image, (CGFloat)1.0);</div><div class="line">                &#125;</div><div class="line">#else</div><div class="line">                data = [NSBitmapImageRep representationOfImageRepsInArray:image.representations usingType: NSJPEGFileType properties:nil];</div><div class="line">#endif</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            if (data) &#123;</div><div class="line">                if (![_fileManager fileExistsAtPath:_diskCachePath]) &#123;</div><div class="line">                    [_fileManager createDirectoryAtPath:_diskCachePath withIntermediateDirectories:YES attributes:nil error:NULL];</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                [_fileManager createFileAtPath:[self defaultCachePathForKey:key] contents:data attributes:nil];</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以知道<strong>UIImage</strong>对象在IO线程中直接使用<strong>UIImagePNGRepresentation</strong>或者<strong>UIImageJPEGRepresentation</strong>方法转换成<strong>NSData</strong>对象然后直接存储到文件中了。 <strong>imageData</strong>参数可以从以下两个方法知道，默认情况下是传的<strong>nil</strong>值。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">- (void)storeImage:(UIImage *)image forKey:(NSString *)key &#123;</div><div class="line">    [self storeImage:image recalculateFromImage:YES imageData:nil forKey:key toDisk:YES];</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (void)storeImage:(UIImage *)image forKey:(NSString *)key toDisk:(BOOL)toDisk &#123;</div><div class="line">    [self storeImage:image recalculateFromImage:YES imageData:nil forKey:key toDisk:toDisk];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>也就是说我们在使用<strong>SDImageCache</strong>做缓存时，默认会当做PNG图片存储到文件。而经过测试发现<strong>UIImagePNGRepresentation</strong>方法转换成<strong>NSData</strong>对象时，EXIF信息将会丢失，而<strong>UIImageJPEGRepresentation</strong>方法则不会。在找到原因之后，问题就可以很好的解决了，只要在加入到缓存之前，将图片恢复到正常方向，再将图片保存到缓存中即可。  </p>
+<h3 id="获取缓存失败"><a href="#获取缓存失败" class="headerlink" title="获取缓存失败"></a>获取缓存失败</h3><p>本以为问题都解决了，然而第二天我们测试发现在一些情况下，插入图片时会显示一张默认图片（图片如果加载失败会显示一张默认的小图），在跟测试MM做了一些沟通之后，走读了一下代码流程，并进行了调试，发现图片被放进缓存之后，再次进行获取时，却获取不到数据。  </p>
+<p>想不通为什么，于是看了一下<strong>SDImageCache</strong>类的源码（前面有提到），结合调试发现的一些信息，在加载iPad（我们的应用是iPad）拍摄的照片并且在插入多张图片之后才会出现这种现象，于是猜想是不是在<strong>UIImage</strong>对象在加入到缓存中之后，这时候收到内存警告或者超过设定的阀值，导致被加入的对象在IO线程还未将图片写入到磁盘之前就被释放了，这样将导致从内存和磁盘中都获取不到数据。为了验证这个猜想，修改了<strong>SDImageCache</strong>源码，设置了memCache的delegate，<strong>NSCache</strong>有个delegate，协议如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">@protocol NSCacheDelegate &lt;NSObject&gt;</div><div class="line">@optional</div><div class="line">- (void)cache:(NSCache *)cache willEvictObject:(id)obj;</div><div class="line">@end</div></pre></td></tr></table></figure>
+<p>通过该protocol便可以知道被加入缓存中的对象什么时候被释放。在delegate中、IO线程中写入文件成功之后以及获取<strong>UIImage</strong>对象时添加一些Log信息。这样便可以知道各个逻辑的执行流程。经过验证，执行流程我猜想的一样，<strong>UIImage</strong>对象在加入到缓存一小会时间之后立马被释放了，这时候IO线程还未执行完成，这时候从缓存中是获取不到缓存数据的。从而导致失败显示默认图片。  </p>
+<p>问题已经找到了，但是要解决这个问题很是蛋疼，分别有以下几种做法：</p>
+<ul>
+<li>修改上层逻辑代码等待IO线程写入成功后，才执行后续流程，这样确保一定能获取到数据。</li>
+<li>修改<strong>SDWebImage</strong>让内存数据不那么快被释放。</li>
+<li>自己重新造个轮子达到我们想要的要求。</li>
+</ul>
+<p>对于上述修改第一条有点恶心，有点打补丁的节奏。针对后两条不太实际，工作量太大，最近在<a href="http://blog.ibireme.com/" target="_blank" rel="external"><strong>ibireme</strong></a>的博客上看一个<a href="https://github.com/ibireme/YYCache" target="_blank" rel="external"><strong>YYCache</strong></a>的开源项目，看了介绍还不错，于是将项目中的缓存直接换成了<strong>YYCache</strong>，做了相同的测试，发现问题没有出现了。^o^，后续将阅读一下<strong>YYCache</strong>的源代码了，看看具体的实现方法。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>在优化的过程中发现了<strong>SDWebImage</strong>的两个问题分别为：</p>
+<ul>
+<li>在使用<strong>SDWebImage</strong>做图片缓存时，图片默认会被当做PNG格式存储，而<strong>UIImagePNGRepresentation</strong>方法转换成<strong>NSData</strong>时会丢失EXIF信息，这样当再次从磁盘读取数据时，将是丢失EXIF信息的图片，从而导致无法进行正常的图片旋转。</li>
+<li>使用<strong>SDWebImage</strong>做缓存时，当内存到达一个临界值时，加入的新的缓存对象，会在IO线程写入文件之前释放，在内存对象被释放，IO未完成写入的这段时间内，无法正确获取到缓存数据。  </li>
+</ul>
+<p><a href="https://github.com/rs/SDWebImage" target="_blank" rel="external"><strong>SDWebImage</strong></a>很多人在用，而且使用起来也很方便，尤其在加载网络图片时非常方便，项目中还将继续使用用来做网络图片的加载，不过内存缓存会使用<a href="https://github.com/ibireme/YYCache" target="_blank" rel="external"><strong>YYCache</strong></a>， 针对<a href="https://github.com/ibireme/YYCache" target="_blank" rel="external"><strong>YYCache</strong></a>这个类，还没来得及细看代码，网上评价作者代码相当工整，看过<a href="https://github.com/ibireme/YYCategories" target="_blank" rel="external"><strong>YYCategories</strong></a>部分源码实现，确实写的不错，今后多看看，向大牛们学习。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;起因-旋转了的图片&quot;&gt;&lt;a href=&quot;#起因-旋转了的图片&quot; class=&quot;headerlink&quot; title=&quot;起因 旋转了的图片&quot;&gt;&lt;/a&gt;起因 旋转了的图片&lt;/h3&gt;&lt;p&gt;前段时间在对程序的绘图逻辑进行了使用OpenGL做优化，但是在使用OpenGL进行绘制时发现一些图片会莫名其妙的旋转，在细看了代码之后发现问题发生在&lt;strong&gt;UIImage&lt;/strong&gt;对象的&lt;strong&gt;imageOrientation&lt;/strong&gt;属性。该属性为枚举类型可以有以下取值：&lt;br&gt;
+    
+    </summary>
+    
+      <category term="开发笔记" scheme="http://enkichen.com/categories/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0/"/>
+    
+    
+      <category term="旋转" scheme="http://enkichen.com/tags/%E6%97%8B%E8%BD%AC/"/>
+    
+      <category term="SDWebImage" scheme="http://enkichen.com/tags/SDWebImage/"/>
+    
+      <category term="NSCache" scheme="http://enkichen.com/tags/NSCache/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>开博第一篇</title>
+    <link href="http://enkichen.com/2015/12/19/First-blog/"/>
+    <id>http://enkichen.com/2015/12/19/First-blog/</id>
+    <published>2015-12-19T01:02:51.000Z</published>
+    <updated>2016-02-29T01:19:02.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>折腾了几天总算把博客搭建成功了，心情大好，本博客是基于<a href="https://github.com/" target="_blank" rel="external"><strong>GitHub</strong></a>和<a href="https://hexo.io/" target="_blank" rel="external"><strong>Hexo</strong></a>搭建，并使用了<a href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="external"><strong>NexT.Mist</strong></a>主题，在万网购买的域名，两个域名分别为<a href="http://www.enkichen.com" target="_blank" rel="external"><strong>www.enkichen.com</strong></a>和<a href="http://www.enkichen.cn" target="_blank" rel="external"><strong>www.enkichen.cn</strong></a>，5年400多点大洋，个人觉得还是蛮便宜的。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;折腾了几天总算把博客搭建成功了，心情大好，本博客是基于&lt;a href=&quot;https://github.com/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;strong&gt;GitHub&lt;/strong&gt;&lt;/a&gt;和&lt;a href=&quot;https://hexo
+    
+    </summary>
+    
+      <category term="default" scheme="http://enkichen.com/categories/default/"/>
+    
+    
+  </entry>
+  
+</feed>
