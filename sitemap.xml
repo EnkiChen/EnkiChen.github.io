@@ -2,6 +2,27 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://enkichen.com/categories/index.html</loc>
+    
+    <lastmod>2017-04-14T06:17:22.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://enkichen.com/tags/index.html</loc>
+    
+    <lastmod>2017-04-14T06:17:14.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://enkichen.com/about/index.html</loc>
+    
+    <lastmod>2017-04-14T06:16:31.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://enkichen.com/2017/02/18/ios-associative/</loc>
     
     <lastmod>2017-02-18T05:03:04.000Z</lastmod>
@@ -26,13 +47,6 @@
     <loc>http://enkichen.com/2016/08/29/http-Content-Type/</loc>
     
     <lastmod>2016-08-29T12:37:38.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://enkichen.com/about/index.html</loc>
-    
-    <lastmod>2016-07-22T06:38:51.000Z</lastmod>
     
   </url>
   
@@ -89,20 +103,6 @@
     <loc>http://enkichen.com/2016/01/05/UIWindow-cannot-rotate/</loc>
     
     <lastmod>2016-01-07T02:08:00.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://enkichen.com/tags/index.html</loc>
-    
-    <lastmod>2015-12-19T03:41:03.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://enkichen.com/categories/index.html</loc>
-    
-    <lastmod>2015-12-19T03:40:20.000Z</lastmod>
     
   </url>
   
