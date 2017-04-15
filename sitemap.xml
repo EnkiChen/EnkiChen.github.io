@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://enkichen.com/about/index.html</loc>
+    
+    <lastmod>2017-04-15T02:11:11.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://enkichen.com/categories/index.html</loc>
     
     <lastmod>2017-04-14T06:17:22.000Z</lastmod>
@@ -12,13 +19,6 @@
     <loc>http://enkichen.com/tags/index.html</loc>
     
     <lastmod>2017-04-14T06:17:14.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://enkichen.com/about/index.html</loc>
-    
-    <lastmod>2017-04-14T06:16:31.000Z</lastmod>
     
   </url>
   
