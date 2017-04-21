@@ -71,7 +71,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="OpenGL,纹理," />
+  <meta name="keywords" content="运行时,消息转发," />
 
 
 
@@ -89,17 +89,19 @@
 
 
 
-<meta name="description" content="因为项目中使用到了OpenGL ES做绘图，记录一下一些要注意的点：    glGenTextures()方法申请到的纹理对象ID，会由系统控制其对象的释放（也可以使用glDeleteTextures()进行手动释放），所以在使用之前需要使用glIsTexture()来检测该纹理ID是否可用，当为false时，需要重新生成纹理对象ID，如果继续使用该纹理ID，会无法绘制从而导致绘制时为纯白色。">
-<meta name="keywords" content="OpenGL,纹理">
+<meta name="description" content="今天写一篇老生常谈的话题 —— Objective-C 的消息转发机制。Objective-C 下所有的方法调用都可以理解为，给一个对象发送一个消息。一个对象接收到消息后，会从当前类的方法列表或者父类的方法列表查找到对应的方法实现（IMP）来处理该消息。大致流程如下：  通过 NSObject 的 isa 指针找到对应的 Class 在 Class 的方法列表中找到对应的 selector 如果在">
+<meta name="keywords" content="运行时,消息转发">
 <meta property="og:type" content="article">
-<meta property="og:title" content="iOS下使用OpenGL要注意的几点">
-<meta property="og:url" content="http://enkichen.com/2015/12/29/ios-xia-opengl-xu-yao-zhu-yi-de-ji-dian/index.html">
+<meta property="og:title" content="iOS 运行时之消息转发机制">
+<meta property="og:url" content="http://enkichen.com/2017/04/21/ios-message-forwarding/index.html">
 <meta property="og:site_name" content="Enki's Notes">
-<meta property="og:description" content="因为项目中使用到了OpenGL ES做绘图，记录一下一些要注意的点：    glGenTextures()方法申请到的纹理对象ID，会由系统控制其对象的释放（也可以使用glDeleteTextures()进行手动释放），所以在使用之前需要使用glIsTexture()来检测该纹理ID是否可用，当为false时，需要重新生成纹理对象ID，如果继续使用该纹理ID，会无法绘制从而导致绘制时为纯白色。">
-<meta property="og:updated_time" content="2016-01-07T02:25:25.000Z">
+<meta property="og:description" content="今天写一篇老生常谈的话题 —— Objective-C 的消息转发机制。Objective-C 下所有的方法调用都可以理解为，给一个对象发送一个消息。一个对象接收到消息后，会从当前类的方法列表或者父类的方法列表查找到对应的方法实现（IMP）来处理该消息。大致流程如下：  通过 NSObject 的 isa 指针找到对应的 Class 在 Class 的方法列表中找到对应的 selector 如果在">
+<meta property="og:image" content="http://enkichen.com/uploads/forwardflow.png">
+<meta property="og:updated_time" content="2017-04-21T06:58:12.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="iOS下使用OpenGL要注意的几点">
-<meta name="twitter:description" content="因为项目中使用到了OpenGL ES做绘图，记录一下一些要注意的点：    glGenTextures()方法申请到的纹理对象ID，会由系统控制其对象的释放（也可以使用glDeleteTextures()进行手动释放），所以在使用之前需要使用glIsTexture()来检测该纹理ID是否可用，当为false时，需要重新生成纹理对象ID，如果继续使用该纹理ID，会无法绘制从而导致绘制时为纯白色。">
+<meta name="twitter:title" content="iOS 运行时之消息转发机制">
+<meta name="twitter:description" content="今天写一篇老生常谈的话题 —— Objective-C 的消息转发机制。Objective-C 下所有的方法调用都可以理解为，给一个对象发送一个消息。一个对象接收到消息后，会从当前类的方法列表或者父类的方法列表查找到对应的方法实现（IMP）来处理该消息。大致流程如下：  通过 NSObject 的 isa 指针找到对应的 Class 在 Class 的方法列表中找到对应的 selector 如果在">
+<meta name="twitter:image" content="http://enkichen.com/uploads/forwardflow.png">
 
 
 
@@ -127,13 +129,13 @@
 
 
 
-  <link rel="canonical" href="http://enkichen.com/2015/12/29/ios-xia-opengl-xu-yao-zhu-yi-de-ji-dian/"/>
+  <link rel="canonical" href="http://enkichen.com/2017/04/21/ios-message-forwarding/"/>
 
 
 
 
 
-  <title> iOS下使用OpenGL要注意的几点 | Enki's Notes </title>
+  <title> iOS 运行时之消息转发机制 | Enki's Notes </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -278,7 +280,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2015/12/29/ios-xia-opengl-xu-yao-zhu-yi-de-ji-dian/">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2017/04/21/ios-message-forwarding/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Enki">
@@ -299,7 +301,7 @@
             
             
               
-                iOS下使用OpenGL要注意的几点
+                iOS 运行时之消息转发机制
               
             
           </h1>
@@ -314,8 +316,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-29T16:59:49+08:00">
-                2015-12-29
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-21T14:49:54+08:00">
+                2017-04-21
               </time>
             
 
@@ -337,8 +339,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/开发笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">开发笔记</span>
+                  <a href="/categories/知识整理-总结/" itemprop="url" rel="index">
+                    <span itemprop="name">知识整理/总结</span>
                   </a>
                 </span>
 
@@ -355,7 +357,7 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a class="cloud-tie-join-count" href="/2015/12/29/ios-xia-opengl-xu-yao-zhu-yi-de-ji-dian/#comments" itemprop="discussionUrl">
+                <a class="cloud-tie-join-count" href="/2017/04/21/ios-message-forwarding/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count join-count" itemprop="commentCount"></span>
                 </a>
               </span>
@@ -364,7 +366,7 @@
 
           
           
-             <span id="/2015/12/29/ios-xia-opengl-xu-yao-zhu-yi-de-ji-dian/" class="leancloud_visitors" data-flag-title="iOS下使用OpenGL要注意的几点">
+             <span id="/2017/04/21/ios-message-forwarding/" class="leancloud_visitors" data-flag-title="iOS 运行时之消息转发机制">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -393,43 +395,45 @@
       
 
       
-        <p>因为项目中使用到了OpenGL ES做绘图，记录一下一些要注意的点：  </p>
-<ul>
-<li><em>glGenTextures()</em>方法申请到的纹理对象ID，会由系统控制其对象的释放（也可以使用<em>glDeleteTextures()</em>进行手动释放），所以在使用之前需要使用<em>glIsTexture()</em>来检测该纹理ID是否可用，当为false时，需要重新生成纹理对象ID，如果继续使用该纹理ID，会无法绘制从而导致绘制时为纯白色。  <a id="more"></a></li>
-<li>iOS下不同的硬件设备，最大的纹理大小是有限制的，如下表（来源于网络）：</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">1024 x 1024</th>
-<th style="text-align:center">2048 x 2048</th>
-<th style="text-align:center">4096 x 4096</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">iPhone 2G</td>
-<td style="text-align:center">iPhone 3gs</td>
-<td style="text-align:center">iPhone 4s</td>
-</tr>
-<tr>
-<td style="text-align:center">iPhone 3G</td>
-<td style="text-align:center">iPhone 4</td>
-<td style="text-align:center">iPad 2</td>
-</tr>
-<tr>
-<td style="text-align:center"></td>
-<td style="text-align:center">iPad</td>
-<td style="text-align:center">iPad 3</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>我在最新的iPad Air上测试发现最大也支持4096x4096，所以结合上表来看，从iPhone4S和iPad2开始，到最新的iPhone6s以及最新的iPad Air最大也只能支持4096x4096的大小。所以在使用时要注意，否则会导致无法渲染而变成纯白色。  </li>
-<li>在使用OpenGL时纹理图片的宽高都需要是2的N次方，在一些平台下（PC平台）下没有这样的限制。并且纹理图片不需要非得是正方形的。所以在使用一些不符合大小时，需要手动对图片进行拉伸，然后复制到显存中进行关联，在进行绘制时按对应的坐标进行转换，所以并不用担心图片在渲染时会被拉伸的问题。</li>
+        <p>今天写一篇老生常谈的话题 —— Objective-C 的消息转发机制。Objective-C 下所有的方法调用都可以理解为，给一个对象发送一个消息。一个对象接收到消息后，会从当前类的方法列表或者父类的方法列表查找到对应的方法实现（IMP）来处理该消息。大致流程如下：</p>
+<ol>
+<li>通过 <code>NSObject</code> 的 <em>isa</em> 指针找到对应的 Class</li>
+<li>在 Class 的方法列表中找到对应的 <em>selector</em></li>
+<li>如果在当前 Class 中未能找到 <em>selector</em> 则往父类的方法中继续查找</li>
+<li>如果能找到对应的 <em>selector</em> 则去执行对象的方法实现（IMP）</li>
+</ol>
+<p>在上述流程中如果不能找对对应的 <em>selector</em> 时，这时候就会进入消息转发机制。消息转发机制可分为两个阶段，在这两个阶段中，有 3 次机会来处理之前未能处理 <em>selector</em>，越往后所花费的代价将越大，处理的灵活程度也就越高。如下图所示：</p>
+<p><img src="/uploads/forwardflow.png" alt="消息转发流程"><br><a id="more"></a> </p>
+<h3 id="第一阶段"><a href="#第一阶段" class="headerlink" title="第一阶段"></a>第一阶段</h3><p>第一阶段也可称之为 <strong>动态方法解析</strong> 阶段，在该阶段中，可以动态的为类添加一个方法，从而让动态添加的方法来处理之前未能处理的消息。可重写类以下方法： </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">+ (BOOL)resolveInstanceMethod:(SEL)sel</div></pre></td></tr></table></figure>
+<p>如果是类的静态方法，可重写以下方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">+ (BOOL)resolveClassMethod:(SEL)sel</div></pre></td></tr></table></figure>
+<p><code>SEL</code> 就是未能处理的 <em>selector</em>，返回值为 <code>BOOL</code> 表示是否增加了新的方法来处理该 <em>selector</em>。在当前阶段处理未知 <em>selector</em> 的前提是，你已经准备好了新的方法来处理该 <em>selector</em>，等着运行时将方法动态添加到类中即可，该阶段一般用来实现 <code>@dynamic</code> 属性。</p>
+<h3 id="第二阶段"><a href="#第二阶段" class="headerlink" title="第二阶段"></a>第二阶段</h3><p>如果在第一该阶段中为能处理未知的 <em>selector</em>，运行时将进入第二阶段消息的转发，在该阶段中我们可以将未知的 <em>selector</em> 转发给其他对象来处理。运行时提供两次机会，来做消息的转发，第一次是重写以下方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">- (id)forwardingTargetForSelector:(SEL)aSelector</div></pre></td></tr></table></figure>
+<p>该方法的 <code>SEL</code> 就是未能处理的 <em>selector</em>，返回值类型为 <code>id</code> 用来指定 <em>selector</em> 处理的对象，运行时将会把未能处理的 <code>SEL</code> 转发给该对象。该阶段我们可以将 <em>selector</em> 转发到类中的其他对象来处理，从而实现 <code>代理模式</code>。如果不重写该方法，运行时将把方法调用的所有细节封装到 <code>NSInvocation</code> 对象中，进入完整的消息转发机制中，运行时将继续调用一下方法来进行消息的派发：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector</div><div class="line">- (void)forwardInvocation:(NSInvocation *)anInvocation</div></pre></td></tr></table></figure>
+<p>方法中的 <code>NSInvocation</code> 参数，包含了所有方法调用的细节，包括 <code>selector/target/参数</code> 等，重写该方法后我们可以将 <code>anInvocation</code> 转发给多个对象来处理该消息。在该阶段我们可以用来实现 “多重继承” 或者多重代理等。</p>
+<p>如果在两个阶段都不做任何处理的话，运行时将会把 <em>selector</em> 交由 <em>doesNotRecognizeSelector</em> 方法来处理，从而抛出异常导致 Crash ，异常信息一般如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">-[*** ***]:unrecognized selector sent to instance 0x*****</div></pre></td></tr></table></figure>
+<h3 id="重写-respondsToSelector-方法"><a href="#重写-respondsToSelector-方法" class="headerlink" title="重写 respondsToSelector 方法"></a>重写 respondsToSelector 方法</h3><p>Objective-C 中 <em>respondsToSelector</em> 方法可以用检查类对象是否能够处理对应的 <em>selector</em>，当我们通过消息转发机制来处理 <em>selector</em> 时， <em>respondsToSelector</em> 并不能按原意正常工作了，这时候需要重写类的 <em>respondsToSelector</em> 方法，用来告诉方法调用者对应的 <em>selector</em> 是能够被处理的。如果是在 <strong>动态方法解析</strong> 阶段使用 <em>class_addMethod</em> 来为类动态添加方法，则不需要重写 <em>respondsToSelector</em> 。</p>
+<h3 id="消息转发特性的应用场景"><a href="#消息转发特性的应用场景" class="headerlink" title="消息转发特性的应用场景"></a>消息转发特性的应用场景</h3><h4 id="为-dynamic-实现方法"><a href="#为-dynamic-实现方法" class="headerlink" title="为 @dynamic 实现方法"></a>为 @dynamic 实现方法</h4><p>使用 <code>@synthesize</code> 可以为 <code>@property</code> 自动生成 <code>getter</code> 和 <code>setter</code> 方法（现 Xcode 版本中，会自动生成），而 <code>@dynamic</code> 则是告诉编译器，不用生成 <code>getter</code> 和 <code>setter</code> 方法。当使用 <code>@dynamic</code> 时，我们可以使用消息转发机制，来动态添加 <code>getter</code> 和 <code>setter</code> 方法。当然你也用其他的方法来实现。</p>
+<h4 id="代理模式实现"><a href="#代理模式实现" class="headerlink" title="代理模式实现"></a>代理模式实现</h4><p>看完 Objective-C 的消息转发机制，相信很多朋友都能想到 <strong>代理模式</strong>。对 <strong>代理模式</strong> 不熟悉或者不明白的应用场景的同学，可以自行去学习一下 <strong>代理模式</strong>。同时 Objective-C 提供了 <code>NSProxy</code> 类可以用来做动态代理。</p>
+<h4 id="多重继承"><a href="#多重继承" class="headerlink" title="多重继承"></a>多重继承</h4><p>学过 C++ 的同学都支持，C++ 是支持多继承的，子类可以从多个类继承，从而获得多个类所有的特性。在消息转发的最后一次处理机会中，运行时会产生一个 <code>NSInvocation</code> 对象，进入到完整的消息转发机制中，在该流程中我们将 <em>selector</em> 转发到不同的对象中处理，便可以达到 “多重继承” 的特性。做法是在类的构造方法中，构造一个或者多个需要继承的对象，将未能处理的 <em>selector</em> 转发到对应的对象中处理即可。</p>
+<blockquote>
+<p><a href="https://github.com/EnkiChen/MsgForwardingSample.git" target="_blank" rel="external">样例代码</a> 在这里</p>
+</blockquote>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><ul>
+<li>当接收无法处理的 <em>selector</em> 时，则进入消息转发流程</li>
+<li>消息转发流程可分为两阶段，一共有 3 次机会来处理未知的 <em>selector</em></li>
+<li>第一阶段为 <strong>动态方法解析</strong> 阶段，用来为类动态添加方法，第二阶段才是正在的消息转发阶段，该阶段可以将未知的 <em>selector</em> 转发到一个或者多个对象中来处理</li>
+<li>消息转发流程完成后，都不做任何处理的话，这进入 <em>doesNotRecognizeSelector</em> 方法从而抛出异常</li>
+<li>如果将消息转发到其他对象来处理，则需要重写 <em>respondsToSelector</em> 方法来保证该方法正常工作</li>
+<li><code>NSProxy</code> 类是基于消息转发机制来实现的动态代理模式</li>
+<li>消息转发机制可用来实现 <code>@dynamic</code> 属性、代理模式、多重继承等</li>
 </ul>
 <blockquote>
-<p>我使用的是OpenGL ES 1.x的版本，第一条我在网上没找到太多的资料，都是通过测试发现的，如果有什么不对，还请指正，谢谢。</p>
+<p>原文作者：Enki<br>原文出处：<a href="http://www.enkichen.com" target="_blank" rel="external">http://www.enkichen.com</a></p>
 </blockquote>
 
       
@@ -460,9 +464,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/OpenGL/" rel="tag"># OpenGL</a>
+            <a href="/tags/运行时/" rel="tag"># 运行时</a>
           
-            <a href="/tags/纹理/" rel="tag"># 纹理</a>
+            <a href="/tags/消息转发/" rel="tag"># 消息转发</a>
           
         </div>
       
@@ -475,18 +479,14 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/01/05/UIWindow-cannot-rotate/" rel="next" title="无法旋转的UIWindow子类">
-                <i class="fa fa-chevron-left"></i> 无法旋转的UIWindow子类
-              </a>
-            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/12/22/sdwebimage-issues/" rel="prev" title="优化APP时发现的SDWebImage的问题">
-                优化APP时发现的SDWebImage的问题 <i class="fa fa-chevron-right"></i>
+              <a href="/2017/02/18/ios-associative/" rel="prev" title="iOS 运行时之 Associative(关联)">
+                iOS 运行时之 Associative(关联) <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -559,8 +559,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/uploads/avatar.jpg"
@@ -640,6 +649,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#第一阶段"><span class="nav-number">1.</span> <span class="nav-text">第一阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第二阶段"><span class="nav-number">2.</span> <span class="nav-text">第二阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重写-respondsToSelector-方法"><span class="nav-number">3.</span> <span class="nav-text">重写 respondsToSelector 方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#消息转发特性的应用场景"><span class="nav-number">4.</span> <span class="nav-text">消息转发特性的应用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#为-dynamic-实现方法"><span class="nav-number">4.1.</span> <span class="nav-text">为 @dynamic 实现方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代理模式实现"><span class="nav-number">4.2.</span> <span class="nav-text">代理模式实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多重继承"><span class="nav-number">4.3.</span> <span class="nav-text">多重继承</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">5.</span> <span class="nav-text">小结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
