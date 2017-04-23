@@ -97,7 +97,7 @@
 <meta property="og:site_name" content="Enki's Notes">
 <meta property="og:description" content="今天写一篇老生常谈的话题 —— Objective-C 的消息转发机制。Objective-C 下所有的方法调用都可以理解为，给一个对象发送一个消息。一个对象接收到消息后，会从当前类的方法列表或者父类的方法列表查找到对应的方法实现（IMP）来处理该消息。大致流程如下：  通过 NSObject 的 isa 指针找到对应的 Class 在 Class 的方法列表中找到对应的 selector 如果在">
 <meta property="og:image" content="http://enkichen.com/uploads/forwardflow.png">
-<meta property="og:updated_time" content="2017-04-21T06:58:12.000Z">
+<meta property="og:updated_time" content="2017-04-23T16:08:12.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS 运行时之消息转发机制">
 <meta name="twitter:description" content="今天写一篇老生常谈的话题 —— Objective-C 的消息转发机制。Objective-C 下所有的方法调用都可以理解为，给一个对象发送一个消息。一个对象接收到消息后，会从当前类的方法列表或者父类的方法列表查找到对应的方法实现（IMP）来处理该消息。大致流程如下：  通过 NSObject 的 isa 指针找到对应的 Class 在 Class 的方法列表中找到对应的 selector 如果在">
@@ -399,7 +399,7 @@
 <ol>
 <li>通过 <code>NSObject</code> 的 <em>isa</em> 指针找到对应的 Class</li>
 <li>在 Class 的方法列表中找到对应的 <em>selector</em></li>
-<li>如果在当前 Class 中未能找到 <em>selector</em> 则往父类的方法中继续查找</li>
+<li>如果在当前 Class 中未能找到 <em>selector</em> 则往父类的方法列表中继续查找</li>
 <li>如果能找到对应的 <em>selector</em> 则去执行对象的方法实现（IMP）</li>
 </ol>
 <p>在上述流程中如果不能找对对应的 <em>selector</em> 时，这时候就会进入消息转发机制。消息转发机制可分为两个阶段，在这两个阶段中，有 3 次机会来处理之前未能处理 <em>selector</em>，越往后所花费的代价将越大，处理的灵活程度也就越高。如下图所示：</p>
