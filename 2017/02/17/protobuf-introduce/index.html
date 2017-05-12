@@ -96,7 +96,7 @@
 <meta property="og:url" content="http://enkichen.com/2017/02/17/protobuf-introduce/index.html">
 <meta property="og:site_name" content="Enki's Notes">
 <meta property="og:description" content="Protocol Buffer(简称Protobuf或PB)是由 Google 开发的，原本用来解决索引服务器的请求、响应协议，后面才对外使用和开源的，它是一种数据交换格式，与 XML 和 JSON 相比 ，它是一种二进制格式，避免了各种文本格式转换的问题，并且更体积更小、速度更快使用更简单方便，还自带部分数据压缩功能，在网络传输时可以减少数据流量。同时它也是与平台和语言无关的，尤其在网络数据交换">
-<meta property="og:updated_time" content="2017-02-17T07:04:31.000Z">
+<meta property="og:updated_time" content="2017-05-12T05:03:40.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Protocol Buffer 简介与使用">
 <meta name="twitter:description" content="Protocol Buffer(简称Protobuf或PB)是由 Google 开发的，原本用来解决索引服务器的请求、响应协议，后面才对外使用和开源的，它是一种数据交换格式，与 XML 和 JSON 相比 ，它是一种二进制格式，避免了各种文本格式转换的问题，并且更体积更小、速度更快使用更简单方便，还自带部分数据压缩功能，在网络传输时可以减少数据流量。同时它也是与平台和语言无关的，尤其在网络数据交换">
@@ -456,8 +456,13 @@
 </blockquote>
 <h3 id="Protobuf-编译器"><a href="#Protobuf-编译器" class="headerlink" title="Protobuf 编译器"></a>Protobuf 编译器</h3><p>Protobuf 编译器在于将 <em>.proto</em> 文件转成对应语言的对象模型的源代码，可以从 GitHub 上下载源代码在本地进行编译，然后生成 Protobuf 编译器，也可以从 GitHub 上下载已经编译好的编译器。</p>
 <p>下载链接为：<a href="https://github.com/google/protobuf/releases" target="_blank" rel="external">https://github.com/google/protobuf/releases</a></p>
-<p>如果是源码的话执行以下命令进行编译：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">cd Source code 目录</div><div class="line">./configure</div><div class="line">make</div><div class="line">make check</div><div class="line">sudo make install</div></pre></td></tr></table></figure>
+<p>如果是源码的话需要确保一下工具已经安装：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">autoconf automake libtool curl make g++ unzip</div></pre></td></tr></table></figure>
+<p>执行以下几个步骤进行编译和安装：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"># 生成 configure 文件</div><div class="line">$ ./autogen.sh</div><div class="line"></div><div class="line"># 配置 makefile</div><div class="line">$ ./configure</div><div class="line"></div><div class="line"># 编译</div><div class="line">$ make</div><div class="line">$ make check</div><div class="line"></div><div class="line"># 安装编译后的二进制文件</div><div class="line">$ sudo make install</div></pre></td></tr></table></figure>
+<blockquote>
+<p>如果出现 <code>/usr/local/Cellar/../Library/ENV/4.3/sed: No such file or directory</code> 错误可以尝试使用 <code>brew reinstall libtool</code> 重新安装 libtool</p>
+</blockquote>
 <p>如果编译成功，就可以使用 <code>proto</code> 命令了，如果是直接下载的 <code>proto</code> 文件，就不需要编译可直接运行。我们可以创建一个 <em>.proto</em> 文件来测试一下环境是否搭建好，样例文件如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">message User</div><div class="line">&#123;</div><div class="line">  required int32 uid = 1;        // 用户唯一标识</div><div class="line">  required string nickname = 2;  // 用户昵称</div><div class="line">  required int32 age = 3;        // 用户年龄</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>如果需要生成 Objective-C 源文件的话，执行以下命令即可：</p>
@@ -502,6 +507,21 @@
     <div>
       
         
+  <ul class="post-copyright">
+    <li class="post-copyright-author">
+      <strong>本文作者：</strong>
+      Enki
+    </li>
+    <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="http://enkichen.com/2017/02/17/protobuf-introduce/" title="Protocol Buffer 简介与使用">http://enkichen.com/2017/02/17/protobuf-introduce/</a>
+    </li>
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong>
+      本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+
 
       
     </div>
@@ -632,7 +652,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-count">14</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -654,7 +674,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-count">26</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
