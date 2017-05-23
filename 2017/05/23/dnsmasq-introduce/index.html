@@ -89,17 +89,17 @@
 
 
 
-<meta name="description" content="上一个星期在查找一个设备无法解析公司内部域名的问题，最终查出来问题是在网关设备上运行的 Dnsmasq 服务没有正确的配置上游 DNS 服务器，导致内网域名无法被正常的解析。在这期间对 DNS协议 又重新学习了一番，并且对 Dnsmasq 服务有了一些了解，结合网上一些资料，对 Dnsmasq 提供的 DNS 和 DHCP 服务的配置做一些总结和备忘。 Dnsmasq  是一个开源的项目，可以在">
+<meta name="description" content="上一个星期在查找一个设备无法解析公司内部域名的问题，最终查出来问题是在网关设备上运行的 Dnsmasq 服务没有正确的配置上游 DNS 服务器，导致内网域名无法被正常的解析。在这期间对 DNS协议 又重新学习了一番，并且对 Dnsmasq 服务有了一些了解，结合网上一些资料，对 Dnsmasq 提供的 DNS 和 DHCP 服务的配置做一些总结和备忘。  Dnsmasq  是一个开源的项目，可以">
 <meta name="keywords" content="Dnsmasq">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Dnsmasq 介绍与使用">
 <meta property="og:url" content="http://enkichen.com/2017/05/23/dnsmasq-introduce/index.html">
 <meta property="og:site_name" content="Enki's Notes">
-<meta property="og:description" content="上一个星期在查找一个设备无法解析公司内部域名的问题，最终查出来问题是在网关设备上运行的 Dnsmasq 服务没有正确的配置上游 DNS 服务器，导致内网域名无法被正常的解析。在这期间对 DNS协议 又重新学习了一番，并且对 Dnsmasq 服务有了一些了解，结合网上一些资料，对 Dnsmasq 提供的 DNS 和 DHCP 服务的配置做一些总结和备忘。 Dnsmasq  是一个开源的项目，可以在">
-<meta property="og:updated_time" content="2017-05-23T06:08:24.000Z">
+<meta property="og:description" content="上一个星期在查找一个设备无法解析公司内部域名的问题，最终查出来问题是在网关设备上运行的 Dnsmasq 服务没有正确的配置上游 DNS 服务器，导致内网域名无法被正常的解析。在这期间对 DNS协议 又重新学习了一番，并且对 Dnsmasq 服务有了一些了解，结合网上一些资料，对 Dnsmasq 提供的 DNS 和 DHCP 服务的配置做一些总结和备忘。  Dnsmasq  是一个开源的项目，可以">
+<meta property="og:updated_time" content="2017-05-23T06:13:20.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Dnsmasq 介绍与使用">
-<meta name="twitter:description" content="上一个星期在查找一个设备无法解析公司内部域名的问题，最终查出来问题是在网关设备上运行的 Dnsmasq 服务没有正确的配置上游 DNS 服务器，导致内网域名无法被正常的解析。在这期间对 DNS协议 又重新学习了一番，并且对 Dnsmasq 服务有了一些了解，结合网上一些资料，对 Dnsmasq 提供的 DNS 和 DHCP 服务的配置做一些总结和备忘。 Dnsmasq  是一个开源的项目，可以在">
+<meta name="twitter:description" content="上一个星期在查找一个设备无法解析公司内部域名的问题，最终查出来问题是在网关设备上运行的 Dnsmasq 服务没有正确的配置上游 DNS 服务器，导致内网域名无法被正常的解析。在这期间对 DNS协议 又重新学习了一番，并且对 Dnsmasq 服务有了一些了解，结合网上一些资料，对 Dnsmasq 提供的 DNS 和 DHCP 服务的配置做一些总结和备忘。  Dnsmasq  是一个开源的项目，可以">
 
 
 
@@ -393,7 +393,9 @@
       
 
       
-        <p>上一个星期在查找一个设备无法解析公司内部域名的问题，最终查出来问题是在网关设备上运行的 <code>Dnsmasq</code> 服务没有正确的配置上游 DNS 服务器，导致内网域名无法被正常的解析。在这期间对 <code>DNS协议</code> 又重新学习了一番，并且对 <code>Dnsmasq</code> 服务有了一些了解，结合网上一些资料，对 <code>Dnsmasq</code> 提供的 DNS 和 DHCP 服务的配置做一些总结和备忘。</p>
+        <blockquote>
+<p>上一个星期在查找一个设备无法解析公司内部域名的问题，最终查出来问题是在网关设备上运行的 <code>Dnsmasq</code> 服务没有正确的配置上游 DNS 服务器，导致内网域名无法被正常的解析。在这期间对 <code>DNS协议</code> 又重新学习了一番，并且对 <code>Dnsmasq</code> 服务有了一些了解，结合网上一些资料，对 <code>Dnsmasq</code> 提供的 DNS 和 DHCP 服务的配置做一些总结和备忘。</p>
+</blockquote>
 <p><code>Dnsmasq</code>  是一个开源的项目，可以在 <a href="http://www.thekelleys.org.uk/dnsmasq/doc.html" target="_blank" rel="external">thekelleys</a> 上找到最新版本和源码，它能提供 DNS 、DHCP、TFTP、PXE 等功能。<code>Dnsmasq</code> 的 DNS 服务工作原理是，当接收到一个 DNS 请求是， <code>Dnsmasq</code> 首先会查找 <code>/etc/hosts</code> 文件，如果没有查找到，会查询本地 DNS 缓存记录，如果还是未找到对应的记录，则会将请求装发到 <code>/etc/resolv.conf</code> 文件中定义的上游 DNS 服务器中，从而实现对域名的解析。</p>
 <p>基于上述原理，我们可以在 <code>/etc/hosts</code> 文件中添加本地内网的域名解析，从而实现本地内网的域名解析。同时我们还可以使用 <code>Dnsmasq</code> 来为一些特定的域名指定 DNS 服务器，或者阻止某些域名的访问。由于 <code>Dnsmasq</code> 会缓存上游 DNS 服务的查询记录，从而可以提高访问过的网址的连接速度。</p>
 <p>默认情况下，<code>Dnsmasq</code> 会从 <code>/etc/dnsmasq.conf</code> 读取配置项，我们也可以使用 <code>-C</code> 的启动参数来指定配置文件。下面介绍一下常用的 DNS 和 DHCP 服务的配置参数。</p>
@@ -517,7 +519,7 @@
 </tbody>
 </table>
 <blockquote>
-<p>dhcp-option 遵循RFC 2132（Options and BOOTP Vendor Extensions)，可以通过 dnsmasq –help dhcp 来查看具体的配置很多高级的配置，如 iSCSI 连接配置等同样可以由 RFC 2132 定义的 dhcp-option 中给出。option 3 为 default route</p>
+<p>dhcp-option 遵循RFC 2132（Options and BOOTP Vendor Extensions)，可以通过 dnsmasq –help dhcp 来查看具体的配置很多高级的配置，如 iSCSI 连接配置等同样可以由 RFC 2132 定义的 dhcp-option 中给出。</p>
 </blockquote>
 <h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
 <li><a href="http://www.thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html" target="_blank" rel="external">thekelleys 官网</a></li>

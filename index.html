@@ -387,7 +387,9 @@
 
       
         
-          <p>上一个星期在查找一个设备无法解析公司内部域名的问题，最终查出来问题是在网关设备上运行的 <code>Dnsmasq</code> 服务没有正确的配置上游 DNS 服务器，导致内网域名无法被正常的解析。在这期间对 <code>DNS协议</code> 又重新学习了一番，并且对 <code>Dnsmasq</code> 服务有了一些了解，结合网上一些资料，对 <code>Dnsmasq</code> 提供的 DNS 和 DHCP 服务的配置做一些总结和备忘。</p>
+          <blockquote>
+<p>上一个星期在查找一个设备无法解析公司内部域名的问题，最终查出来问题是在网关设备上运行的 <code>Dnsmasq</code> 服务没有正确的配置上游 DNS 服务器，导致内网域名无法被正常的解析。在这期间对 <code>DNS协议</code> 又重新学习了一番，并且对 <code>Dnsmasq</code> 服务有了一些了解，结合网上一些资料，对 <code>Dnsmasq</code> 提供的 DNS 和 DHCP 服务的配置做一些总结和备忘。</p>
+</blockquote>
 <p><code>Dnsmasq</code>  是一个开源的项目，可以在 <a href="http://www.thekelleys.org.uk/dnsmasq/doc.html">thekelleys</a> 上找到最新版本和源码，它能提供 DNS 、DHCP、TFTP、PXE 等功能。<code>Dnsmasq</code> 的 DNS 服务工作原理是，当接收到一个 DNS 请求是， <code>Dnsmasq</code> 首先会查找 <code>/etc/hosts</code> 文件，如果没有查找到，会查询本地 DNS 缓存记录，如果还是未找到对应的记录，则会将请求装发到 <code>/etc/resolv.conf</code> 文件中定义的上游 DNS 服务器中，从而实现对域名的解析。</p>
 <p>基于上述原理，我们可以在 <code>/etc/hosts</code> 文件中添加本地内网的域名解析，从而实现本地内网的域名解析。同时我们还可以使用 <code>Dnsmasq</code> 来为一些特定的域名指定 DNS 服务器，或者阻止某些域名的访问。由于 <code>Dnsmasq</code> 会缓存上游 DNS 服务的查询记录，从而可以提高访问过的网址的连接速度。</p>
 <p>默认情况下，<code>Dnsmasq</code> 会从 <code>/etc/dnsmasq.conf</code> 读取配置项，我们也可以使用 <code>-C</code> 的启动参数来指定配置文件。下面介绍一下常用的 DNS 和 DHCP 服务的配置参数。</p>
