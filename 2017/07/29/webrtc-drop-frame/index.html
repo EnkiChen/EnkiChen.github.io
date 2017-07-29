@@ -1,0 +1,969 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="WebRTC," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Enki's Notes" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="最近在弄一个 Android 平台下远程桌面项目，是基于 WebRTC 框架实现的，由于平台限制，芯片是用的特定厂商的芯片，桌面采集以及 H264 硬编码都是芯片厂商提供方案，能够有很好性能表现。在将桌面的采集以及 H264 的编码库整合到 WebRTC 框架中时，发现的存在画面延时的问题，于是对 WebRTC 的编解码框架的源码进行了分析，了解到 WebRTC 的两个特性。  在 WebRTC">
+<meta name="keywords" content="WebRTC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WebRTC 的主动丢帧行为">
+<meta property="og:url" content="http://enkichen.com/2017/07/29/webrtc-drop-frame/index.html">
+<meta property="og:site_name" content="Enki's Notes">
+<meta property="og:description" content="最近在弄一个 Android 平台下远程桌面项目，是基于 WebRTC 框架实现的，由于平台限制，芯片是用的特定厂商的芯片，桌面采集以及 H264 硬编码都是芯片厂商提供方案，能够有很好性能表现。在将桌面的采集以及 H264 的编码库整合到 WebRTC 框架中时，发现的存在画面延时的问题，于是对 WebRTC 的编解码框架的源码进行了分析，了解到 WebRTC 的两个特性。  在 WebRTC">
+<meta property="og:image" content="http://enkichen.com/uploads/webrtc_class_drop.png">
+<meta property="og:updated_time" content="2017-07-29T09:40:16.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="WebRTC 的主动丢帧行为">
+<meta name="twitter:description" content="最近在弄一个 Android 平台下远程桌面项目，是基于 WebRTC 框架实现的，由于平台限制，芯片是用的特定厂商的芯片，桌面采集以及 H264 硬编码都是芯片厂商提供方案，能够有很好性能表现。在将桌面的采集以及 H264 的编码库整合到 WebRTC 框架中时，发现的存在画面延时的问题，于是对 WebRTC 的编解码框架的源码进行了分析，了解到 WebRTC 的两个特性。  在 WebRTC">
+<meta name="twitter:image" content="http://enkichen.com/uploads/webrtc_class_drop.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://enkichen.com/2017/07/29/webrtc-drop-frame/"/>
+
+
+
+
+
+  <title> WebRTC 的主动丢帧行为 | Enki's Notes </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  <div style="display: none;">
+    <script src="//s95.cnzz.com/z_stat.php?id=1261736991&web_id=1261736991" language="JavaScript"></script>
+  </div>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Enki's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2017/07/29/webrtc-drop-frame/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Enki">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Enki's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                WebRTC 的主动丢帧行为
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-29T17:35:15+08:00">
+                2017-07-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/音视频-WebRTC/" itemprop="url" rel="index">
+                    <span itemprop="name">音视频/WebRTC</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a class="cloud-tie-join-count" href="/2017/07/29/webrtc-drop-frame/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count join-count" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/07/29/webrtc-drop-frame/" class="leancloud_visitors" data-flag-title="WebRTC 的主动丢帧行为">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>最近在弄一个 Android 平台下远程桌面项目，是基于 WebRTC 框架实现的，由于平台限制，芯片是用的特定厂商的芯片，桌面采集以及 H264 硬编码都是芯片厂商提供方案，能够有很好性能表现。在将桌面的采集以及 H264 的编码库整合到 WebRTC 框架中时，发现的存在画面延时的问题，于是对 WebRTC 的编解码框架的源码进行了分析，了解到 WebRTC 的两个特性。</p>
+</blockquote>
+<p>在 WebRTC 中有很多可以控制视频帧率和码率的行为，这里介绍一下当视频采集过快以及编码器输出码率过高时，WebRTC 主动丢帧的行为。这里采集过快是指视频采集的速度大于编码器处理的速度。例如视频采集线程每秒采集 30 帧，而编码线程每秒只能处理 15 帧，这时候就出现了采集过快或者说是编码器太慢。编码器输出码率过高，是指编码器的输出码率大于设定的最高输出码率值，例如设置编码器码率为 1024kbps，而实际产生的码率是 1500kbps 这时候就出现了输出码率过高的情况。本文主要介绍上述两种情况下 WebRTC 是如何实现丢帧行为的。</p>
+<p>下图是这次涉及到一些类的结构图，如果要在 WebRTC 源码中找对对应的文件，直接搜索类名称即可。WebRTC 的源码由于在墙外，我这里为了后续方便拷贝了一份到我的 GitHub 空间中，<a href="https://github.com/EnkiChen/webrtc" target="_blank" rel="external">点击这里</a> 可以找到源码。</p>
+<p><img src="/uploads/webrtc_class_drop.png" alt="Example"><br><a id="more"></a></p>
+<h3 id="采集过快时的丢帧行为"><a href="#采集过快时的丢帧行为" class="headerlink" title="采集过快时的丢帧行为"></a>采集过快时的丢帧行为</h3><p>在 WebRTC 中视频或者桌面图像的采集和图像的编码线程各自是独立线程进行工作的，采集线程会将采集好的图像打包成 <code>VideoFrame</code> 对象，这里的 <code>VideoFrame</code> 封装了经过转换的 <code>YUV</code> 数据而非 <code>RGB</code> 数据， <code>VideoFrame</code> 在经过一系列的周转后，最终会在 <em><code>ViEEncoder</code></em> 类中得到处理，在 <em><code>ViEEncoder</code></em> 类一部分工作是将数据从采集线程 <code>post</code> 到编码线程中，这里就会涉及到多线程间协作的问题。</p>
+<p>这里用的是 <code>rtc::TaskQueue</code> 队列类，在 <em><code>ViEEncoder</code></em> 类内部，会将所有跟编码器相关的操作都将打包成一个 <code>Task</code> 扔到队列中，确保所有的操作都是顺序执行的。在 <em><code>onFrame()</code></em> 方法中接收到采集线程传进来的 <code>VideoFrame</code> 对象，并将其打包成一个 <code>EncodeTask</code> 对象放入队列中。代码片段如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">void ViEEncoder::OnFrame(const VideoFrame&amp; video_frame) &#123;</div><div class="line"></div><div class="line">    ...</div><div class="line"></div><div class="line">    last_captured_timestamp_ = incoming_frame.ntp_time_ms();</div><div class="line">    encoder_queue_.PostTask(std::unique_ptr&lt;rtc::QueuedTask&gt;(new EncodeTask(</div><div class="line">      incoming_frame, this, rtc::TimeMicros(), log_stats)));</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>EncodeTask</code> 是一个内部类，代码非常少，这里就直接贴上来了：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line">class ViEEncoder::EncodeTask : public rtc::QueuedTask &#123;</div><div class="line"> public:</div><div class="line">  EncodeTask(const VideoFrame&amp; frame,</div><div class="line">             ViEEncoder* vie_encoder,</div><div class="line">             int64_t time_when_posted_us,</div><div class="line">             bool log_stats)</div><div class="line">      : frame_(frame),</div><div class="line">        vie_encoder_(vie_encoder),</div><div class="line">        time_when_posted_us_(time_when_posted_us),</div><div class="line">        log_stats_(log_stats) &#123;</div><div class="line">    ++vie_encoder_-&gt;posted_frames_waiting_for_encode_;</div><div class="line">  &#125;</div><div class="line"></div><div class="line"> private:</div><div class="line">  bool Run() override &#123;</div><div class="line">    RTC_DCHECK_RUN_ON(&amp;vie_encoder_-&gt;encoder_queue_);</div><div class="line">    RTC_DCHECK_GT(vie_encoder_-&gt;posted_frames_waiting_for_encode_.Value(), 0);</div><div class="line">    vie_encoder_-&gt;stats_proxy_-&gt;OnIncomingFrame(frame_.width(),</div><div class="line">                                                frame_.height());</div><div class="line">    ++vie_encoder_-&gt;captured_frame_count_;</div><div class="line">    if (--vie_encoder_-&gt;posted_frames_waiting_for_encode_ == 0) &#123;</div><div class="line">      vie_encoder_-&gt;EncodeVideoFrame(frame_, time_when_posted_us_);</div><div class="line">    &#125; else &#123;</div><div class="line">      // There is a newer frame in flight. Do not encode this frame.</div><div class="line">      LOG(LS_VERBOSE)</div><div class="line">          &lt;&lt; &quot;Incoming frame dropped due to that the encoder is blocked.&quot;;</div><div class="line">      ++vie_encoder_-&gt;dropped_frame_count_;</div><div class="line">    &#125;</div><div class="line">    if (log_stats_) &#123;</div><div class="line">      LOG(LS_INFO) &lt;&lt; &quot;Number of frames: captured &quot;</div><div class="line">                   &lt;&lt; vie_encoder_-&gt;captured_frame_count_</div><div class="line">                   &lt;&lt; &quot;, dropped (due to encoder blocked) &quot;</div><div class="line">                   &lt;&lt; vie_encoder_-&gt;dropped_frame_count_ &lt;&lt; &quot;, interval_ms &quot;</div><div class="line">                   &lt;&lt; kFrameLogIntervalMs;</div><div class="line">      vie_encoder_-&gt;captured_frame_count_ = 0;</div><div class="line">      vie_encoder_-&gt;dropped_frame_count_ = 0;</div><div class="line">    &#125;</div><div class="line">    return true;</div><div class="line">  &#125;</div><div class="line">  VideoFrame frame_;</div><div class="line">  ViEEncoder* const vie_encoder_;</div><div class="line">  const int64_t time_when_posted_us_;</div><div class="line">  const bool log_stats_;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>第一段代码生成 <code>EncodeTask</code> 后直接调用 <code>PostTask</code> 方法将其放入队列中，该代码是在采集线程中执行的。在 <code>EncodeTask</code> 的构造方法中会对 <code>posted_frames_waiting_for_encode_</code> 属性执行一次自增操作，用来记录待编码的帧数。</p>
+<p><code>EncodeTask</code>  的 <em><code>Run</code></em> 方法 是在 <code>rtc::TaskQueue</code> 的队列线程中执行的，方法中的条件判断可以理解为，当队列中只有当前一个待编码的帧时，才进行编码，否则丢弃当前帧并记录被丢弃帧的数量。由于是一个队列，采集的帧会被依次存入队列中，如果编码线程处理不过来时，编码线程将队列中的待编码的帧依次丢弃，直到最后一帧，然后调用 <em><code>EncodeVideoFrame</code></em> 方法进入下一步的编码处理。</p>
+<h3 id="编码器码率过高时的丢帧行为"><a href="#编码器码率过高时的丢帧行为" class="headerlink" title="编码器码率过高时的丢帧行为"></a>编码器码率过高时的丢帧行为</h3><p>采集过快时，会在 <code>ViEEncoder</code> 类中处理，而输出码率过高时则是在 <code>VideoSender</code> 类中处理。数据会沿着 <em><code>EncodeVideoFrame</code></em> 方法，数据会经过 <code>VideoSender</code> 类的 <em><code>AddVideoFrame</code></em> 方法，在该方法中存在以下逻辑：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">// Add one raw video frame to the encoder, blocking.</div><div class="line">int32_t VideoSender::AddVideoFrame(const VideoFrame&amp; videoFrame,</div><div class="line">                                   const CodecSpecificInfo* codecSpecificInfo) &#123;</div><div class="line">  ...</div><div class="line">  </div><div class="line">  if (_mediaOpt.DropFrame()) &#123;</div><div class="line">     LOG(LS_VERBOSE) &lt;&lt; &quot;Drop Frame &quot;</div><div class="line">                     &lt;&lt; &quot;target bitrate &quot;</div><div class="line">                     &lt;&lt; encoder_params.target_bitrate.get_sum_bps()</div><div class="line">                     &lt;&lt; &quot; loss rate &quot; &lt;&lt; encoder_params.loss_rate &lt;&lt; &quot; rtt &quot;</div><div class="line">                     &lt;&lt; encoder_params.rtt &lt;&lt; &quot; input frame rate &quot;</div><div class="line">                     &lt;&lt; encoder_params.input_frame_rate;</div><div class="line">     post_encode_callback_-&gt;OnDroppedFrame();</div><div class="line">     return VCM_OK;</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  ...</div><div class="line">  </div><div class="line">  int32_t ret =</div><div class="line">      _encoder-&gt;Encode(converted_frame, codecSpecificInfo, next_frame_types);</div><div class="line">  if (ret &lt; 0) &#123;</div><div class="line">    LOG(LS_ERROR) &lt;&lt; &quot;Failed to encode frame. Error code: &quot; &lt;&lt; ret;</div><div class="line">    return ret;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p><em><code>DropFrame</code></em> 方法是 <code>MediaOptimization</code> 类的一个方法，用来判断是否丢弃当前帧。 <code>MediaOptimization</code> 类实际上并不直接处理该逻辑，而是交给关联的 <code>FrameDropper</code> 类对象进行处理。<code>MediaOptimization</code> 类主要任务是依赖于编码后的数据对象来计算和记录当前输出码率、帧率以及一些其他信息，这里介绍该类其他两个主要方法：</p>
+<p> <em><code>void SetEncodingData(int32_t max_bit_rate, uint32_t bit_rate, uint16_t width, uint16_t height, uint32_t frame_rate, int num_temporal_layers, int32_t mtu)</code></em> </p>
+<p>该方法用来初始一些配置参数，例如最大码率、帧率等，另一个方法就是：</p>
+<p><em><code>int32_t UpdateWithEncodedData(const EncodedImage&amp; encoded_image);</code></em> </p>
+<p>该方法用来接收编码后的 <code>EncodedImage</code> 对象，该对象包含了编码的数据，以及长度时间等信息。至于该方法什么时候会被调用，以及在哪里被调用，这里就不介绍了，因为涉及到编码类的一些结构，比较复杂，有时间单独写一篇专门介绍 WebRTC 的编解码模块的框架结构。</p>
+<p><code>FrameDropper</code> 类的声明如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line">// The Frame Dropper implements a variant of the leaky bucket algorithm</div><div class="line">// for keeping track of when to drop frames to avoid bit rate</div><div class="line">// over use when the encoder can&apos;t keep its bit rate.</div><div class="line">class FrameDropper &#123;</div><div class="line"> public:</div><div class="line">  FrameDropper();</div><div class="line">  explicit FrameDropper(float max_time_drops);</div><div class="line">  virtual ~FrameDropper() &#123;&#125;</div><div class="line"></div><div class="line">  // Resets the FrameDropper to its initial state.</div><div class="line">  // This means that the frameRateWeight is set to its</div><div class="line">  // default value as well.</div><div class="line">  virtual void Reset();</div><div class="line"></div><div class="line">  virtual void Enable(bool enable);</div><div class="line">  // Answers the question if it&apos;s time to drop a frame</div><div class="line">  // if we want to reach a given frame rate. Must be</div><div class="line">  // called for every frame.</div><div class="line">  //</div><div class="line">  // Return value     : True if we should drop the current frame</div><div class="line">  virtual bool DropFrame();</div><div class="line">  // Updates the FrameDropper with the size of the latest encoded</div><div class="line">  // frame. The FrameDropper calculates a new drop ratio (can be</div><div class="line">  // seen as the probability to drop a frame) and updates its</div><div class="line">  // internal statistics.</div><div class="line">  //</div><div class="line">  // Input:</div><div class="line">  //          - frameSizeBytes    : The size of the latest frame</div><div class="line">  //                                returned from the encoder.</div><div class="line">  //          - deltaFrame        : True if the encoder returned</div><div class="line">  //                                a key frame.</div><div class="line">  virtual void Fill(size_t frameSizeBytes, bool deltaFrame);</div><div class="line"></div><div class="line">  virtual void Leak(uint32_t inputFrameRate);</div><div class="line"></div><div class="line">  // Sets the target bit rate and the frame rate produced by</div><div class="line">  // the camera.</div><div class="line">  //</div><div class="line">  // Input:</div><div class="line">  //          - bitRate       : The target bit rate</div><div class="line">  virtual void SetRates(float bitRate, float incoming_frame_rate);</div><div class="line">  </div><div class="line">  ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以了解到  <code>FrameDropper</code> 类是一个漏斗算法的一种变体实现，当编码器无法保证比特率时， 用来跟踪何时应该丢弃帧。具体的算法实现代码我没有细看，有兴趣的同学可以看看，从方法的输入参数可以推测，计算模型跟时间、帧率、数据量以及是否为关键帧几个参数相关。可以理解为通过计算之前编码后的实际码率，来判断当前是否丢弃帧的。</p>
+<p>从上面的分析可以了解到在 <em><code>VideoSender::AddVideoFrame</code></em> 方法中，间接的依赖了 <code>FrameDropper</code> 类的漏斗算法模型，来处理是否丢弃当前帧。从而确保输出码率不大于设定的值。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>当采集过快或者编码过慢都可能导致编码队列中存在很多待处理的帧，从而导致码率过高或者画面延时很大（可能还取决于编码器）。主动丢弃一些帧行，可以有效的控制码率和画面延时，代价就是损失帧率。在一些情况下编码器的输出码率并不能达到预先设定的值，从而导致码率过高增加了网络负担，第二种丢帧行为可以根据实际的码率来控制最终的码率，而非通过参数来调整。</p>
+<p>可能有些人会有疑问，为什么采集就会过快呢？编码器可以通过参数设定码率，为何又不能按要求输的给定的码率呢？这里从两方面来表达我个人的看法。第一个问题可以从软件设计原则角度来解析，采集模块与编码模块可以说是两个相对独立的模块，两个模块分别独立工作，各自都不需要依赖对方的具体实现，知道的细节越少越好。简单的说就是依赖接口编程，而非具体实现。第二个问题也比较好解析，H264 的编码参数有很多例如帧率、码率、Qp、Profiles 级别等一些参数，并且一些参数之间相互影响，一些特定的编码器可能还存在一些特定的编码参数。在配置参数时可能存在一些不合理的情况。编解码器（暂且为H264）可以有两种实现方式，一种是硬编码，依赖于一些特点硬件设备；另一种是纯软件算法实现；软编码相对来说稳定，硬编解码在不同平台下存在差异，尤其是 Android 设备下，差异更大。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <ul class="post-copyright">
+    <li class="post-copyright-author">
+      <strong>本文作者：</strong>
+      Enki
+    </li>
+    <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="http://enkichen.com/2017/07/29/webrtc-drop-frame/" title="WebRTC 的主动丢帧行为">http://enkichen.com/2017/07/29/webrtc-drop-frame/</a>
+    </li>
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong>
+      本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/WebRTC/" rel="tag"># WebRTC</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/06/06/iperf-introduce/" rel="prev" title="iperf 的介绍和使用">
+                iperf 的介绍和使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.jpg"
+               alt="Enki" />
+          <p class="site-author-name" itemprop="name">Enki</p>
+           
+              <p class="site-description motion-element" itemprop="description">说过很多潇洒的话，做过很多打脸的事</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">28</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/enkichen" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#采集过快时的丢帧行为"><span class="nav-number">1.</span> <span class="nav-text">采集过快时的丢帧行为</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编码器码率过高时的丢帧行为"><span class="nav-number">2.</span> <span class="nav-text">编码器码率过高时的丢帧行为</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Enki</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="powered-by">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span id="busuanzi_container_site_pv">
+    本站总访问量 <span id="busuanzi_value_site_pv"></span> 次
+    </span>
+
+    <span id="busuanzi_container_site_uv">
+    本站访客数 <span id="busuanzi_value_site_uv"></span> 人次
+    </span>
+
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+    <script>
+      var cloudTieConfig = {
+        url: document.location.href, 
+        sourceId: "",
+        productKey: "b019fe5dd8d744e39fa73d41b1318114",
+        target: "cloud-tie-wrapper"
+      };
+    </script>
+    <script src="https://img1.ws.126.net/f2e/tie/yun/sdk/loader.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("s2KBBM4Ds9T9xph1tVqryHGs-gzGzoHsz", "oeHNenyWj0gdT83ostg2P4LL");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
