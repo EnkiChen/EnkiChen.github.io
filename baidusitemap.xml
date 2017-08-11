@@ -5,10 +5,10 @@
     
   <url>
     <loc>http://enkichen.com/2017/07/29/webrtc-drop-frame/</loc>
-    <lastmod>2017-07-29T09:40:16.000Z</lastmod>
+    <lastmod>2017-08-11T00:57:21.000Z</lastmod>
     <data>
         <display>
-        <title>WebRTC 的主动丢帧行为</title>
+        <title>WebRTC 的丢帧策略</title>
         <pubTime>2017-07-29T09:35:15.000Z</pubTime>
         
         <tag>WebRTC</tag>

@@ -92,14 +92,14 @@
 <meta name="description" content="最近在弄一个 Android 平台下远程桌面项目，是基于 WebRTC 框架实现的，由于平台限制，芯片是用的特定厂商的芯片，桌面采集以及 H264 硬编码都是芯片厂商提供方案，能够有很好性能表现。在将桌面的采集以及 H264 的编码库整合到 WebRTC 框架中时，发现的存在画面延时的问题，于是对 WebRTC 的编解码框架的源码进行了分析，了解到 WebRTC 的两个特性。  在 WebRTC">
 <meta name="keywords" content="WebRTC">
 <meta property="og:type" content="article">
-<meta property="og:title" content="WebRTC 的主动丢帧行为">
+<meta property="og:title" content="WebRTC 的丢帧策略">
 <meta property="og:url" content="http://enkichen.com/2017/07/29/webrtc-drop-frame/index.html">
 <meta property="og:site_name" content="Enki's Notes">
 <meta property="og:description" content="最近在弄一个 Android 平台下远程桌面项目，是基于 WebRTC 框架实现的，由于平台限制，芯片是用的特定厂商的芯片，桌面采集以及 H264 硬编码都是芯片厂商提供方案，能够有很好性能表现。在将桌面的采集以及 H264 的编码库整合到 WebRTC 框架中时，发现的存在画面延时的问题，于是对 WebRTC 的编解码框架的源码进行了分析，了解到 WebRTC 的两个特性。  在 WebRTC">
 <meta property="og:image" content="http://enkichen.com/uploads/webrtc_class_drop.png">
-<meta property="og:updated_time" content="2017-07-29T09:40:16.000Z">
+<meta property="og:updated_time" content="2017-08-11T00:57:21.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="WebRTC 的主动丢帧行为">
+<meta name="twitter:title" content="WebRTC 的丢帧策略">
 <meta name="twitter:description" content="最近在弄一个 Android 平台下远程桌面项目，是基于 WebRTC 框架实现的，由于平台限制，芯片是用的特定厂商的芯片，桌面采集以及 H264 硬编码都是芯片厂商提供方案，能够有很好性能表现。在将桌面的采集以及 H264 的编码库整合到 WebRTC 框架中时，发现的存在画面延时的问题，于是对 WebRTC 的编解码框架的源码进行了分析，了解到 WebRTC 的两个特性。  在 WebRTC">
 <meta name="twitter:image" content="http://enkichen.com/uploads/webrtc_class_drop.png">
 
@@ -135,7 +135,7 @@
 
 
 
-  <title> WebRTC 的主动丢帧行为 | Enki's Notes </title>
+  <title> WebRTC 的丢帧策略 | Enki's Notes </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -301,7 +301,7 @@
             
             
               
-                WebRTC 的主动丢帧行为
+                WebRTC 的丢帧策略
               
             
           </h1>
@@ -366,7 +366,7 @@
 
           
           
-             <span id="/2017/07/29/webrtc-drop-frame/" class="leancloud_visitors" data-flag-title="WebRTC 的主动丢帧行为">
+             <span id="/2017/07/29/webrtc-drop-frame/" class="leancloud_visitors" data-flag-title="WebRTC 的丢帧策略">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -398,17 +398,17 @@
         <blockquote>
 <p>最近在弄一个 Android 平台下远程桌面项目，是基于 WebRTC 框架实现的，由于平台限制，芯片是用的特定厂商的芯片，桌面采集以及 H264 硬编码都是芯片厂商提供方案，能够有很好性能表现。在将桌面的采集以及 H264 的编码库整合到 WebRTC 框架中时，发现的存在画面延时的问题，于是对 WebRTC 的编解码框架的源码进行了分析，了解到 WebRTC 的两个特性。</p>
 </blockquote>
-<p>在 WebRTC 中有很多可以控制视频帧率和码率的行为，这里介绍一下当视频采集过快以及编码器输出码率过高时，WebRTC 主动丢帧的行为。这里采集过快是指视频采集的速度大于编码器处理的速度。例如视频采集线程每秒采集 30 帧，而编码线程每秒只能处理 15 帧，这时候就出现了采集过快或者说是编码器太慢。编码器输出码率过高，是指编码器的输出码率大于设定的最高输出码率值，例如设置编码器码率为 1024kbps，而实际产生的码率是 1500kbps 这时候就出现了输出码率过高的情况。本文主要介绍上述两种情况下 WebRTC 是如何实现丢帧行为的。</p>
+<p>在 WebRTC 中有很多可以控制视频帧率和码率的行为，这里介绍一下当视频采集过快以及编码器输出码率过高时，WebRTC 主动丢帧的策略。这里采集过快是指视频采集的速度大于编码器处理的速度。例如视频采集线程每秒采集 30 帧，而编码线程每秒只能处理 15 帧，这时候就出现了采集过快或者说是编码器太慢。编码器输出码率过高，是指编码器的输出码率大于设定的最高输出码率值，例如设置编码器码率为 1024kbps，而实际产生的码率是 1500kbps 这时候就出现了输出码率过高的情况。本文主要介绍上述两种情况下 WebRTC 是如何实现丢帧行为的。</p>
 <p>下图是这次涉及到一些类的结构图，如果要在 WebRTC 源码中找对对应的文件，直接搜索类名称即可。WebRTC 的源码由于在墙外，我这里为了后续方便拷贝了一份到我的 GitHub 空间中，<a href="https://github.com/EnkiChen/webrtc" target="_blank" rel="external">点击这里</a> 可以找到源码。</p>
 <p><img src="/uploads/webrtc_class_drop.png" alt="Example"><br><a id="more"></a></p>
-<h3 id="采集过快时的丢帧行为"><a href="#采集过快时的丢帧行为" class="headerlink" title="采集过快时的丢帧行为"></a>采集过快时的丢帧行为</h3><p>在 WebRTC 中视频或者桌面图像的采集和图像的编码线程各自是独立线程进行工作的，采集线程会将采集好的图像打包成 <code>VideoFrame</code> 对象，这里的 <code>VideoFrame</code> 封装了经过转换的 <code>YUV</code> 数据而非 <code>RGB</code> 数据， <code>VideoFrame</code> 在经过一系列的周转后，最终会在 <em><code>ViEEncoder</code></em> 类中得到处理，在 <em><code>ViEEncoder</code></em> 类一部分工作是将数据从采集线程 <code>post</code> 到编码线程中，这里就会涉及到多线程间协作的问题。</p>
+<h3 id="采集过快时的丢帧策略"><a href="#采集过快时的丢帧策略" class="headerlink" title="采集过快时的丢帧策略"></a>采集过快时的丢帧策略</h3><p>在 WebRTC 中视频或者桌面图像的采集和图像的编码线程各自是独立线程进行工作的，采集线程会将采集好的图像打包成 <code>VideoFrame</code> 对象，这里的 <code>VideoFrame</code> 封装了经过转换的 <code>YUV</code> 数据而非 <code>RGB</code> 数据， <code>VideoFrame</code> 在经过一系列的周转后，最终会在 <em><code>ViEEncoder</code></em> 类中得到处理，在 <em><code>ViEEncoder</code></em> 类一部分工作是将数据从采集线程 <code>post</code> 到编码线程中，这里就会涉及到多线程间协作的问题。</p>
 <p>这里用的是 <code>rtc::TaskQueue</code> 队列类，在 <em><code>ViEEncoder</code></em> 类内部，会将所有跟编码器相关的操作都将打包成一个 <code>Task</code> 扔到队列中，确保所有的操作都是顺序执行的。在 <em><code>onFrame()</code></em> 方法中接收到采集线程传进来的 <code>VideoFrame</code> 对象，并将其打包成一个 <code>EncodeTask</code> 对象放入队列中。代码片段如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">void ViEEncoder::OnFrame(const VideoFrame&amp; video_frame) &#123;</div><div class="line"></div><div class="line">    ...</div><div class="line"></div><div class="line">    last_captured_timestamp_ = incoming_frame.ntp_time_ms();</div><div class="line">    encoder_queue_.PostTask(std::unique_ptr&lt;rtc::QueuedTask&gt;(new EncodeTask(</div><div class="line">      incoming_frame, this, rtc::TimeMicros(), log_stats)));</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p><code>EncodeTask</code> 是一个内部类，代码非常少，这里就直接贴上来了：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line">class ViEEncoder::EncodeTask : public rtc::QueuedTask &#123;</div><div class="line"> public:</div><div class="line">  EncodeTask(const VideoFrame&amp; frame,</div><div class="line">             ViEEncoder* vie_encoder,</div><div class="line">             int64_t time_when_posted_us,</div><div class="line">             bool log_stats)</div><div class="line">      : frame_(frame),</div><div class="line">        vie_encoder_(vie_encoder),</div><div class="line">        time_when_posted_us_(time_when_posted_us),</div><div class="line">        log_stats_(log_stats) &#123;</div><div class="line">    ++vie_encoder_-&gt;posted_frames_waiting_for_encode_;</div><div class="line">  &#125;</div><div class="line"></div><div class="line"> private:</div><div class="line">  bool Run() override &#123;</div><div class="line">    RTC_DCHECK_RUN_ON(&amp;vie_encoder_-&gt;encoder_queue_);</div><div class="line">    RTC_DCHECK_GT(vie_encoder_-&gt;posted_frames_waiting_for_encode_.Value(), 0);</div><div class="line">    vie_encoder_-&gt;stats_proxy_-&gt;OnIncomingFrame(frame_.width(),</div><div class="line">                                                frame_.height());</div><div class="line">    ++vie_encoder_-&gt;captured_frame_count_;</div><div class="line">    if (--vie_encoder_-&gt;posted_frames_waiting_for_encode_ == 0) &#123;</div><div class="line">      vie_encoder_-&gt;EncodeVideoFrame(frame_, time_when_posted_us_);</div><div class="line">    &#125; else &#123;</div><div class="line">      // There is a newer frame in flight. Do not encode this frame.</div><div class="line">      LOG(LS_VERBOSE)</div><div class="line">          &lt;&lt; &quot;Incoming frame dropped due to that the encoder is blocked.&quot;;</div><div class="line">      ++vie_encoder_-&gt;dropped_frame_count_;</div><div class="line">    &#125;</div><div class="line">    if (log_stats_) &#123;</div><div class="line">      LOG(LS_INFO) &lt;&lt; &quot;Number of frames: captured &quot;</div><div class="line">                   &lt;&lt; vie_encoder_-&gt;captured_frame_count_</div><div class="line">                   &lt;&lt; &quot;, dropped (due to encoder blocked) &quot;</div><div class="line">                   &lt;&lt; vie_encoder_-&gt;dropped_frame_count_ &lt;&lt; &quot;, interval_ms &quot;</div><div class="line">                   &lt;&lt; kFrameLogIntervalMs;</div><div class="line">      vie_encoder_-&gt;captured_frame_count_ = 0;</div><div class="line">      vie_encoder_-&gt;dropped_frame_count_ = 0;</div><div class="line">    &#125;</div><div class="line">    return true;</div><div class="line">  &#125;</div><div class="line">  VideoFrame frame_;</div><div class="line">  ViEEncoder* const vie_encoder_;</div><div class="line">  const int64_t time_when_posted_us_;</div><div class="line">  const bool log_stats_;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
 <p>第一段代码生成 <code>EncodeTask</code> 后直接调用 <code>PostTask</code> 方法将其放入队列中，该代码是在采集线程中执行的。在 <code>EncodeTask</code> 的构造方法中会对 <code>posted_frames_waiting_for_encode_</code> 属性执行一次自增操作，用来记录待编码的帧数。</p>
 <p><code>EncodeTask</code>  的 <em><code>Run</code></em> 方法 是在 <code>rtc::TaskQueue</code> 的队列线程中执行的，方法中的条件判断可以理解为，当队列中只有当前一个待编码的帧时，才进行编码，否则丢弃当前帧并记录被丢弃帧的数量。由于是一个队列，采集的帧会被依次存入队列中，如果编码线程处理不过来时，编码线程将队列中的待编码的帧依次丢弃，直到最后一帧，然后调用 <em><code>EncodeVideoFrame</code></em> 方法进入下一步的编码处理。</p>
-<h3 id="编码器码率过高时的丢帧行为"><a href="#编码器码率过高时的丢帧行为" class="headerlink" title="编码器码率过高时的丢帧行为"></a>编码器码率过高时的丢帧行为</h3><p>采集过快时，会在 <code>ViEEncoder</code> 类中处理，而输出码率过高时则是在 <code>VideoSender</code> 类中处理。数据会沿着 <em><code>EncodeVideoFrame</code></em> 方法，数据会经过 <code>VideoSender</code> 类的 <em><code>AddVideoFrame</code></em> 方法，在该方法中存在以下逻辑：</p>
+<h3 id="编码器码率过高时的丢帧策略"><a href="#编码器码率过高时的丢帧策略" class="headerlink" title="编码器码率过高时的丢帧策略"></a>编码器码率过高时的丢帧策略</h3><p>采集过快时，会在 <code>ViEEncoder</code> 类中处理，而输出码率过高时则是在 <code>VideoSender</code> 类中处理。数据会沿着 <em><code>EncodeVideoFrame</code></em> 方法，数据会经过 <code>VideoSender</code> 类的 <em><code>AddVideoFrame</code></em> 方法，在该方法中存在以下逻辑：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">// Add one raw video frame to the encoder, blocking.</div><div class="line">int32_t VideoSender::AddVideoFrame(const VideoFrame&amp; videoFrame,</div><div class="line">                                   const CodecSpecificInfo* codecSpecificInfo) &#123;</div><div class="line">  ...</div><div class="line">  </div><div class="line">  if (_mediaOpt.DropFrame()) &#123;</div><div class="line">     LOG(LS_VERBOSE) &lt;&lt; &quot;Drop Frame &quot;</div><div class="line">                     &lt;&lt; &quot;target bitrate &quot;</div><div class="line">                     &lt;&lt; encoder_params.target_bitrate.get_sum_bps()</div><div class="line">                     &lt;&lt; &quot; loss rate &quot; &lt;&lt; encoder_params.loss_rate &lt;&lt; &quot; rtt &quot;</div><div class="line">                     &lt;&lt; encoder_params.rtt &lt;&lt; &quot; input frame rate &quot;</div><div class="line">                     &lt;&lt; encoder_params.input_frame_rate;</div><div class="line">     post_encode_callback_-&gt;OnDroppedFrame();</div><div class="line">     return VCM_OK;</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  ...</div><div class="line">  </div><div class="line">  int32_t ret =</div><div class="line">      _encoder-&gt;Encode(converted_frame, codecSpecificInfo, next_frame_types);</div><div class="line">  if (ret &lt; 0) &#123;</div><div class="line">    LOG(LS_ERROR) &lt;&lt; &quot;Failed to encode frame. Error code: &quot; &lt;&lt; ret;</div><div class="line">    return ret;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
 <p><em><code>DropFrame</code></em> 方法是 <code>MediaOptimization</code> 类的一个方法，用来判断是否丢弃当前帧。 <code>MediaOptimization</code> 类实际上并不直接处理该逻辑，而是交给关联的 <code>FrameDropper</code> 类对象进行处理。<code>MediaOptimization</code> 类主要任务是依赖于编码后的数据对象来计算和记录当前输出码率、帧率以及一些其他信息，这里介绍该类其他两个主要方法：</p>
 <p> <em><code>void SetEncodingData(int32_t max_bit_rate, uint32_t bit_rate, uint16_t width, uint16_t height, uint32_t frame_rate, int num_temporal_layers, int32_t mtu)</code></em> </p>
@@ -449,7 +449,7 @@
     </li>
     <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="http://enkichen.com/2017/07/29/webrtc-drop-frame/" title="WebRTC 的主动丢帧行为">http://enkichen.com/2017/07/29/webrtc-drop-frame/</a>
+      <a href="http://enkichen.com/2017/07/29/webrtc-drop-frame/" title="WebRTC 的丢帧策略">http://enkichen.com/2017/07/29/webrtc-drop-frame/</a>
     </li>
     <li class="post-copyright-license">
       <strong>版权声明： </strong>
@@ -658,7 +658,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#采集过快时的丢帧行为"><span class="nav-number">1.</span> <span class="nav-text">采集过快时的丢帧行为</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编码器码率过高时的丢帧行为"><span class="nav-number">2.</span> <span class="nav-text">编码器码率过高时的丢帧行为</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#采集过快时的丢帧策略"><span class="nav-number">1.</span> <span class="nav-text">采集过快时的丢帧策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编码器码率过高时的丢帧策略"><span class="nav-number">2.</span> <span class="nav-text">编码器码率过高时的丢帧策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
             
 
           </div>
