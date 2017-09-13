@@ -4,6 +4,26 @@
 
     
   <url>
+    <loc>http://enkichen.com/2017/09/13/ios-static-library-categories/</loc>
+    <lastmod>2017-09-13T03:52:05.000Z</lastmod>
+    <data>
+        <display>
+        <title>iOS 静态库中的 Category 运行时错误</title>
+        <pubTime>2017-09-13T03:49:24.000Z</pubTime>
+        
+        <tag>Category</tag>
+         
+         
+           
+             
+              <breadCrumb title="开发笔记" url="http://enkichen.com/categories/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://enkichen.com/2017/07/29/webrtc-drop-frame/</loc>
     <lastmod>2017-08-11T00:57:21.000Z</lastmod>
     <data>

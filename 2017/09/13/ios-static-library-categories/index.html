@@ -71,7 +71,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="WebRTC," />
+  <meta name="keywords" content="Category," />
 
 
 
@@ -89,19 +89,17 @@
 
 
 
-<meta name="description" content="安装 Depot_tools git 命令获取 depot_tools：  1$ git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git  配置坏境变量  12$ echo &amp;quot;export PATH=$PWD/depot_tools:$PATH&amp;quot; &amp;gt; $HOME/.bash_pr">
-<meta name="keywords" content="WebRTC">
+<meta name="description" content="最近在弄 iOS 下的音视频 SDK 的移植和适配，该 SDK 是基于 WebRTC 项目但并未使用官方的 ninja 编译脚本，而是使用的 cmake 作为编译工具。在 WebRTC 的音频模块中引用了一个 UIDevice 的 Category 来做设备类型的判断，编译和链接都没有出现问题，但在运行时出现了 selector not recognized 的异常。该异常可以从我之前的  《iO">
+<meta name="keywords" content="Category">
 <meta property="og:type" content="article">
-<meta property="og:title" content="WebRTC iOS&OSX 库的编译">
-<meta property="og:url" content="http://enkichen.com/2017/05/12/webrtc-ios-build/index.html">
+<meta property="og:title" content="iOS 静态库中的 Category 运行时错误">
+<meta property="og:url" content="http://enkichen.com/2017/09/13/ios-static-library-categories/index.html">
 <meta property="og:site_name" content="Enki's Notes">
-<meta property="og:description" content="安装 Depot_tools git 命令获取 depot_tools：  1$ git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git  配置坏境变量  12$ echo &amp;quot;export PATH=$PWD/depot_tools:$PATH&amp;quot; &amp;gt; $HOME/.bash_pr">
-<meta property="og:image" content="http://enkichen.com/uploads/AppRTCMobile.png">
-<meta property="og:updated_time" content="2017-05-12T05:16:39.000Z">
+<meta property="og:description" content="最近在弄 iOS 下的音视频 SDK 的移植和适配，该 SDK 是基于 WebRTC 项目但并未使用官方的 ninja 编译脚本，而是使用的 cmake 作为编译工具。在 WebRTC 的音频模块中引用了一个 UIDevice 的 Category 来做设备类型的判断，编译和链接都没有出现问题，但在运行时出现了 selector not recognized 的异常。该异常可以从我之前的  《iO">
+<meta property="og:updated_time" content="2017-09-13T03:52:05.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="WebRTC iOS&OSX 库的编译">
-<meta name="twitter:description" content="安装 Depot_tools git 命令获取 depot_tools：  1$ git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git  配置坏境变量  12$ echo &amp;quot;export PATH=$PWD/depot_tools:$PATH&amp;quot; &amp;gt; $HOME/.bash_pr">
-<meta name="twitter:image" content="http://enkichen.com/uploads/AppRTCMobile.png">
+<meta name="twitter:title" content="iOS 静态库中的 Category 运行时错误">
+<meta name="twitter:description" content="最近在弄 iOS 下的音视频 SDK 的移植和适配，该 SDK 是基于 WebRTC 项目但并未使用官方的 ninja 编译脚本，而是使用的 cmake 作为编译工具。在 WebRTC 的音频模块中引用了一个 UIDevice 的 Category 来做设备类型的判断，编译和链接都没有出现问题，但在运行时出现了 selector not recognized 的异常。该异常可以从我之前的  《iO">
 
 
 
@@ -129,13 +127,13 @@
 
 
 
-  <link rel="canonical" href="http://enkichen.com/2017/05/12/webrtc-ios-build/"/>
+  <link rel="canonical" href="http://enkichen.com/2017/09/13/ios-static-library-categories/"/>
 
 
 
 
 
-  <title> WebRTC iOS&OSX 库的编译 | Enki's Notes </title>
+  <title> iOS 静态库中的 Category 运行时错误 | Enki's Notes </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -280,7 +278,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2017/05/12/webrtc-ios-build/">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2017/09/13/ios-static-library-categories/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Enki">
@@ -301,7 +299,7 @@
             
             
               
-                WebRTC iOS&OSX 库的编译
+                iOS 静态库中的 Category 运行时错误
               
             
           </h1>
@@ -316,8 +314,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-12T13:04:36+08:00">
-                2017-05-12
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-13T11:49:24+08:00">
+                2017-09-13
               </time>
             
 
@@ -339,8 +337,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/知识整理-总结/" itemprop="url" rel="index">
-                    <span itemprop="name">知识整理/总结</span>
+                  <a href="/categories/开发笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">开发笔记</span>
                   </a>
                 </span>
 
@@ -357,7 +355,7 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a class="cloud-tie-join-count" href="/2017/05/12/webrtc-ios-build/#comments" itemprop="discussionUrl">
+                <a class="cloud-tie-join-count" href="/2017/09/13/ios-static-library-categories/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count join-count" itemprop="commentCount"></span>
                 </a>
               </span>
@@ -366,7 +364,7 @@
 
           
           
-             <span id="/2017/05/12/webrtc-ios-build/" class="leancloud_visitors" data-flag-title="WebRTC iOS&OSX 库的编译">
+             <span id="/2017/09/13/ios-static-library-categories/" class="leancloud_visitors" data-flag-title="iOS 静态库中的 Category 运行时错误">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -395,71 +393,29 @@
       
 
       
-        <h3 id="安装-Depot-tools"><a href="#安装-Depot-tools" class="headerlink" title="安装 Depot_tools"></a>安装 Depot_tools</h3><ul>
-<li>git 命令获取 depot_tools：</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git</div></pre></td></tr></table></figure>
-<ul>
-<li>配置坏境变量</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ echo &quot;export PATH=$PWD/depot_tools:$PATH&quot; &gt; $HOME/.bash_profile</div><div class="line">$ source $HOME/.bash_profile</div></pre></td></tr></table></figure>
-<ul>
-<li>检测配置是否成功</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ echo $PATH</div></pre></td></tr></table></figure>
-<h3 id="安装-ninja"><a href="#安装-ninja" class="headerlink" title="安装 ninja"></a>安装 ninja</h3><a id="more"></a>
-<p><strong>ninja</strong> 是 <strong>WebRTC</strong> 的编译工具，我们需要对其进行编译，步骤如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ git clone git://github.com/martine/ninja.git</div><div class="line">$ cd ninja/</div><div class="line">$ ./bootstrap.py</div></pre></td></tr></table></figure>
-<p>复制到系统目录（也可配置坏境变量）</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ sudo cp ninja /usr/local/bin/</div><div class="line">$ sudo chmod a+rx /usr/local/bin/ninja</div></pre></td></tr></table></figure>
-<h3 id="下载源代码"><a href="#下载源代码" class="headerlink" title="下载源代码"></a>下载源代码</h3><p><strong>WebRTC</strong> 源码托管在 <a href="https://chromium.googlesource.com/external/webrtc" target="_blank" rel="external"><strong>Google Source</strong></a> ，在 <a href="https://webrtc.org/release-notes/" target="_blank" rel="external"><strong>Release Notes</strong></a> 中选择需要的版本，这里选择最新的 <strong>M57</strong> 版本</p>
-<ul>
-<li>设置要编译的平台到环境变量中：</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ export GYP_DEFINES=&quot;OS=ios&quot;</div></pre></td></tr></table></figure>
-<p>不同机型的编译参数：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"># 32位真机</div><div class="line">$ export GYP_DEFINES=&quot;OS=ios target_arch=arm&quot;</div><div class="line"># 64位真机</div><div class="line">$ export GYP_DEFINES=&quot;OS=ios target_arch=arm64&quot;</div><div class="line"># 32位模拟器</div><div class="line">$ export GYP_DEFINES=&quot;OS=ios target_arch=ia32&quot;</div><div class="line"># 64位模拟器</div><div class="line">$ export GYP_DEFINES=&quot;OS=ios target_arch=x64&quot;</div><div class="line"># OSX</div><div class="line">$ export GYP_DEFINES=&quot;OS=mac target_arch=x64&quot;</div><div class="line"></div><div class="line"># 配置输出路径</div><div class="line">$ export GYP_GENERATOR_FLAGS=&quot;output_dir=out_xxx&quot;</div></pre></td></tr></table></figure>
-<ul>
-<li>创建工作路径并执行下面的语句： </li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ fetch --nohooks webrtc_ios</div><div class="line">$ gclient sync -r 52b6562a10b495cf771d8388ee51990d56074059 --force</div></pre></td></tr></table></figure>
+        <p>最近在弄 iOS 下的音视频 SDK 的移植和适配，该 SDK 是基于 WebRTC 项目但并未使用官方的 <code>ninja</code> 编译脚本，而是使用的 <code>cmake</code> 作为编译工具。在 WebRTC 的音频模块中引用了一个 <code>UIDevice</code> 的 <code>Category</code> 来做设备类型的判断，编译和链接都没有出现问题，但在运行时出现了 <code>selector not recognized</code> 的异常。该异常可以从我之前的  <a href="http://www.enkichen.com/2017/04/21/ios-message-forwarding/" target="_blank" rel="external">《iOS 运行时之消息转发机制》</a> 文章中了解到，由于对象接收到了一个无法处理该 <code>selector</code> ，经过消息转发后还未得到处理，会在 <code>doesNotRecognizeSelector</code> 方法中抛出的异常。</p>
+<p><code>Category</code> 以及一些其他的工具类被编译在一个基础的静态库中，在音频模块中引用该静态库，除了 <code>Category</code> 代码其他所有的代码都能正常编译、链接以及运行，但唯独 <code>Category</code> 在运行时出现了错误，由于 <code>Category</code> 的 Objective-C 语言的特性，最开始我以为需要为编译器添加针对 <code>Category</code> 的参数，找了很久也没找到针对 <code>Category</code> 特性的编译参数，无奈之下只好求助 <code>stackoverflow</code> ，最终找到了根本原因和解决方法。<br><a id="more"></a> </p>
+<h3 id="编译-链接过程"><a href="#编译-链接过程" class="headerlink" title="编译/链接过程"></a>编译/链接过程</h3><p>编译器在编译的过程中首先会将 <code>.c/.cc/.cpp/.m/.mm</code> 的源文件编译成后缀为 <code>.o</code> 的对象文件 ，源文件与对象文件是一一对应的，对象文件中包含了符号、代码以及数据，对象文件是不能被系统加载并使用的。当在编译生成静态库时，这些所有的对象文件，都会被封装到 <code>.a(archive)</code> 文件，可以理解为一个归档文件，也就是我们平常使用的静态库。</p>
+<p>当需要生产二进制文件或是动态库时，编译器会对静态库 <code>.a(archive)</code> 文件进行处理；编译器将获取静态库中所以的符号表，并检查哪些符号被引用，只有被引用的对象文件才会被链接器真正的加载并处理。例如在静态库中有 10 个对象文件，但被引用到只有 2 个，则链接器只加载被引用的 2 个对象文件，未被使用到的 8 个对象文件则会被忽略。</p>
+<p>在 C/C++ 语言中，这种机制可以很好的工作，因为 C/C++ 语言会尽可能的在编译期去做这些事。在 Objective-C 语言中非常依赖运行时特性，<code>Category</code> 就是基于运行时实现，但它并不会像类或者函数一样被创建链接符号，编译器在检查符号表时便不能检查到 <code>Category</code> 对应的符号表，从而 <code>Category</code> 的对象文件就不能被正常的加载，在运行时便无法找到对应的 <code>selector</code> 。</p>
+<h3 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h3><p>基于上述的原因，网上存在 5 种解决方法：</p>
+<ol>
+<li>在编译选项 <code>Other Linker Flags</code> 中添加 <code>-all_load</code>，用于会告诉编译器 <strong>对于所有静态库中的所有对象文件，不管里面的符号有没有被用到，全部都载入</strong>，这种方法可以解决问题，但是会产生比较大的二进制文件。</li>
+<li>添加编译选项 <code>-force_load</code> 并指定路径，<code>-force_load $(BUILT_PRODUCTS_DIR)/&lt;library_name.a&gt;</code> 这种方法和 <code>-all_load</code> 类似，不同的是它只载入指定的静态库。</li>
+<li>在编译选项 <code>Other Linker Flags</code> 中添加 <code>-ObjC</code>，这个标识告诉编译器 <strong>如果在静态库的对象文件中发现了 Objective-C 代码，就把它载入</strong>，<code>Category</code>  中肯定会存在 Objective-C 代码。该方法与前两张类似，只是将加载的范围减少了。</li>
+<li>另一种解决方法是新版本 Xcode 里 <code>build setting</code> 中的 <code>Perform Single-Object PreLink</code>，如果启用这个选项，所有的对象文件都会被合并成一个单文件（这不是真正的链接，所以叫做预链接），这个对象文件（有时被称做主对象文件 <code>master object file</code>）被添加到静态库中。现在如果主对象文件中的任何符号被认为是在使用，整个主对象文件都会被认为在使用，这样它里面的 Objective-C  部分就会被载入了，当然也包括 <code>Category</code> 对应的对象文件。</li>
+<li>最后一种解决方法是在 <code>Category</code> 的源文件里添加 <code>Fake symbol</code>，并确保以某种方法在编译时引用了该 <code>Fake symbol</code>，这会使得 <code>Fake symbol</code> 对象文件被加载时它里面 <code>Category</code>  代码也会被载入。该方法可以控制哪些 <code>Category</code> 可以被正常加载，同时也不需要添加编译参数做特殊处理。</li>
+</ol>
 <blockquote>
-<p>上面的 commit id 是 <strong>M57</strong> 版本最后一次 commit id，可以从 <a href="https://webrtc.org/release-notes/" target="_blank" rel="external"><strong>Release Notes</strong></a> 中找到，可替换成自己所需的版本的 commit id 或者直接使用最新的 commit id</p>
+<p>在 64 位的 Mac 系统或者 iOS 系统下，链接器有一个 bug，会导致只包含有 Category 的静态库无法使用 -ObjC 标志来加载  Objective-C 对象文件。</p>
 </blockquote>
-<p>执行上述命令就会去下载对应的 <strong>WebRTC</strong> 的源码、构建工具链以及依赖的第三方库，由于是国外网站，并且是 <strong>Google</strong>，请自备梯子，我这边翻墙后大概 2 个小时就下完了源码。</p>
-<h3 id="编译库文件"><a href="#编译库文件" class="headerlink" title="编译库文件"></a>编译库文件</h3><h4 id="iOS-版本的编译"><a href="#iOS-版本的编译" class="headerlink" title="iOS 版本的编译"></a>iOS 版本的编译</h4><p><strong>ninja</strong> 是 <strong>WebRTC</strong> 的编译平台，iOS 版本我们可以使用自带的编译脚本，这样就不需要自己编译和安装 <strong>ninja</strong>，默认情况行，脚本会编译 3 个平台机型的库文件，以及一个各个平台的集合库，脚本也可以指定编译成 <code>.a</code> 的库文件或者 <code>.framework</code>，命令如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ cd src/webrtc/build/ios/</div><div class="line">$ ./build_ios_libs.sh</div></pre></td></tr></table></figure>
-<p>不同的版本，编译脚本的路径会有不一样。编译完成后，如果没有指定输出路径，则会在  <em><code>out_ios_libs</code></em> 目录下生成所需要的 <strong>WebRTC.framework</strong>，子目录中会有对应平台单独的 <strong>WebRTC.framework</strong>，根目录下的则支持所有平台，目录结构如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">drwxr-xr-x   3 Enki  staff   102  5  9 16:49 WebRTC.dSYM/		[符号表文件]</div><div class="line">drwxr-xr-x   6 Enki  staff   204  5  9 16:49 WebRTC.framework/	[支持所有平台]</div><div class="line">drwx------  14 Enki  staff   476  5  9 16:39 arm64_libs/		[真机 64 位]</div><div class="line">drwx------  14 Enki  staff   476  5  9 16:30 arm_libs/			[真机 32 位]</div><div class="line">drwx------  14 Enki  staff   476  5  9 16:49 x64_libs/			[模拟器 64 位]</div></pre></td></tr></table></figure>
-<h4 id="Mac-版本的编译"><a href="#Mac-版本的编译" class="headerlink" title="Mac 版本的编译"></a>Mac 版本的编译</h4><p>下载源码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ export GYP_DEFINES=&quot;OS=mac&quot;</div><div class="line">$ fetch --nohooks webrtc_ios</div><div class="line">$ gclient sync -r 52b6562a10b495cf771d8388ee51990d56074059 --force</div></pre></td></tr></table></figure>
-<p>Mac 没有现成的编译脚本，我们只能通过 <code>gn</code> 来生成对应的 ninja 编译脚本，然后通过 ninja 脚本来编译，用如下命令来生成对应的 ninja 项目文件：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ gn gen out/mac_x64 --args=&apos;target_os=&quot;mac&quot; target_cpu=&quot;x64&quot; is_component_build=false&apos;</div></pre></td></tr></table></figure>
-<blockquote>
-<p>可以添加 –ide=xcode 参数来生成 Xcode 的项目文件，使用 Xcode 来进行编译。</p>
-</blockquote>
-<p>编译源码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ ninja -C out/mac_x64 rtc_sdk_objc</div></pre></td></tr></table></figure>
-<p>上述命令 <code>out/mac_x64</code> 则是 ninja 项目文件的路径，<code>rtc_sdk_objc</code> 则是要编译的目标，可以通过以下命令来查看目标列表：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ gn ls out/mac_x64</div></pre></td></tr></table></figure>
-<h3 id="其他平台源码下载"><a href="#其他平台源码下载" class="headerlink" title="其他平台源码下载"></a>其他平台源码下载</h3><p><strong>Windows</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ fetch --nohooks webrtc</div><div class="line">$ gclient sync</div></pre></td></tr></table></figure>
-<p><strong>Linux</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ export GYP_DEFINES=&quot;OS=linux&quot;</div><div class="line">$ fetch --nohooks webrtc_android</div><div class="line">$ gclient sync</div></pre></td></tr></table></figure>
-<p>Windows 和 Linux 都使用 <code>./build/install-build-deps.sh</code> 脚本进行编译即可。</p>
-<p><strong>Android</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ export GYP_DEFINES=&quot;OS=android&quot;</div><div class="line">$ fetch --nohooks webrtc_android</div><div class="line">$ gclient sync</div></pre></td></tr></table></figure>
-<p>Android 使用 <code>./build/install-build-deps-android.sh</code> 脚本进行编译。</p>
-<h3 id="生成-Example-并运行"><a href="#生成-Example-并运行" class="headerlink" title="生成 Example 并运行"></a>生成 Example 并运行</h3><p>执行以下命令，用于生成 ninja 的编译脚本 ：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ gn gen out/mac_x64 --args=&apos;target_os=&quot;mac&quot; target_cpu=&quot;x64&quot; is_component_build=false&apos;</div></pre></td></tr></table></figure>
-<p>用以下命令可用来编译并生成可执行的二进制文件：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ ninja -C out/mac_x64 AppRTCMobile</div></pre></td></tr></table></figure>
-<p>执行之后可在 <em><code>out/mac_x64</code></em> 目录生成可执行的 <code>AppRTCMobile</code> 文件，双击即可运行。效果如下图：</p>
-<p><img src="/uploads/AppRTCMobile.png" alt="Example"></p>
-<p>通过修改 <code>--args=&#39;target_os=&quot;mac&quot; target_cpu=&quot;x64&quot;</code> 参数来生成其他平台的 Example。</p>
+<h3 id="问题的处理"><a href="#问题的处理" class="headerlink" title="问题的处理"></a>问题的处理</h3><p>我这里用的是最后一种方法来解决该问题，原因在于前 4 种都会增加二进制文件的体积，在第三方使用当前 SDK 时需要手动设置编译参数，会给第三方带来不好的使用体验。为了使用方便可定义一下宏：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">#define FIX_CATEGORY_BUG_H(name) \</div><div class="line">@interface FIX_CATEGORY_BUG_##name : NSObject \</div><div class="line">+(void)print; \</div><div class="line">@end</div><div class="line"></div><div class="line">#define FIX_CATEGORY_BUG_M(name) \</div><div class="line">@implementation FIX_CATEGORY_BUG_##name \</div><div class="line">+ (void)print &#123;&#125; \</div><div class="line">@end</div><div class="line"></div><div class="line">#define ENABLE_CATEGORY(name) [FIX_CATEGORY_BUG_##name print]</div></pre></td></tr></table></figure>
+<p>在 <code>Category</code> 的头文件中使用 <code>FIX_CATEGORY_BUG_H()</code> 宏来声明一个 <code>Fake symbol</code> ，在 <code>Category</code> 的实现文件中使用 <code>FIX_CATEGORY_BUG_M()</code> 宏来实现该 <code>Fake symbol</code>。最后在找一处运行 <code>ENABLE_CATEGORY()</code> 宏，可以是初始化方法中，也可以是其他任何地方，只要确保它能被正常调用，目的在于该 <code>Fake symbol</code> 确保编译器能正常加载它。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>在 iOS/Mac 平台下，包含 <code>Category</code> 的静态库无法被正常加载，原因在于 <code>Category</code> 是 Objective-C 语言的特性，编译器并不会为它生成链接符号，在链接过程中便无法找到该对象文件的引用关系，链接器将会直接忽略掉 <code>Category</code>  对应的对象文件，从而在运行时无法找到相应的 <code>selector</code>。解决该问题的目标就是让链接器加载 <code>Category</code> 对应的对象文件，一种方法是添加编译参数让编译器加载所有的对象文件或是加载指定的对象文件；另一种方法是在 <code>Category</code>  的对象文件中添加 <code>Fake symbol</code> ，当 <code>Fake symbol</code> 被加载时 <code>Category</code> 的对象文件便一同被加载。</p>
 <h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
-<li><a href="https://webrtc.org" target="_blank" rel="external">WebRTC 官网</a></li>
-<li><a href="http://www.cnblogs.com/fulianga/p/5868823.html" target="_blank" rel="external">WebRTC(iOS)下载编译(下载指定版本)</a></li>
+<li><a href="https://stackoverflow.com/questions/2567498/objective-c-categories-in-static-library" target="_blank" rel="external">Objective-C categories in static library</a></li>
+<li><a href="http://www.dreamingwish.com/frontui/article/default/the-create-the-static-the-library-containing-the-category.html" target="_blank" rel="external">创建含有category的静态库,selector not recognized的解决方案</a></li>
 </ul>
 
       
@@ -489,7 +445,7 @@
     </li>
     <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="http://enkichen.com/2017/05/12/webrtc-ios-build/" title="WebRTC iOS&OSX 库的编译">http://enkichen.com/2017/05/12/webrtc-ios-build/</a>
+      <a href="http://enkichen.com/2017/09/13/ios-static-library-categories/" title="iOS 静态库中的 Category 运行时错误">http://enkichen.com/2017/09/13/ios-static-library-categories/</a>
     </li>
     <li class="post-copyright-license">
       <strong>版权声明： </strong>
@@ -505,7 +461,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/WebRTC/" rel="tag"># WebRTC</a>
+            <a href="/tags/Category/" rel="tag"># Category</a>
           
         </div>
       
@@ -518,18 +474,14 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/05/23/dnsmasq-introduce/" rel="next" title="Dnsmasq 介绍与使用">
-                <i class="fa fa-chevron-left"></i> Dnsmasq 介绍与使用
-              </a>
-            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/04/21/ios-message-forwarding/" rel="prev" title="iOS 运行时之消息转发机制">
-                iOS 运行时之消息转发机制 <i class="fa fa-chevron-right"></i>
+              <a href="/2017/07/29/webrtc-drop-frame/" rel="prev" title="WebRTC 的丢帧策略">
+                WebRTC 的丢帧策略 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -702,7 +654,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-Depot-tools"><span class="nav-number">1.</span> <span class="nav-text">安装 Depot_tools</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-ninja"><span class="nav-number">2.</span> <span class="nav-text">安装 ninja</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#下载源代码"><span class="nav-number">3.</span> <span class="nav-text">下载源代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编译库文件"><span class="nav-number">4.</span> <span class="nav-text">编译库文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#iOS-版本的编译"><span class="nav-number">4.1.</span> <span class="nav-text">iOS 版本的编译</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Mac-版本的编译"><span class="nav-number">4.2.</span> <span class="nav-text">Mac 版本的编译</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他平台源码下载"><span class="nav-number">5.</span> <span class="nav-text">其他平台源码下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生成-Example-并运行"><span class="nav-number">6.</span> <span class="nav-text">生成 Example 并运行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-number">7.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#编译-链接过程"><span class="nav-number">1.</span> <span class="nav-text">编译/链接过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方案"><span class="nav-number">2.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题的处理"><span class="nav-number">3.</span> <span class="nav-text">问题的处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
             
 
           </div>
