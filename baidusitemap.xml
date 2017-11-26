@@ -3,6 +3,27 @@
 
 
     
+    
+  <url>
+    <loc>http://enkichen.com/2017/11/26/image-h264-encode/</loc>
+    <lastmod>2017-11-26T06:33:42.000Z</lastmod>
+    <data>
+        <display>
+        <title>图像编码与 H264 基础知识</title>
+        <pubTime>2017-11-26T06:23:58.000Z</pubTime>
+        
+        <tag>h264</tag>
+         
+         
+           
+             
+              <breadCrumb title="音视频/WebRTC" url="http://enkichen.com/categories/%E9%9F%B3%E8%A7%86%E9%A2%91-WebRTC/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
   <url>
     <loc>http://enkichen.com/2017/09/13/ios-static-library-categories/</loc>
     <lastmod>2017-09-13T03:52:05.000Z</lastmod>
@@ -162,7 +183,6 @@
     </data>
     </url>
 
-    
     
     
     
