@@ -97,7 +97,7 @@
 <meta property="og:site_name" content="Enki's Notes">
 <meta property="og:description" content="iOS/Mac 平台下 apple 提供了非常好用的 dispatch_queue 能够很方便的进行线程的管理以及各个线程之间的切换（当然还有很多其他特性）。虽说 C++ 的标准库中提供了很多线程管理的方法，但相比于 dispatch_queue 还是弱爆了。由于项目中会经常用到，GitHub 上找了一些类似的实现都不太理想，于是自己实现了一版简单的主要支持一下特性：  支持并发调用，并支持并发的">
 <meta property="og:image" content="http://enkichen.com/uploads/dispatch_queue_class.png">
-<meta property="og:updated_time" content="2018-03-10T11:46:28.135Z">
+<meta property="og:updated_time" content="2018-03-24T05:24:09.528Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="C++ 实现的 Dispatch Queue">
 <meta name="twitter:description" content="iOS/Mac 平台下 apple 提供了非常好用的 dispatch_queue 能够很方便的进行线程的管理以及各个线程之间的切换（当然还有很多其他特性）。虽说 C++ 的标准库中提供了很多线程管理的方法，但相比于 dispatch_queue 还是弱爆了。由于项目中会经常用到，GitHub 上找了一些类似的实现都不太理想，于是自己实现了一版简单的主要支持一下特性：  支持并发调用，并支持并发的">
@@ -405,8 +405,8 @@
 <li>支持 lambda 表达式</li>
 <li>支持任务线程的安全退出</li>
 </ol>
-<h3 id="结构设计"><a href="#结构设计" class="headerlink" title="结构设计"></a>结构设计</h3><p><img src="/uploads/dispatch_queue_class.png" alt="dispatch_queue"></p>
 <a id="more"></a>
+<h3 id="结构设计"><a href="#结构设计" class="headerlink" title="结构设计"></a>结构设计</h3><p><img src="/uploads/dispatch_queue_class.png" alt="dispatch_queue"></p>
 <p>上图是 <code>DispatchQueue</code> 类结构图，结构比较简单，<code>DispatchQueue</code> 是核心抽象类；<code>QueueTask</code> 就是任务的抽象基类了，<code>ClosureTask</code> 类是一个模板类，主要用来实现 lambda 表达式；<code>DisruptorImp</code> 与  <code>MutexQueueImp</code> 则是两个具体的 <code>DispatchQueue</code> 的实现，<code>disruptor</code> 包是一个第三方库，后面会有详细介绍，。</p>
 <h4 id="DispatchQueue-抽象类的定义"><a href="#DispatchQueue-抽象类的定义" class="headerlink" title="DispatchQueue 抽象类的定义"></a>DispatchQueue 抽象类的定义</h4><p>以下是 <code>DispatchQueue</code> 接口的定义和实现：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">class DispatchQueue &#123;</div><div class="line">public:</div><div class="line">    DispatchQueue(int thread_count) &#123;&#125;</div><div class="line">    </div><div class="line">    virtual ~DispatchQueue() &#123;&#125;</div><div class="line">    </div><div class="line">    template &lt;class T, typename std::enable_if&lt;std::is_copy_constructible&lt;T&gt;::value&gt;::type* = nullptr&gt;</div><div class="line">    void sync(const T &amp;task) &#123;</div><div class="line">        sync(std::shared_ptr&lt;QueueTask&gt;(new ClosureTask&lt;T&gt;(task)));</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    void sync(std::shared_ptr&lt;QueueTask&gt; task) &#123;</div><div class="line">        if( nullptr != task ) &#123;</div><div class="line">            sync_imp(task);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    template &lt;class T, typename std::enable_if&lt;std::is_copy_constructible&lt;T&gt;::value&gt;::type* = nullptr&gt;</div><div class="line">    int64_t async(const T &amp;task) &#123;</div><div class="line">        return async(std::shared_ptr&lt;QueueTask&gt;(new ClosureTask&lt;T&gt;(task)));</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    int64_t async(std::shared_ptr&lt;QueueTask&gt; task) &#123;</div><div class="line">        if ( nullptr != task ) &#123;</div><div class="line">            return async_imp(task);</div><div class="line">        &#125;</div><div class="line">        return -1;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">protected:</div><div class="line">    virtual void sync_imp(std::shared_ptr&lt;QueueTask&gt; task) = 0;</div><div class="line">    </div><div class="line">    virtual int64_t async_imp(std::shared_ptr&lt;QueueTask&gt; task) = 0;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
@@ -487,6 +487,10 @@
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/24/videotoolbox/" rel="next" title="Apple 平台下的 VideoToolBox 框架">
+                <i class="fa fa-chevron-left"></i> Apple 平台下的 VideoToolBox 框架
+              </a>
             
           </div>
 
@@ -593,7 +597,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-count">22</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -615,7 +619,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">31</span>
+                <span class="site-state-item-count">32</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

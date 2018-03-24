@@ -278,6 +278,173 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2018/03/24/videotoolbox/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Enki">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Enki's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2018/03/24/videotoolbox/" itemprop="url">
+                  Apple 平台下的 VideoToolBox 框架
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-24T13:17:16+08:00">
+                2018-03-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/音视频-WebRTC/" itemprop="url" rel="index">
+                    <span itemprop="name">音视频/WebRTC</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/03/24/videotoolbox/" class="leancloud_visitors" data-flag-title="Apple 平台下的 VideoToolBox 框架">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p><code>VideoToolBox</code> 是一个低级的框架，可直接访问硬件的编解码器。它能够为视频提供压缩和解压缩的服务，同时也提供存储在 <code>CoreVideo</code> 像素缓冲区的图像进行格式的转换。该框架在 <code>iOS(8.0)/macOS(10.8)/tvOS(10.2)</code> 以后才被开放出来，在这之前都是不能使用的。</p>
+<p><code>VideoToolBox</code> 框架为我们提供的接口都是以 C 语言函数形式提供的，并且以会话 <code>Session</code> 方式来进行管理，这些接口分为以下几个类别：</p>
+<ol>
+<li>VTCompressionSession：提供数据压缩的会话</li>
+<li>VTDecompressionSession：提供数据解压缩的会话</li>
+<li>VTPixelTransferSession：提供数据格式转换的会话</li>
+<li>VTMultiPassStorage&amp;VTFrameSilo：提供多通道压缩的会话</li>
+<li>VTSession&amp;Utilities：针对会话的管理以及辅助的函数</li>
+</ol>
+<p>这里主要针对 VTCompressionSession 以及 VTDecompressionSession 两个方面的介绍。由于 <code>VideoToolBox</code> 可进行多种格式的压缩以及解压缩，下文都是以 H264 编码格式进行介绍和举例。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/03/24/videotoolbox/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://enkichen.com/2018/03/10/dispatch-queue/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -397,7 +564,6 @@
 <li>支持 lambda 表达式</li>
 <li>支持任务线程的安全退出</li>
 </ol>
-<h3 id="结构设计"><a href="#结构设计" class="headerlink" title="结构设计"></a>结构设计</h3><p><img src="/uploads/dispatch_queue_class.png" alt="dispatch_queue"></p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2018/03/10/dispatch-queue/#more" rel="contents">
@@ -3353,164 +3519,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2015/12/22/sdwebimage-issues/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Enki">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Enki's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/12/22/sdwebimage-issues/" itemprop="url">
-                  优化APP时发现的SDWebImage的问题
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-22T19:34:17+08:00">
-                2015-12-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/开发笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">开发笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2015/12/22/sdwebimage-issues/" class="leancloud_visitors" data-flag-title="优化APP时发现的SDWebImage的问题">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h3 id="起因-旋转了的图片"><a href="#起因-旋转了的图片" class="headerlink" title="起因 旋转了的图片"></a>起因 旋转了的图片</h3><p>前段时间在对程序的绘图逻辑进行了使用OpenGL做优化，但是在使用OpenGL进行绘制时发现一些图片会莫名其妙的旋转，在细看了代码之后发现问题发生在<strong>UIImage</strong>对象的<strong>imageOrientation</strong>属性。该属性为枚举类型可以有以下取值：<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2015/12/22/sdwebimage-issues/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -3560,7 +3568,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-count">22</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -3582,7 +3590,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">31</span>
+                <span class="site-state-item-count">32</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
