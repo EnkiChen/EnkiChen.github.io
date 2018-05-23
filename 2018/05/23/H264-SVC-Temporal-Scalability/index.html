@@ -71,7 +71,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT, Enki, EnkiChen, enkichen, xc120313778" />
+  <meta name="keywords" content="h264," />
 
 
 
@@ -89,17 +89,19 @@
 
 
 
-<meta name="description" content="近期将项目中的 webrtc 代码与官方最新的 m63 分支进行了同步，由于之前的代码比较老，这次升级后，webrtc 的代码结构相对来说有了很多的调整和变化，再加上对 webrtc 代码的修改和代码的添加，索性依照 m63 分支的 gn 脚本使用 cmake 重写了 webrtc 的编译脚本。在编译 android 平台时遇到一些 c++ 标准库中的函数无法进行链接的问题，于是了解了一下 an">
-<meta name="keywords">
+<meta name="description" content="在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 Temporal Scalability 机制来优化该">
+<meta name="keywords" content="h264">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Android 对 C++ Runtime 的支持">
-<meta property="og:url" content="http://enkichen.com/2017/12/20/android-c-runtime-version/index.html">
+<meta property="og:title" content="H264/SVC Temporal Scalability">
+<meta property="og:url" content="http://enkichen.com/2018/05/23/H264-SVC-Temporal-Scalability/index.html">
 <meta property="og:site_name" content="Enki's Notes">
-<meta property="og:description" content="近期将项目中的 webrtc 代码与官方最新的 m63 分支进行了同步，由于之前的代码比较老，这次升级后，webrtc 的代码结构相对来说有了很多的调整和变化，再加上对 webrtc 代码的修改和代码的添加，索性依照 m63 分支的 gn 脚本使用 cmake 重写了 webrtc 的编译脚本。在编译 android 平台时遇到一些 c++ 标准库中的函数无法进行链接的问题，于是了解了一下 an">
-<meta property="og:updated_time" content="2017-12-20T12:51:56.000Z">
+<meta property="og:description" content="在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 Temporal Scalability 机制来优化该">
+<meta property="og:image" content="http://enkichen.com/uploads/SVC_Temporal_Scalability.png">
+<meta property="og:updated_time" content="2018-05-23T10:31:38.786Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Android 对 C++ Runtime 的支持">
-<meta name="twitter:description" content="近期将项目中的 webrtc 代码与官方最新的 m63 分支进行了同步，由于之前的代码比较老，这次升级后，webrtc 的代码结构相对来说有了很多的调整和变化，再加上对 webrtc 代码的修改和代码的添加，索性依照 m63 分支的 gn 脚本使用 cmake 重写了 webrtc 的编译脚本。在编译 android 平台时遇到一些 c++ 标准库中的函数无法进行链接的问题，于是了解了一下 an">
+<meta name="twitter:title" content="H264/SVC Temporal Scalability">
+<meta name="twitter:description" content="在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 Temporal Scalability 机制来优化该">
+<meta name="twitter:image" content="http://enkichen.com/uploads/SVC_Temporal_Scalability.png">
 
 
 
@@ -127,13 +129,13 @@
 
 
 
-  <link rel="canonical" href="http://enkichen.com/2017/12/20/android-c-runtime-version/"/>
+  <link rel="canonical" href="http://enkichen.com/2018/05/23/H264-SVC-Temporal-Scalability/"/>
 
 
 
 
 
-  <title> Android 对 C++ Runtime 的支持 | Enki's Notes </title>
+  <title> H264/SVC Temporal Scalability | Enki's Notes </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -278,7 +280,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2017/12/20/android-c-runtime-version/">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2018/05/23/H264-SVC-Temporal-Scalability/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Enki">
@@ -299,7 +301,7 @@
             
             
               
-                Android 对 C++ Runtime 的支持
+                H264/SVC Temporal Scalability
               
             
           </h1>
@@ -314,8 +316,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-20T20:50:24+08:00">
-                2017-12-20
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-23T17:46:10+08:00">
+                2018-05-23
               </time>
             
 
@@ -337,8 +339,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/开发笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">开发笔记</span>
+                  <a href="/categories/音视频-WebRTC/" itemprop="url" rel="index">
+                    <span itemprop="name">音视频/WebRTC</span>
                   </a>
                 </span>
 
@@ -355,7 +357,7 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a class="cloud-tie-join-count" href="/2017/12/20/android-c-runtime-version/#comments" itemprop="discussionUrl">
+                <a class="cloud-tie-join-count" href="/2018/05/23/H264-SVC-Temporal-Scalability/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count join-count" itemprop="commentCount"></span>
                 </a>
               </span>
@@ -364,7 +366,7 @@
 
           
           
-             <span id="/2017/12/20/android-c-runtime-version/" class="leancloud_visitors" data-flag-title="Android 对 C++ Runtime 的支持">
+             <span id="/2018/05/23/H264-SVC-Temporal-Scalability/" class="leancloud_visitors" data-flag-title="H264/SVC Temporal Scalability">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -393,32 +395,51 @@
       
 
       
-        <blockquote>
-<p>近期将项目中的 webrtc 代码与官方最新的 m63 分支进行了同步，由于之前的代码比较老，这次升级后，webrtc 的代码结构相对来说有了很多的调整和变化，再加上对 webrtc 代码的修改和代码的添加，索性依照 m63 分支的 gn 脚本使用 cmake 重写了 webrtc 的编译脚本。在编译 android 平台时遇到一些 c++ 标准库中的函数无法进行链接的问题，于是了解了一下 android 对 c++ 标准库的支持。</p>
+        <p>在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 <code>Temporal Scalability</code> 机制来优化该方案。</p>
+<p><code>Temporal Scalability</code> 是 H264/SVC 编码器中的概念，意思为时间上可伸缩的，在实际编码中编码器进行了分层编码，可简单的理解为 <strong>编码器对同一组输入的数据进行编码，可以输出不同帧率的码流</strong>，例如当前编码器输入帧率为 30fps 的流，编码器可同时输出多个码流，例如同时输出 3 层码流，从而可以得到不同帧率的码流。<br><a id="more"></a></p>
+<blockquote>
+<p>这里的 3 层码流是有依赖关系，比如输出有 A、B、C 3 层码流，单独的发送 A 层则得到低帧率的码流例如 5fps，如果同时发送 A 和 B 两层码流，则能得到相对较高的码流例如 15fps，如果同时发送 ABC ，则能得到最高的码流例如 30fps。</p>
 </blockquote>
-<p>Android 对 C++ 基础库的实现有多个版本，具体的版本可以在 NDK 目录下的 <code>sources/cxx-stl</code> 子目录中查看，我当前使用的版本是 <code>android-ndk-r12b</code> 子目录内容如下：</p>
-<a id="more"></a>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">drwxr-xr-x  10 Enki  staff   340 12  7 18:05 gabi++</div><div class="line">drwxr-xr-x   5 Enki  staff   170 12  7 17:29 gnu-libstdc++</div><div class="line">drwxr-xr-x  16 Enki  staff   544 12  7 17:37 llvm-libc++</div><div class="line">drwxr-xr-x   8 Enki  staff   272 12  7 17:12 llvm-libc++abi</div><div class="line">drwxr-xr-x  16 Enki  staff   544 12  7 18:37 stlport</div><div class="line">drwxr-xr-x   9 Enki  staff   306 12  7 20:47 system</div></pre></td></tr></table></figure>
+<p>在具体应用中便可以根据用户的网络质量来分配不同码率的视频流，这样网络质量较好的用户能看到高帧率的视频流，而网络较差的用户则看到低帧率的视频流。如下图所示：</p>
+<p><img src="/uploads/SVC_Temporal_Scalability.png" alt="Alt text"></p>
+<p>编码器进行了分层编码，例如上图描述编码端同时将所有的码流层发送至服务器，如果用户网络质量非常好，服务器将所有层的码流数据转发至该用户例如 Receiver2；如果用户网络非常差，则只需要将低层级码流数据转发给该用户例如 Receiver1。</p>
+<h3 id="编码器的支持"><a href="#编码器的支持" class="headerlink" title="编码器的支持"></a>编码器的支持</h3><p>Temporal Scalability 机制并不是所有的编码都支持的，Apple 平台下（包括iOS和MacOS）的硬件编解码框架 <code>VideoToolbox</code> 是不支持的该特性的，因为没有看到任何的可设置的参数或者 API 接口。Android 平台下硬件编解码框架 <code>MediaCodec</code> 在 API 21 一下是不支持的，在 API 21 时添加了对 <code>KEY_TEMPORAL_LAYERING</code> 编码属性的配置，但只支持 VP8 编码格式 H264 编码格式不支持（毕竟 Android 和 VPx 都是属于 Google 的产品）。Android 下有需要了解详情的可以查看 <a href="https://developer.android.google.cn/reference/android/media/MediaFormat.html#KEY_TEMPORAL_LAYERING" target="_blank" rel="external">MediaFormat</a> 类的说明。</p>
+<p>在两大主流的移动平台上，硬件编码器都是不支持 H264/SVC Temporal Scalability 特性，如果要在移动平台上使用该特性只能使用软编码器，可以使用开源的 openh264 编解码库，代码托管在 GitHub 上对应的地址为 <a href="https://github.com/cisco/openh264" target="_blank" rel="external">openh264</a> ，其中有该项目的介绍和使用方法。</p>
+<blockquote>
+<p>x264 编码器当前还不支持 Temporal Scalability 特性。</p>
+</blockquote>
+<p>在 openh264 中使用 <code>SEncParamExt</code> 结构体来对编码进行参数的配置，Temporal Scalability 的特性使用 <code>iTemporalLayerNum</code> 字段来配置，用来指定输出多少层最大只支持 4 层。</p>
+<p>使用 <em><code>EncodeFrame</code></em> 方法进行 H264 的编码后可以得到 <code>SFrameBSInfo</code> 的输出结果，该结构体以及关联的结构体的定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">typedef struct &#123;</div><div class="line">  int           iLayerNum;</div><div class="line">  SLayerBSInfo  sLayerInfo[MAX_LAYER_NUM_OF_FRAME];</div><div class="line">  EVideoFrameType eFrameType;</div><div class="line">  int iFrameSizeInBytes;</div><div class="line">  long long uiTimeStamp;</div><div class="line">&#125; SFrameBSInfo, *PFrameBSInfo;</div><div class="line"></div><div class="line">typedef struct &#123;</div><div class="line">  unsigned char uiTemporalId;</div><div class="line">  unsigned char uiSpatialId;</div><div class="line">  unsigned char uiQualityId;</div><div class="line">  EVideoFrameType eFrameType;</div><div class="line">  unsigned char uiLayerType;</div><div class="line">  int   iSubSeqId;</div><div class="line">  int   iNalCount;</div><div class="line">  int*  pNalLengthInByte;</div><div class="line">  unsigned char*  pBsBuf;</div><div class="line">&#125; SLayerBSInfo, *PLayerBSInfo;</div></pre></td></tr></table></figure>
+<p>在 <code>SLayerBSInfo</code> 结构体的 <code>uiTemporalId</code> 字段用来描述当前编码后的数据流属于哪一层。openh264 的使用可查看其它文档。</p>
+<blockquote>
+<p>openh264 对 H264/SVC 的支持，不仅在时间维度上，并且也在空间和质量维度上都有支持。</p>
+</blockquote>
+<h4 id="openh264-中-temporal-layer-的输出顺序与帧率"><a href="#openh264-中-temporal-layer-的输出顺序与帧率" class="headerlink" title="openh264 中 temporal layer 的输出顺序与帧率"></a>openh264 中 temporal layer 的输出顺序与帧率</h4><p>在 openh264 的内部，存在一张表，用来记录每一层的输出顺序，可以在 <a href="https://github.com/cisco/openh264/blob/master/codec/encoder/core/src/encoder_data_tables.cpp" target="_blank" rel="external">encoder_data_tables.cpp</a> 中找到内容如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">const uint8_t   g_kuiTemporalIdListTable[MAX_TEMPORAL_LEVEL][MAX_GOP_SIZE + 1] = &#123;</div><div class="line">  &#123;</div><div class="line">    0, 0, 0, 0, 0, 0, 0, 0,</div><div class="line">    0</div><div class="line">  &#125;,  // uiGopSize = 1</div><div class="line">  &#123;</div><div class="line">    0, 1, 0, 0, 0, 0, 0, 0,</div><div class="line">    0</div><div class="line">  &#125;,  // uiGopSize = 2</div><div class="line">  &#123;</div><div class="line">    0, 2, 1, 2, 0, 0, 0, 0,</div><div class="line">    0</div><div class="line">  &#125;,  // uiGopSize = 4</div><div class="line">  &#123;</div><div class="line">    0, 3, 2, 3, 1, 3, 2, 3,</div><div class="line">    0</div><div class="line">  &#125;  //uiGopSize = 8</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>解析如下：</p>
 <ul>
-<li>gabi++：该库不支持 C++ 标准库，但加入了对异常和 RTTI 的支持。</li>
-<li>gnu-libstdc++：GNU 标准 C++ 运行时库（libstdc++-v3），同样支持异常和 RTTI。</li>
-<li>llvm-libc++：该版本是 <a href="http://libcxx.llvm.org/" target="_blank" rel="external">LLVM libc++</a> 的一个移植版本，支持 C++ 的所有特性。</li>
-<li>stlport：该库也提供 C++ 所有的特性支持，它是开源项目 <a href="http://www.stlport.org" target="_blank" rel="external">STLPort</a> 的一个 android 移植版本</li>
-<li>system：默认最小的 C++ 运行库，这样生成的应用体积小，内存占用小，但部分功能将无法支持</li>
+<li><code>iTemporalLayerNum</code> 的值为 1 时，使用 <code>uiGopSize = 1</code> 的配置，即每一帧为一组，每一组的 <code>uiTemporalId</code> 值为 0</li>
+<li><code>iTemporalLayerNum</code> 的值为 2 时，使用 <code>uiGopSize = 2</code> 的配置，即每两帧为一组，每一组中对应的<br><code>uiTemporalId</code> 为 <code>[0, 1]</code></li>
+<li><code>iTemporalLayerNum</code> 的值为 3 时，使用 <code>uiGopSize = 4</code> 的配置，即每四帧为一组，每一组中对应的<br><code>uiTemporalId</code> 为 <code>[0, 2, 1, 2]</code></li>
+<li><code>iTemporalLayerNum</code> 的值为 4 时，使用 <code>uiGopSize = 8</code> 的配置，即每 8 帧为一组，每一组中对应的<br><code>uiTemporalId</code> 为 <code>[0, 3, 2, 3, 1, 3, 2, 3]</code></li>
 </ul>
-<p>在 NDK 目录中都有预编译好的静态库和动态库，在实际项目中，只要链接对应的库即可。在使用 <code>cmake</code> 脚本的项目中可以使用 <code>ANDROID_STL</code> 宏来指定需要链接的库，在使用 <code>MK</code> 项目中可以使用 <code>APP_STL</code> 宏来指定链接的库例如：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"># cmake</div><div class="line">-DANDROID_STL=c++_static</div><div class="line"></div><div class="line"># Application.mk</div><div class="line">APP_STL:= c++_static</div></pre></td></tr></table></figure>
-<p>链接库可选值有如下几种：</p>
+<p>根据上述描述以及输入的帧率可计算每一层的帧率是多少，例如在 30fps 下分两层输出，则 T0 帧率为 15fps；分 3 层时，每 4 帧组则有完整 7 组，则 T0 的帧率有 7 + 1 = 8fps，T1 的帧率有  8 + 7 = 15fps，T2 则有 30fps；分 4 层的情况可按相同的方法计算每一层的帧率。</p>
+<h3 id="RTP-数据包的封装"><a href="#RTP-数据包的封装" class="headerlink" title="RTP 数据包的封装"></a>RTP 数据包的封装</h3><p>Temporal Scalability 属于 H264/SVC 的范畴，在封装成 RTP 包时也有对应的标准做法，但流程相对复杂，有兴趣的同学可以了解以下资料：</p>
 <ul>
-<li>stlport_static：stlport 作为静态库</li>
-<li>stlport_shared：stlport 作为动态库，这个可能产生兼容性和部分低版本的 Android 固件</li>
-<li>c++_static：stdlib 作为静态库链接</li>
-<li>c++_shared：stdlib 作为动态库链接</li>
-<li>gnustl_static：使用 GNU libstdc++ 作为静态库</li>
-<li>system：使用默认的最小的 C++ 运行库</li>
+<li><a href="https://wenku.baidu.com/view/dfc855d5195f312b3169a5dd.html" target="_blank" rel="external">SVC的RTP封装算法及其应用</a></li>
+<li><a href="https://blog.csdn.net/vblittleboy/article/details/11872469" target="_blank" rel="external">可伸缩视频编解码SVC技术介绍应用分析</a></li>
 </ul>
-<p>在 android 平台下编译 m63 分支时，原来使用的是 <code>gnustl_static</code> 版本的标准库，在新的 m63 分支中使用了一些诸如 <code>std::strtoll()</code> 的方法（还使用了一些其他方法也 <code>gnustl_static</code> 中没有实现的），而在 <code>gnustl_static</code> 版本的标准库中，并没有提供该函数的实现，从而导致 android 平台下无法链接 webrtc 库。这里使用了 <code>c++_static</code> 替换了 <code>gnustl_static</code> 来解决链接的问题。</p>
-<p>NDK 中提供了不同版本，不同的版本有不同的特性，有些体积大提供更丰富的特性和标准函数的支持，一些体积小占用空间少，可根据具体的项目需求来选择，随着不 NDK 版本的升级，特性也会有改动。</p>
+<p>大致的思想是将基本层（低帧率）和增强层（高帧率）的层通过不同的 payload 分开传输，同时两个通道分别使用不同的 QoS 机制来保证传输的质量。</p>
+<p>除了上述的较为复杂的做法外也可以使用 RTP 的扩展头来实现，在 RTP 头后面添加一个扩展头用来描述当前数据包的 temporal layer id，这样服务器就能区分 RTP 包分别属于哪个层级，从而根据客户端的网络质量来转发不同的帧率的码流。具体的做法可参考其他资料。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>H264/SVC 是以 H264/AVC 为基础，利用了AVC 编解码器的各种高效算法工具，在语法和工具集上进行了扩展，所以 H264/SVC 时间可扩展性完全向后兼容 H.264/AVC，即当使用 SVC 编码出多层的码流时，AVC 的编码器也是可以正常解码的。当 Temporal Scalability 帧率降低一半时，比特率通常不会降低一半，因为低层级的帧可能是其他高层级帧的参考帧，编码器会为其分配更多的码流。</p>
+<p>由于编码端到服务器以及服务器到接收端的码流有了更灵活的传输方式，结合网络上其他的优化方案，可以衍生出更多的优化方案，例如针对低层级的丢包重传、缓存低层级的帧等。</p>
+<p>可惜的是在 iOS 和 Android 两大主流移动平台上，对应的硬件编码器都不支持该特性，不过在分辨率不高的场景下还是可以尝试使用软编码器来实现的。一些时候用户更偏向于接受低分辨率的图像而需要更流畅的画面，这时候 <code>Temporal Scalability</code> 机制并不能达到要求，后续将介绍 H264/SVC 中的空间分层来解决该问题。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li><a href="https://blog.csdn.net/worldpharos/article/details/3369933" target="_blank" rel="external">The Scalable Video Coding Amendment of the H.264/AVC Standard</a></li>
+<li><a href="https://www.researchgate.net/publication/224227711_Rate_Control_Optimization_for_Temporal-Layer_Scalable_Video_Coding" target="_blank" rel="external">Rate Control Optimization for Temporal-LayerScalable Video Coding</a></li>
+<li><a href="https://webrtchacks.com/chrome-vp9-svc/" target="_blank" rel="external">Chrome’s WebRTC VP9 SVC Layer Cake: Sergio Garcia Murillo &amp; Gustavo Garcia</a></li>
+</ul>
 
       
     </div>
@@ -447,7 +468,7 @@
     </li>
     <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="http://enkichen.com/2017/12/20/android-c-runtime-version/" title="Android 对 C++ Runtime 的支持">http://enkichen.com/2017/12/20/android-c-runtime-version/</a>
+      <a href="http://enkichen.com/2018/05/23/H264-SVC-Temporal-Scalability/" title="H264/SVC Temporal Scalability">http://enkichen.com/2018/05/23/H264-SVC-Temporal-Scalability/</a>
     </li>
     <li class="post-copyright-license">
       <strong>版权声明： </strong>
@@ -461,6 +482,12 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/h264/" rel="tag"># h264</a>
+          
+        </div>
+      
 
       
         
@@ -470,18 +497,14 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/03/10/dispatch-queue/" rel="next" title="C++ 实现的 Dispatch Queue">
-                <i class="fa fa-chevron-left"></i> C++ 实现的 Dispatch Queue
-              </a>
-            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/11/26/image-h264-encode/" rel="prev" title="图像编码与 H264 基础知识">
-                图像编码与 H264 基础知识 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/03/24/videotoolbox/" rel="prev" title="Apple 平台下的 VideoToolBox 框架">
+                Apple 平台下的 VideoToolBox 框架 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -554,8 +577,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/uploads/avatar.jpg"
@@ -635,6 +667,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#编码器的支持"><span class="nav-number">1.</span> <span class="nav-text">编码器的支持</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#openh264-中-temporal-layer-的输出顺序与帧率"><span class="nav-number">1.1.</span> <span class="nav-text">openh264 中 temporal layer 的输出顺序与帧率</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RTP-数据包的封装"><span class="nav-number">2.</span> <span class="nav-text">RTP 数据包的封装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
