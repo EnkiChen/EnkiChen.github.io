@@ -391,9 +391,9 @@
 <ol>
 <li>OSX 的事件机制</li>
 <li>OSX/iOS 响应链者链</li>
-<li>Keycode 键盘编码</li>
 <li>鼠标事件的监听及模拟（鼠标单击、双击、拖动、滚动等事件）</li>
 <li>键盘事件的监听及模拟（包括组合键的模拟）</li>
+<li>Keycode 键盘编码（统一 Windows、OSX、浏览器端键盘按键的编码值）</li>
 </ol>
 <h3 id="事件分发机制"><a href="#事件分发机制" class="headerlink" title="事件分发机制"></a>事件分发机制</h3><p>在 OSX 系统中鼠标和键盘的活动事件都会产生底层的系统事件，首先传递到 IOKit 框架处理后存储到队列中，通知 Window Server 服务层处理。Window Server 存储到 FIFO 优先队列中，然后逐一转发到当前活动窗口或者能响应这个事件的应用程序去处理。</p>
 <p>在 OSX 或者 iOS 程序中，都会有一个 Main Run Loop 的线程，RunLoop 循环中会遍历 event 消息队列，逐一分发这些事件到应用中合适的对象去处理。具体来说就是调用 <code>NSApp</code> 的 <em><code>sendEvent:</code></em> 方法发送消息到<code>NSWindow</code>，<code>NSWindow</code> 再分发到 <code>NSView</code> 视图对象，由其鼠标或键盘事件响应方法去处理。</p>
