@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://enkichen.com/"/>
-  <updated>2018-05-23T10:31:38.786Z</updated>
+  <updated>2018-09-12T11:31:42.557Z</updated>
   <id>http://enkichen.com/</id>
   
   <author>
@@ -16,13 +16,159 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>Mac OSX 鼠标键盘事件的监听和模拟</title>
+    <link href="http://enkichen.com/2018/09/12/osx-mouse-keyboard-event/"/>
+    <id>http://enkichen.com/2018/09/12/osx-mouse-keyboard-event/</id>
+    <published>2018-09-12T11:15:45.000Z</published>
+    <updated>2018-09-12T11:31:42.557Z</updated>
+    
+    <content type="html"><![CDATA[<p>最近完成了 Mac OSX 平台下的远程控制功能，期间找了不少资料，这里做个总结，主要涉及到一下知识点：</p>
+<ol>
+<li>OSX 的事件机制</li>
+<li>OSX/iOS 响应链者链</li>
+<li>Keycode 键盘编码</li>
+<li>鼠标事件的监听及模拟（鼠标单击、双击、拖动、滚动等事件）</li>
+<li>键盘事件的监听及模拟（包括组合键的模拟）</li>
+</ol>
+<h3 id="事件分发机制"><a href="#事件分发机制" class="headerlink" title="事件分发机制"></a>事件分发机制</h3><p>在 OSX 系统中鼠标和键盘的活动事件都会产生底层的系统事件，首先传递到 IOKit 框架处理后存储到队列中，通知 Window Server 服务层处理。Window Server 存储到 FIFO 优先队列中，然后逐一转发到当前活动窗口或者能响应这个事件的应用程序去处理。</p>
+<p>在 OSX 或者 iOS 程序中，都会有一个 Main Run Loop 的线程，RunLoop 循环中会遍历 event 消息队列，逐一分发这些事件到应用中合适的对象去处理。具体来说就是调用 <code>NSApp</code> 的 <em><code>sendEvent:</code></em> 方法发送消息到<code>NSWindow</code>，<code>NSWindow</code> 再分发到 <code>NSView</code> 视图对象，由其鼠标或键盘事件响应方法去处理。</p>
+<p><img src="/uploads/EventDispatch.png" alt="Alt text"></p>
+<a id="more"></a>
+<h3 id="事件响应链"><a href="#事件响应链" class="headerlink" title="事件响应链"></a>事件响应链</h3><p>在 OSX 和 iOS 程序中响应者链是 Application Kit 事件处理架构的中心机制，它由一系列链接在一起的响应者对象组成，事件或者动作消息可以沿着这些对象进行传递。如果一个响应者对象不能处理某个事件或动作，也就是说，它不响应那个消息，或者不认识那个事件，则将该消息重新发送给链中的下一个响应者。消息沿着响应者链向上、向更高级别的对象传递，直到最终被处理（如果最终还是没有被处理，就会被抛弃）。</p>
+<p>事件响应者 <code>Responders</code> 类为核心应用程序架构的三个主要模式或机制定义了一个接口：</p>
+<ul>
+<li>它声明了一些处理事件消息（也就是源自用户事件的消息，比如象鼠标点击或按键按下这样的事件）的方法。</li>
+<li>它声明了数十个处理动作消息的方法，它们和标准的键绑定（比如那些在文本内部移动插入点的绑定）密切相关。动作消息会被派发到目标对象；如果目标没有被指定，应用程序会负责检索合适的响应者。</li>
+<li>它定义了一套在应用程序中指派和管理响应者的方法。这些响应者组成了我们所知道的响应者链，即一系列响应者，事件或动作消息在它们之间传递，直到找到能够对它们进行处理的对象。</li>
+</ul>
+<p>当 Application Kit 在应用程序中构造对象时，会为每个窗口建立响应者链。响应者链中的基本对象是<code>NSWindow</code> 对象及其视图层次。在视图层次中级别较低的视图将比级别更高的视图优先获得处理事件或动作消息的机会。<strong><code>NSWindow</code> 中保有一个第一响应者的引用，它通常是当前窗口中处于选择状态的视图，窗口通常把响应消息的机会首先给它</strong>。对于事件消息，响应者链通常以发生事件的窗口对应的 <code>NSWindow</code> 对象作为结束，虽然其它对象也可以作为下一个响应者被加入到 <code>NSWindow</code> 对象的后面。</p>
+<p>从层级上看离观察者最近的视图优先响应事件，通过 <code>view</code> 的 <em><code>hitTest</code></em> 方法检测，满足 <em><code>hitTest</code></em> 方法的的子视图优先响应事件。</p>
+<p><code>NSApplication</code>, <code>NSWindow</code>, <code>NSDrawer</code>, <code>NSWindowController</code>, <code>NSView</code> 以及继承于 <code>NSView</code> 的所有控件对象都直接或间接继承了 <code>Responders</code> 类，所以这些类都能处理鼠标和键盘事件。</p>
+<p>iOS 程序相比于 OSX 程序会有点不一样：</p>
+<ol>
+<li>OSX 程序可能存在多个窗口，会有多个响应者链，iPhone 的应用程序就一个窗口，所以只会有一个响应者链。</li>
+<li>在 iOS 程序中与加速计、陀螺仪和磁力计相关的运动事件不遵循响应者链，Core Motion 会将这些事件直接传递给我们指定的对象。有关更多信息，可以参看 <a href="https://developer.apple.com/library/content/documentation/Miscellaneous/Conceptual/iPhoneOSTechOverview/CoreServicesLayer/CoreServicesLayer.html#//apple_ref/doc/uid/TP40007898-CH10-SW27" target="_blank" rel="external">Core Motion Framework</a>。</li>
+</ol>
+<h3 id="相关类的解析说明"><a href="#相关类的解析说明" class="headerlink" title="相关类的解析说明"></a>相关类的解析说明</h3><h4 id="NSResponder"><a href="#NSResponder" class="headerlink" title="NSResponder"></a>NSResponder</h4><p><code>NSResponder</code> 在这里是非常重要的一个类，其中定义了鼠标键盘触控板等多种事件，这里列举一些鼠标跟键盘的主要方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">// 鼠标按下事件</div><div class="line">- (void)mouseDown:(NSEvent *)event;</div><div class="line"></div><div class="line">// 鼠标右键按下事件</div><div class="line">- (void)rightMouseDown:(NSEvent *)event;</div><div class="line"></div><div class="line">// 鼠标抬起事件</div><div class="line">- (void)mouseUp:(NSEvent *)event;</div><div class="line"></div><div class="line">// 鼠标右键抬起事件</div><div class="line">- (void)rightMouseUp:(NSEvent *)event;</div><div class="line"></div><div class="line">// 鼠标移动事件</div><div class="line">- (void)mouseMoved:(NSEvent *)event;</div><div class="line"></div><div class="line">// 鼠标拖拽事件</div><div class="line">- (void)mouseDragged:(NSEvent *)event;</div><div class="line"></div><div class="line">// 鼠标滚动事件</div><div class="line">- (void)scrollWheel:(NSEvent *)event;</div><div class="line"></div><div class="line">// 鼠标右键拖拽事件</div><div class="line">- (void)rightMouseDragged:(NSEvent *)event;</div><div class="line"></div><div class="line">// 鼠标进入监控区域事件</div><div class="line">- (void)mouseEntered:(NSEvent *)event;</div><div class="line"></div><div class="line">// 鼠标离开监控区域事件</div><div class="line">- (void)mouseExited:(NSEvent *)event;</div><div class="line"></div><div class="line">// 键盘按下事件</div><div class="line">- (void)keyDown:(NSEvent *)event;</div><div class="line"></div><div class="line">// 键盘按下事件</div><div class="line">- (void)keyUp:(NSEvent *)event;</div><div class="line"></div><div class="line">// 键盘控制键的按下标记状态发送改变，后面用该方法来获取控制按下事件，参考 NSEventModifierFlags 定义</div><div class="line">- (void)flagsChanged:(NSEvent *)event;</div></pre></td></tr></table></figure>
+<p><code>NSResponder</code> 除了定义基本的响应事件外，还定义了很多其他事件方法。具体请参考 <em><code>NSResponder.h</code></em> 的头文件定义。</p>
+<h4 id="NSEvent"><a href="#NSEvent" class="headerlink" title="NSEvent"></a>NSEvent</h4><p><code>NSEvent</code> 类描述了事件的具体信息，这里列举跟鼠标和键盘相关的一些字段的介绍：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">// 事件类型</div><div class="line">@property (readonly) NSEventType type;</div><div class="line"></div><div class="line">// 键盘控制键的按下状态的标记</div><div class="line">@property (readonly) NSEventModifierFlags modifierFlags;</div><div class="line"></div><div class="line">// 事件的时间戳</div><div class="line">@property (readonly) NSTimeInterval timestamp;</div><div class="line"></div><div class="line">// 鼠标点击的次数（只有鼠标事件，才可使用）</div><div class="line">@property (readonly) NSInteger clickCount;</div><div class="line">@property (readonly) NSInteger buttonNumber; </div><div class="line">@property (readonly) NSInteger eventNumber;</div><div class="line"></div><div class="line">// 压力值</div><div class="line">@property (readonly) float pressure;</div><div class="line"></div><div class="line">// 鼠标在窗口的位置</div><div class="line">@property (readonly) NSPoint locationInWindow;</div><div class="line"></div><div class="line">// 鼠标滚动时。分别在 X 和 Y 轴上的偏移 </div><div class="line">@property (readonly) CGFloat scrollingDeltaX NS_AVAILABLE_MAC(10_7);</div><div class="line">@property (readonly) CGFloat scrollingDeltaY NS_AVAILABLE_MAC(10_7);</div><div class="line"></div><div class="line">// 键盘事件的字符编码和 key code 值</div><div class="line">@property (nullable, readonly, copy) NSString *characters;</div><div class="line">@property (readonly) unsigned short keyCode;</div></pre></td></tr></table></figure>
+<h4 id="NSEventType"><a href="#NSEventType" class="headerlink" title="NSEventType"></a>NSEventType</h4><p><code>NSEventType</code> 类型定义了事件的具体类型，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line">typedef NS_ENUM(NSUInteger, NSEventType) &#123;        /* various types of events */</div><div class="line">    NSEventTypeLeftMouseDown             = 1,</div><div class="line">    NSEventTypeLeftMouseUp               = 2,</div><div class="line">    NSEventTypeRightMouseDown            = 3,</div><div class="line">    NSEventTypeRightMouseUp              = 4,</div><div class="line">    NSEventTypeMouseMoved                = 5,</div><div class="line">    NSEventTypeLeftMouseDragged          = 6,</div><div class="line">    NSEventTypeRightMouseDragged         = 7,</div><div class="line">    NSEventTypeMouseEntered              = 8,</div><div class="line">    NSEventTypeMouseExited               = 9,</div><div class="line">    NSEventTypeKeyDown                   = 10,</div><div class="line">    NSEventTypeKeyUp                     = 11,</div><div class="line">    NSEventTypeFlagsChanged              = 12,</div><div class="line">    NSEventTypeAppKitDefined             = 13,</div><div class="line">    NSEventTypeSystemDefined             = 14,</div><div class="line">    NSEventTypeApplicationDefined        = 15,</div><div class="line">    NSEventTypePeriodic                  = 16,</div><div class="line">    NSEventTypeCursorUpdate              = 17,</div><div class="line">    NSEventTypeScrollWheel               = 22,</div><div class="line">    NSEventTypeTabletPoint               = 23,</div><div class="line">    NSEventTypeTabletProximity           = 24,</div><div class="line">    NSEventTypeOtherMouseDown            = 25,</div><div class="line">    NSEventTypeOtherMouseUp              = 26,</div><div class="line">    NSEventTypeOtherMouseDragged         = 27,</div><div class="line">    /* The following event types are available on some hardware on 10.5.2 and later */</div><div class="line">    NSEventTypeGesture NS_ENUM_AVAILABLE_MAC(10_5)       = 29,</div><div class="line">    NSEventTypeMagnify NS_ENUM_AVAILABLE_MAC(10_5)       = 30,</div><div class="line">    NSEventTypeSwipe   NS_ENUM_AVAILABLE_MAC(10_5)       = 31,</div><div class="line">    NSEventTypeRotate  NS_ENUM_AVAILABLE_MAC(10_5)       = 18,</div><div class="line">    NSEventTypeBeginGesture NS_ENUM_AVAILABLE_MAC(10_5)  = 19,</div><div class="line">    NSEventTypeEndGesture NS_ENUM_AVAILABLE_MAC(10_5)    = 20,</div><div class="line">    </div><div class="line">#if __LP64__</div><div class="line">    NSEventTypeSmartMagnify NS_ENUM_AVAILABLE_MAC(10_8) = 32,</div><div class="line">#endif</div><div class="line">    NSEventTypeQuickLook NS_ENUM_AVAILABLE_MAC(10_8) = 33,</div><div class="line">    </div><div class="line">#if __LP64__</div><div class="line">    NSEventTypePressure NS_ENUM_AVAILABLE_MAC(10_10_3) = 34,</div><div class="line">    NSEventTypeDirectTouch NS_ENUM_AVAILABLE_MAC(10_10) = 37,</div><div class="line">#endif</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h4 id="NSEventModifierFlags"><a href="#NSEventModifierFlags" class="headerlink" title="NSEventModifierFlags"></a>NSEventModifierFlags</h4><p><code>NSEventModifierFlags</code> 类型描述了一些控制键，是否处于按下状态，定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">/* Device-independent bits found in event modifier flags */</div><div class="line">typedef NS_OPTIONS(NSUInteger, NSEventModifierFlags) &#123;</div><div class="line">    NSEventModifierFlagCapsLock           = 1 &lt;&lt; 16, // Set if Caps Lock key is pressed.</div><div class="line">    NSEventModifierFlagShift              = 1 &lt;&lt; 17, // Set if Shift key is pressed.</div><div class="line">    NSEventModifierFlagControl            = 1 &lt;&lt; 18, // Set if Control key is pressed.</div><div class="line">    NSEventModifierFlagOption             = 1 &lt;&lt; 19, // Set if Option or Alternate key is pressed.</div><div class="line">    NSEventModifierFlagCommand            = 1 &lt;&lt; 20, // Set if Command key is pressed.</div><div class="line">    NSEventModifierFlagNumericPad         = 1 &lt;&lt; 21, // Set if any key in the numeric keypad is pressed.</div><div class="line">    NSEventModifierFlagHelp               = 1 &lt;&lt; 22, // Set if the Help key is pressed.</div><div class="line">    NSEventModifierFlagFunction           = 1 &lt;&lt; 23, // Set if any function key is pressed.</div><div class="line">    </div><div class="line">    // Used to retrieve only the device-independent modifier flags, allowing applications to mask off the device-dependent modifier flags, including event coalescing information.</div><div class="line">    NSEventModifierFlagDeviceIndependentFlagsMask    = 0xffff0000UL</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h3 id="事件的监听方法"><a href="#事件的监听方法" class="headerlink" title="事件的监听方法"></a>事件的监听方法</h3><p>鼠标键盘事件的监听有多种方法，第一种方法是重写事件响应者 <code>Responders</code> 对应的方法来获取对应的事件；第二是通过重写 <code>NSWindow</code> 的 <em><code>sendEvent:</code></em> 方法； 第三是通过的 <code>NSEvent</code> 提供静态方法来监听对应的事件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">+ (nullable id)addGlobalMonitorForEventsMatchingMask:(NSEventMask)mask handler:(void (^)(NSEvent*))block`</div><div class="line"></div><div class="line">+ (nullable id)addLocalMonitorForEventsMatchingMask:(NSEventMask)mask handler:(NSEvent* __nullable (^)(NSEvent*))block</div><div class="line"></div><div class="line">+ (void)removeMonitor:(id)eventMonitor</div></pre></td></tr></table></figure>
+<p><code>NSEvent</code> 提供的静态方法可以用监听整个系统的事件或者当前应用程序内的事件。全局事件是异步过程因此无法修改事件，应用程序内的消息可以在捕获到消息后，修改事件然后继续交由响应者链中下一个响应者处理。</p>
+<h3 id="鼠标事件监听"><a href="#鼠标事件监听" class="headerlink" title="鼠标事件监听"></a>鼠标事件监听</h3><p>这里介绍鼠标的一下事件处理方法和注意事项：</p>
+<ol>
+<li>左/右键的按下抬起事件</li>
+<li>左键的双击（或者多击事件）</li>
+<li>左键或者右键的拖拽事件</li>
+<li>鼠标移动事件</li>
+<li>鼠标的滚动事件</li>
+</ol>
+<p>前面介绍了三种监听事件的方法，这里使用重写 <code>Responders</code> 的方法来监听鼠标事件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">- (void)mouseDown:(NSEvent *)event;</div><div class="line">- (void)rightMouseDown:(NSEvent *)event;</div><div class="line">- (void)mouseUp:(NSEvent *)event;</div><div class="line">- (void)rightMouseUp:(NSEvent *)event;</div><div class="line">- (void)mouseMoved:(NSEvent *)event;</div><div class="line">- (void)mouseDragged:(NSEvent *)event;</div><div class="line">- (void)rightMouseDragged:(NSEvent *)event;</div><div class="line">- (void)scrollWheel:(NSEvent *)event;</div></pre></td></tr></table></figure>
+<p>鼠标按键的按下抬起事件，只要判断一下 <code>NSEvent</code> 的 <em><code>type</code></em> 属性即可知道。</p>
+<p>当前鼠标的位置信息可通过 <em><code>locationInWindow</code></em> 属性来获取，该坐标是当前 Window 窗口的坐标，其中包含了 Window 窗口标题栏的高度，所以如果要想获取当前鼠标在当前 <code>NSView</code> 中的位置，需要做一次坐标转换，可以调用 <code>NSView</code> 的 <em><code>convertPoint:</code></em> 方法来转换坐标。</p>
+<p>鼠标左键的 <code>按下 - 抬起</code> 两个连续的动作被定义为单击事件，<em><code>clickCount</code></em> 属于用于描述当前点击的次数。在模拟鼠标双击时，需要用到该字段值，而不能用连续两次点击事件来模拟双击。</p>
+<p>监听鼠标的移动事件时需要设置一个跟踪区域，只有在跟踪区域内的鼠标移动事件才会触发。可以通过 <code>NSView</code> 的 <code>- (void)addTrackingArea:(NSTrackingArea *)trackingArea</code> 方法来设置跟踪区域。同时需要重写 <code>- (void)updateTrackingAreas</code> 方法，当跟踪区域发送改变时，需要手动将之前的跟踪区域移除，再添加新的跟踪区域。</p>
+<p>鼠标的拖拽事件是指用户按下鼠标左键或右键移动鼠标，当拖拽事件发生时 <em><code>mouseMoved:</code></em> 事件将不会触发。</p>
+<p>鼠标的滚动可以通过 <em><code>deltaX</code></em> 和 <em><code>deltaY</code></em> 两个属性来获取分别在水平方向和垂直方向的滚动偏移。</p>
+<blockquote>
+<p>OSX 的坐标系统以左下角为 (0,0) 右上角为 (x_max, y_max)</p>
+</blockquote>
+<h3 id="键盘事件的监听"><a href="#键盘事件的监听" class="headerlink" title="键盘事件的监听"></a>键盘事件的监听</h3><p>键盘事件的监听也使用重写事件响应者 <code>Responders</code> 对应的方法来实现，需要重写的方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">- (void)keyDown:(NSEvent *)event;</div><div class="line">- (void)keyUp:(NSEvent *)event;</div><div class="line">- (void)flagsChanged:(NSEvent *)event;</div></pre></td></tr></table></figure>
+<p>键盘事件重写上述方法外还需要重写以下方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">- (BOOL)acceptsFirstResponder;</div></pre></td></tr></table></figure>
+<p>该方法用来说明是否成为响应者链的第一个响应者，这里需要返回 <code>YES</code> 表示成为第一响应者，否则无法监听键盘消息。</p>
+<p><code>NSEvent</code> 的 <em><code>characters</code></em> 描述了当前键盘按键的字符，<em><code>keyCode</code></em> 描述了按键的值，每个按键的 <code>keyCode</code> 值定义可以在 <em><code>Carbon/HIToolbox/Events.h</code></em> 文件中找到对应的按键的宏定义。</p>
+<p>在 <em><code>keyDown:</code></em> 和 <em><code>keyUp:</code></em> 方法中可以监听到大部分的按键的消息，但一些控制键需要通过 <em><code>flagsChanged:</code></em> 方法来处理，当 <code>NSEventModifierFlags</code> 定义的按键状态发送改变时，该方法就会被触发。这里需要注意的是大小写锁定键 <code>NSEventModifierFlagCapsLock</code> 只有当大写锁定或者取消锁定时，该方法才会被调用，并不会因为 <code>CapsLock</code> 按键按下或者抬起时触发。</p>
+<blockquote>
+<p>keyCode 值在 Windows 和浏览器上都有对应的键盘按键的值的定义，当需要与其他平台进行通信时，例如远程控制时，可以将 Mac 下的 keyCode 值转换成浏览器 JS 上的对应值定义，因为浏览器和 Windows 平台的定义是一致的。</p>
+<p> <em><code>CGEventSourceKeyState(kCGEventSourceStateHIDSystemState, kVK_CapsLock)</code></em> 方法可以用来获取按键是否处于按下状态。</p>
+</blockquote>
+<h3 id="鼠标键盘事件的模拟"><a href="#鼠标键盘事件的模拟" class="headerlink" title="鼠标键盘事件的模拟"></a>鼠标键盘事件的模拟</h3><p>OSX 下的鼠标和键盘事件模拟需要用到 <code>CoreGraphics</code> 及 <code>Carbon</code> 框架，在 <code>CoreGraphics</code> 框架中定义了一些用于创建底层事件的方法，<code>Carbon</code> 框架定义了一些跟键盘相关的宏和方法。</p>
+<p>在模拟鼠标或者键盘事件时，都需要使用 <em><code>CGEventSourceCreate(CGEventSourceStateID stateID)</code></em> 方法来创建事件源，事件源类型定义了 3 个类型，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">typedef CF_ENUM(int32_t, CGEventSourceStateID) &#123;</div><div class="line">  kCGEventSourceStatePrivate = -1,</div><div class="line">  kCGEventSourceStateCombinedSessionState = 0,</div><div class="line">  kCGEventSourceStateHIDSystemState = 1</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<ul>
+<li><code>kCGEventSourceStatePrivate</code>：代表专门的应用，如远程控制程序可以生成和跟踪事件源状态独立于其他进程。</li>
+<li><code>kCGEventSourceStateCombinedSessionState</code>：该状态表反映了所有事件源的组合状态发布到当前用户的登录会话。如果您的程序发布的事件在一个登录会话，您应该使用这个源状态当你创建一个事件源。</li>
+<li><code>kCGEventSourceStateHIDSystemState</code>：该状态表反映了组合硬件输入源从 HID 系统硬件层面发送的事件源。生成的事件。 就是外接键盘或者 macbook 本机键盘以及一些系统定义的按键点击事件。</li>
+</ul>
+<p>这里自己封装了鼠标事件、鼠标滚动事件及键盘事件的方法，需要引入 <code>&lt;Carbon/Carbon.h&gt;</code> 及 <code>&lt;AppKit/AppKit.h&gt;</code> 头文件</p>
+<h4 id="1-模拟鼠标事件："><a href="#1-模拟鼠标事件：" class="headerlink" title="1. 模拟鼠标事件："></a>1. 模拟鼠标事件：</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">void PostMouseEvent(CGMouseButton button, CGEventType type, const CGPoint &amp;point, int64_t clickCount)</div><div class="line">&#123;</div><div class="line">    CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStatePrivate);</div><div class="line">    CGEventRef theEvent = CGEventCreateMouseEvent(source, type, point, button);</div><div class="line">    CGEventSetIntegerValueField(theEvent, kCGMouseEventClickState, clickCount);</div><div class="line">    CGEventSetType(theEvent, type);</div><div class="line">    CGEventPost(kCGHIDEventTap, theEvent);</div><div class="line">    CFRelease(theEvent);</div><div class="line">    CFRelease(source);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>左键单击模拟：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">PostMouseEvent(kCGMouseButtonLeft, kCGEventLeftMouseDown, CGPointZero, 1);</div><div class="line">PostMouseEvent(kCGMouseButtonLeft, kCGEventLeftMouseUp, CGPointZero, 1);</div></pre></td></tr></table></figure>
+<p><strong>左键双击模拟：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">PostMouseEvent(kCGMouseButtonLeft, kCGEventLeftMouseDown, CGPointZero, 1);</div><div class="line">PostMouseEvent(kCGMouseButtonLeft, kCGEventLeftMouseUp, CGPointZero, 1);</div><div class="line">PostMouseEvent(kCGMouseButtonLeft, kCGEventLeftMouseDown, CGPointZero, 2);</div><div class="line">PostMouseEvent(kCGMouseButtonLeft, kCGEventLeftMouseUp, CGPointZero, 2);</div></pre></td></tr></table></figure>
+<p><strong>拖拽事件：</strong> 如果是拖拽事件，例如左键拖拽事件，则需要先发送左键的 <code>kCGEventLeftMouseDown</code> 事件，然后连续发送 <code>kCGEventLeftMouseDragged</code> 事件，再发送 <code>kCGEventLeftMouseUp</code> 事件，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">PostMouseEvent(kCGMouseButtonLeft, kCGEventLeftMouseDown, CGPointZero, 1);</div><div class="line">PostMouseEvent(kCGMouseButtonLeft, kCGEventLeftMouseDragged, CGPointZero, 1);</div><div class="line">...</div><div class="line">PostMouseEvent(kCGMouseButtonLeft, kCGEventLeftMouseDragged, CGPointZero, 1);</div><div class="line">PostMouseEvent(kCGMouseButtonLeft, kCGEventLeftMouseUp, CGPointZero, 1);</div></pre></td></tr></table></figure>
+<p>模拟其他鼠标事件，将枚举值修改一下即可。</p>
+<h4 id="2-模拟鼠标滚动事件"><a href="#2-模拟鼠标滚动事件" class="headerlink" title="2. 模拟鼠标滚动事件"></a>2. 模拟鼠标滚动事件</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">void PostScrollWheelEvent(int32_t scrollingDeltaX, int32_t scrollingDeltaY)</div><div class="line">&#123;</div><div class="line">    CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStatePrivate);</div><div class="line">    CGEventRef theEvent = CGEventCreateScrollWheelEvent(source, kCGScrollEventUnitPixel, 2, scrollingDeltaY, scrollingDeltaX);</div><div class="line">    CGEventPost(kCGHIDEventTap, theEvent);</div><div class="line">    CFRelease(theEvent);</div><div class="line">    CFRelease(source);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>鼠标滚轮事件只要传入水平和垂直方向的偏移即可实现。</p>
+<h4 id="3-模拟键盘事件"><a href="#3-模拟键盘事件" class="headerlink" title="3. 模拟键盘事件"></a>3. 模拟键盘事件</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">void PostKeyboardEvent(CGKeyCode virtualKey, bool keyDown, CGEventFlags flags)</div><div class="line">&#123;</div><div class="line">    CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStatePrivate);</div><div class="line">    CGEventRef push = CGEventCreateKeyboardEvent(source, virtualKey, keyDown);</div><div class="line">    CGEventSetFlags(push, flags);</div><div class="line">    CGEventPost(kCGHIDEventTap, push);</div><div class="line">    CFRelease(push);</div><div class="line">    CFRelease(source);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>键盘事件的模拟需要注意的就是 <em><code>CGEventFlags flags</code></em> 参数，该参数用来模拟组合键的实现，类型定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">typedef CF_OPTIONS(uint64_t, CGEventFlags) &#123; /* Flags for events */</div><div class="line">  /* Device-independent modifier key bits. */</div><div class="line">  kCGEventFlagMaskAlphaShift =          NX_ALPHASHIFTMASK,</div><div class="line">  kCGEventFlagMaskShift =               NX_SHIFTMASK,</div><div class="line">  kCGEventFlagMaskControl =             NX_CONTROLMASK,</div><div class="line">  kCGEventFlagMaskAlternate =           NX_ALTERNATEMASK,</div><div class="line">  kCGEventFlagMaskCommand =             NX_COMMANDMASK,</div><div class="line"></div><div class="line">  /* Special key identifiers. */</div><div class="line">  kCGEventFlagMaskHelp =                NX_HELPMASK,</div><div class="line">  kCGEventFlagMaskSecondaryFn =         NX_SECONDARYFNMASK,</div><div class="line"></div><div class="line">  /* Identifies key events from numeric keypad area on extended keyboards. */</div><div class="line">  kCGEventFlagMaskNumericPad =          NX_NUMERICPADMASK,</div><div class="line"></div><div class="line">  /* Indicates if mouse/pen movement events are not being coalesced */</div><div class="line">  kCGEventFlagMaskNonCoalesced =        NX_NONCOALSESCEDMASK</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>解析如下：</p>
+<ul>
+<li>kCGEventFlagMaskAlphaShift：大小写锁定键是否处于开启状态</li>
+<li>kCGEventFlagMaskShift：Shift 键是否按下</li>
+<li>kCGEventFlagMaskControl：Control 键是否按下</li>
+<li>kCGEventFlagMaskAlternate：Alt 键是否按下，对应 Mac 键盘的 option 键</li>
+<li>kCGEventFlagMaskCommand：Command 键是否按下，对应 Windows 的 WIN 键</li>
+<li>kCGEventFlagMaskHelp：Help 键</li>
+<li>kCGEventFlagMaskSecondaryFn：Fn 键</li>
+<li>kCGEventFlagMaskNumericPad：数字键盘</li>
+<li>kCGEventFlagMaskNonCoalesced：没有任何键按下</li>
+</ul>
+<p>如果有多个控制键同时按下，则使用位运算的或 <code>|</code> 加上对应的键值即可。例如模拟 <code>Command + Control + S</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">PostKeyboardEvent(kVK_ANSI_S, true, kCGEventFlagMaskCommand | kCGEventFlagMaskControl)</div><div class="line">PostKeyboardEvent(kVK_ANSI_S, false, kCGEventFlagMaskNonCoalesced)</div></pre></td></tr></table></figure>
+<blockquote>
+<p>大小写锁定键，无法通过 kVK_CapsLock 按键的按下和抬起事件来模拟大小键的锁定，同时按键上的 LED 灯也是不会有变化的。</p>
+</blockquote>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li><a href="http://www.macdev.io/ebook/event.html" target="_blank" rel="external">鼠标和键盘事件</a></li>
+<li><a href="https://www.sunyazhou.com/2017/02/22/macOS-simulate-keyborad-NSEvent/" target="_blank" rel="external">macOS上模拟发送键盘事件</a></li>
+<li><a href="http://zhihaozhang.github.io/2017/09/23/%E8%AE%A9iMac%E4%B8%8EMacBook%E9%AB%98%E6%95%88%E5%8D%8F%E5%90%8C%E5%B7%A5%E4%BD%9C%E2%80%94%E2%80%94mouseSync%E5%BC%80%E5%8F%91%E5%BF%83%E5%BE%97/" target="_blank" rel="external">开发mouseSync的初衷</a></li>
+<li><a href="https://blog.csdn.net/ch_soft/article/details/7371136" target="_blank" rel="external">监听Mac OS X的全局鼠标事件</a></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;最近完成了 Mac OSX 平台下的远程控制功能，期间找了不少资料，这里做个总结，主要涉及到一下知识点：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;OSX 的事件机制&lt;/li&gt;
+&lt;li&gt;OSX/iOS 响应链者链&lt;/li&gt;
+&lt;li&gt;Keycode 键盘编码&lt;/li&gt;
+&lt;li&gt;鼠标事件的监听及模拟（鼠标单击、双击、拖动、滚动等事件）&lt;/li&gt;
+&lt;li&gt;键盘事件的监听及模拟（包括组合键的模拟）&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&quot;事件分发机制&quot;&gt;&lt;a href=&quot;#事件分发机制&quot; class=&quot;headerlink&quot; title=&quot;事件分发机制&quot;&gt;&lt;/a&gt;事件分发机制&lt;/h3&gt;&lt;p&gt;在 OSX 系统中鼠标和键盘的活动事件都会产生底层的系统事件，首先传递到 IOKit 框架处理后存储到队列中，通知 Window Server 服务层处理。Window Server 存储到 FIFO 优先队列中，然后逐一转发到当前活动窗口或者能响应这个事件的应用程序去处理。&lt;/p&gt;
+&lt;p&gt;在 OSX 或者 iOS 程序中，都会有一个 Main Run Loop 的线程，RunLoop 循环中会遍历 event 消息队列，逐一分发这些事件到应用中合适的对象去处理。具体来说就是调用 &lt;code&gt;NSApp&lt;/code&gt; 的 &lt;em&gt;&lt;code&gt;sendEvent:&lt;/code&gt;&lt;/em&gt; 方法发送消息到&lt;code&gt;NSWindow&lt;/code&gt;，&lt;code&gt;NSWindow&lt;/code&gt; 再分发到 &lt;code&gt;NSView&lt;/code&gt; 视图对象，由其鼠标或键盘事件响应方法去处理。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/uploads/EventDispatch.png&quot; alt=&quot;Alt text&quot;&gt;&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="知识整理/总结" scheme="http://enkichen.com/categories/%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E6%80%BB%E7%BB%93/"/>
+    
+    
+      <category term="OSX" scheme="http://enkichen.com/tags/OSX/"/>
+    
+  </entry>
+  
+  <entry>
     <title>H264/SVC Temporal Scalability</title>
     <link href="http://enkichen.com/2018/05/23/H264-SVC-Temporal-Scalability/"/>
     <id>http://enkichen.com/2018/05/23/H264-SVC-Temporal-Scalability/</id>
     <published>2018-05-23T09:46:10.000Z</published>
-    <updated>2018-05-23T10:31:38.786Z</updated>
+    <updated>2018-05-23T10:44:17.617Z</updated>
     
-    <content type="html"><![CDATA[<p>在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 <code>Temporal Scalability</code> 机制来优化该方案。</p>
+    <content type="html"><![CDATA[<p>在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、Wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 <code>Temporal Scalability</code> 机制来优化该方案。</p>
 <p><code>Temporal Scalability</code> 是 H264/SVC 编码器中的概念，意思为时间上可伸缩的，在实际编码中编码器进行了分层编码，可简单的理解为 <strong>编码器对同一组输入的数据进行编码，可以输出不同帧率的码流</strong>，例如当前编码器输入帧率为 30fps 的流，编码器可同时输出多个码流，例如同时输出 3 层码流，从而可以得到不同帧率的码流。<br><a id="more"></a></p>
 <blockquote>
 <p>这里的 3 层码流是有依赖关系，比如输出有 A、B、C 3 层码流，单独的发送 A 层则得到低帧率的码流例如 5fps，如果同时发送 A 和 B 两层码流，则能得到相对较高的码流例如 15fps，如果同时发送 ABC ，则能得到最高的码流例如 30fps。</p>
@@ -71,7 +217,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 &lt;code&gt;Temporal Scalability&lt;/code&gt; 机制来优化该方案。&lt;/p&gt;
+      &lt;p&gt;在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、Wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 &lt;code&gt;Temporal Scalability&lt;/code&gt; 机制来优化该方案。&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Temporal Scalability&lt;/code&gt; 是 H264/SVC 编码器中的概念，意思为时间上可伸缩的，在实际编码中编码器进行了分层编码，可简单的理解为 &lt;strong&gt;编码器对同一组输入的数据进行编码，可以输出不同帧率的码流&lt;/strong&gt;，例如当前编码器输入帧率为 30fps 的流，编码器可同时输出多个码流，例如同时输出 3 层码流，从而可以得到不同帧率的码流。&lt;br&gt;
     
     </summary>
@@ -1785,41 +1931,6 @@
       <category term="Provisioning Profiles" scheme="http://enkichen.com/tags/Provisioning-Profiles/"/>
     
       <category term="开发者账号" scheme="http://enkichen.com/tags/%E5%BC%80%E5%8F%91%E8%80%85%E8%B4%A6%E5%8F%B7/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>无法旋转的UIWindow子类</title>
-    <link href="http://enkichen.com/2016/01/05/UIWindow-cannot-rotate/"/>
-    <id>http://enkichen.com/2016/01/05/UIWindow-cannot-rotate/</id>
-    <published>2016-01-05T02:36:34.000Z</published>
-    <updated>2016-01-07T02:08:00.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>项目中一直用了两个<strong>UIWindow</strong>，一个是框架默认的，另一个是用来显示调试信息的<strong>UIWindow</strong>。至于为什么要用一个<strong>UIWindow</strong>，而不是用<strong>UIView</strong>呢，是因为<strong>UIView</strong>旋转控制太麻烦了，如果用<strong>UIView</strong>加一个<strong>UIViewController</strong>会方便很多，而且也不用考虑系统版本的区别。<br><a id="more"></a><br>最近一个同事用同样的方法使用<strong>UIWindow</strong>子类做一个提示框的公用组件，但发现<code>rootViewController</code>无法自动旋转。于是我对比了两个<strong>UIWindow</strong>的子类，发现代码并没什么区别，只是多了一些公用方法和一个<code>delegate</code>。但就是不能支持旋转，而我的都正常，试过好多方法，都没找到原因。最后只好一部分一部分注释掉一些代码。当我把一个<code>delegate</code>的属性注释掉以后，神奇的事情发生了，竟然可以旋转了！！！！ 于是把所有改动都还原了，然后只注释掉<code>delegate</code>属性（改一个名称也一样），发现旋转一切正常了。于是在我之前的<strong>UIWindow</strong>子类中添加<code>delegate</code>属性，发现也不能进行旋转。  </p>
-<p>猜想是不是子类<code>delegate</code>属性覆盖了父类的<code>delegate</code>属性，而<strong>UIWindow</strong>在控制旋转的逻辑跟<code>delegate</code>属性有关。至少有一下两种方式进行调试：  </p>
-<ul>
-<li>子类<strong>UIWindow</strong>中添加<code>delegate</code>属性，然后在setDelegate方法中添加日志。</li>
-<li>使用Category为<strong>UIWindow</strong>添加一个<code>delegate</code>属性声明，然后打印<code>delegate</code>属性</li>
-</ul>
-<p>通过上述方法可以发现，<strong>UIWindow</strong>内部实现是存在一个<code>delegate</code>属性的，根据日志可以确定该属性是指向<code>rootViewController</code>对象。也就是说如果我们在<strong>UIWindow</strong>子类添加<code>delegate</code>属性就会影响到<strong>UIWindow</strong>对旋转的控制。  </p>
-<p>后续调试发现旋转的相关方法在<code>rootViewController</code>中都会正常被调用，但就是没办法进行旋转，也就是说在<strong>UIWindow</strong>子类中添加<code>delegate</code>属性和没有添加该属性，对应我们应用来说，该走的方法都会按照正常流程跑完，但就是不能进行旋转。具体原因还未知，后续有新发现将会更新，如果有人知道，还请告知，谢谢，以下我的调试环境：  </p>
-<blockquote>
-<p>OSX版本为：10.10.5 (14F27)<br>Xcode 版本为：7.2 (7C68)<br>SDK：iOS 9.2  </p>
-</blockquote>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;项目中一直用了两个&lt;strong&gt;UIWindow&lt;/strong&gt;，一个是框架默认的，另一个是用来显示调试信息的&lt;strong&gt;UIWindow&lt;/strong&gt;。至于为什么要用一个&lt;strong&gt;UIWindow&lt;/strong&gt;，而不是用&lt;strong&gt;UIView&lt;/strong&gt;呢，是因为&lt;strong&gt;UIView&lt;/strong&gt;旋转控制太麻烦了，如果用&lt;strong&gt;UIView&lt;/strong&gt;加一个&lt;strong&gt;UIViewController&lt;/strong&gt;会方便很多，而且也不用考虑系统版本的区别。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="开发笔记" scheme="http://enkichen.com/categories/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0/"/>
-    
-    
-      <category term="UIWindow" scheme="http://enkichen.com/tags/UIWindow/"/>
-    
-      <category term="旋转" scheme="http://enkichen.com/tags/%E6%97%8B%E8%BD%AC/"/>
     
   </entry>
   

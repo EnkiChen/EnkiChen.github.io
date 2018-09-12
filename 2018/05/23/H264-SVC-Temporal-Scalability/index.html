@@ -89,18 +89,18 @@
 
 
 
-<meta name="description" content="在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 Temporal Scalability 机制来优化该">
+<meta name="description" content="在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、Wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 Temporal Scalability 机制来优化该">
 <meta name="keywords" content="h264">
 <meta property="og:type" content="article">
 <meta property="og:title" content="H264/SVC Temporal Scalability">
 <meta property="og:url" content="http://enkichen.com/2018/05/23/H264-SVC-Temporal-Scalability/index.html">
 <meta property="og:site_name" content="Enki's Notes">
-<meta property="og:description" content="在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 Temporal Scalability 机制来优化该">
+<meta property="og:description" content="在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、Wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 Temporal Scalability 机制来优化该">
 <meta property="og:image" content="http://enkichen.com/uploads/SVC_Temporal_Scalability.png">
-<meta property="og:updated_time" content="2018-05-23T10:31:38.786Z">
+<meta property="og:updated_time" content="2018-05-23T10:44:17.617Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="H264/SVC Temporal Scalability">
-<meta name="twitter:description" content="在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 Temporal Scalability 机制来优化该">
+<meta name="twitter:description" content="在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、Wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 Temporal Scalability 机制来优化该">
 <meta name="twitter:image" content="http://enkichen.com/uploads/SVC_Temporal_Scalability.png">
 
 
@@ -395,7 +395,7 @@
       
 
       
-        <p>在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 <code>Temporal Scalability</code> 机制来优化该方案。</p>
+        <p>在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、Wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 <code>Temporal Scalability</code> 机制来优化该方案。</p>
 <p><code>Temporal Scalability</code> 是 H264/SVC 编码器中的概念，意思为时间上可伸缩的，在实际编码中编码器进行了分层编码，可简单的理解为 <strong>编码器对同一组输入的数据进行编码，可以输出不同帧率的码流</strong>，例如当前编码器输入帧率为 30fps 的流，编码器可同时输出多个码流，例如同时输出 3 层码流，从而可以得到不同帧率的码流。<br><a id="more"></a></p>
 <blockquote>
 <p>这里的 3 层码流是有依赖关系，比如输出有 A、B、C 3 层码流，单独的发送 A 层则得到低帧率的码流例如 5fps，如果同时发送 A 和 B 两层码流，则能得到相对较高的码流例如 15fps，如果同时发送 ABC ，则能得到最高的码流例如 30fps。</p>
@@ -496,6 +496,10 @@
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/12/osx-mouse-keyboard-event/" rel="next" title="Mac OSX 鼠标键盘事件的监听和模拟">
+                <i class="fa fa-chevron-left"></i> Mac OSX 鼠标键盘事件的监听和模拟
+              </a>
             
           </div>
 
@@ -602,7 +606,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-count">24</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -624,7 +628,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-count">33</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
