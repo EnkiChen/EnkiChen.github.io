@@ -105,7 +105,7 @@
 <meta property="og:image" content="http://enkichen.com/uploads/vbr.png">
 <meta property="og:image" content="http://enkichen.com/uploads/interlaced_vs_progressive.png">
 <meta property="og:image" content="http://enkichen.com/uploads/codec_history_timeline.png">
-<meta property="og:updated_time" content="2017-11-26T06:33:42.000Z">
+<meta property="og:updated_time" content="2018-10-23T09:01:52.834Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="图像编码与 H264 基础知识">
 <meta name="twitter:description" content="RGB 颜色模型图像的采集可以通过摄像头或者截取屏幕来获取的图像数据。一幅图像可以看作为一个二维的矩阵，其中矩阵中的每一个点被称为像素。像素的颜色可以通过红、绿、蓝来表示，也就是常说的 3 基色。如下图所示：  每个像素可以用不同的数据位数来表示，常用的量化位数有 16 位、24 位、32 位等，24 位最好理解，就是 RGB 的各个分量各占 8 位，取值范围为 0 ~ 255；32 位则是 24">
@@ -416,7 +416,7 @@
 <p>视频采样中通过逐行扫描得到一幅完整的图像称之为一帧，通常帧频率为 25 帧（PAL制）、30 帧每秒（NTSC制），而通过隔行扫描（奇、偶数行），那么一帧图像就被分成两场，通常场频为 50Hz（PAL制）、60Hz（NTSC制）。这是在早起，工程师们提出的一种技术，能够在不消耗额外的带宽的情况下，使得显示器的感知帧率倍增。这种技术称为隔行视频；它基本上在 1 帧中发送一半的屏幕，而在下一帧中发送另一半。</p>
 <p><img src="/uploads/interlaced_vs_progressive.png" alt="Alt text"></p>
 <p>今天视频的显示主要使用逐行扫描技术。逐行是显示、存储或发送运动图像的方法，其中每帧的所有行被依次绘制。</p>
-<h2 id="H264-编码"><a href="#H264-编码" class="headerlink" title="H264 编码"></a>H264 编码</h2><p>当需要存储视频或者网络传输时，无论是使用 RGB 还是 YUV 格式，所需要的码率和存储空间都是非常大的，例如一个分辨率为 1280 x 720 ，24 位量化位数，采样频率为每秒 30 帧，一个小时的视频则需要 <em>`1280 </em> 720 <em> 3 </em> 30 <em> 60 </em> 60 = 278G<code>* 的空间来存储该视频。而在显示或网络传输该视频时所需要的码率为 *</code>1280 <em> 720 </em> 24 <em> 30 = 632Mbps`</em>，这么大数据量很难实际应用，因为网络带宽和硬盘存储空间都是非常有限的。</p>
+<h2 id="H264-编码"><a href="#H264-编码" class="headerlink" title="H264 编码"></a>H264 编码</h2><p>当需要存储视频或者网络传输时，无论是使用 RGB 还是 YUV 格式，所需要的码率和存储空间都是非常大的，例如一个分辨率为 1280 x 720 ，24 位量化位数，采样频率为每秒 30 帧，一个小时的视频则需要 <em><code>1280 x 720 x 3 x 30 x 60 x 60 = 278G</code></em> 的空间来存储该视频。而在显示或网络传输该视频时所需要的码率为 <em><code>1280 x 720 x 24 x 30 = 632Mbps</code></em>，这么大数据量很难实际应用，因为网络带宽和硬盘存储空间都是非常有限的。</p>
 <p>针对以上问题则需要对视频进行编码压缩，而 H264 是其中一种编解码标准；H264 由视频编解码器 H.261 发展而来的，它诞生于 1990 年（技术上为 1988 年），其设计工作的数据速率为 64 kbit / s。它已经使用了色度子采样，宏块等方面的想法。在 1995 年，H.263 视频编解码器标准被公布，并持续延续至 2001 年。</p>
 <p>2003 年，第一版 H.264/AVC 完成。同一年，一家名为 TrueMotion 的公司将其视频编解码器作为免版税的有损视频压缩称为 VP3。2008 年，Google 收购了该公司，同年发布了 VP8。2012 年 12 月，Google 发布了 VP9， 大约有 3/4 的浏览器市场（包括手机）支持。</p>
 <p>AV1 是一种新的视频编解码器，免版税并且开放源代码，由 AOMedia 联盟设计，该组织包括：谷歌，Mozilla，微软，亚马逊，Netflix，AMD，ARM，NVIDIA，英特尔，思科等等，编解码器的第一个版本 0.1.0 于 2016 年 4 月 7 日发布。</p>
