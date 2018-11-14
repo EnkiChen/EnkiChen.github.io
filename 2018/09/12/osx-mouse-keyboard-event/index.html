@@ -97,7 +97,7 @@
 <meta property="og:site_name" content="Enki's Notes">
 <meta property="og:description" content="最近完成了 Mac OSX 平台下的远程控制功能，期间找了不少资料，这里做个总结，主要涉及到一下知识点：  OSX 的事件机制 OSX/iOS 响应链者链 鼠标事件的监听及模拟（鼠标单击、双击、拖动、滚动等事件） 键盘事件的监听及模拟（包括组合键的模拟） Keycode 键盘编码（统一 Windows、OSX、浏览器端键盘按键的编码值）  事件分发机制在 OSX 系统中鼠标和键盘的活动事件都会产生">
 <meta property="og:image" content="http://enkichen.com/uploads/EventDispatch.png">
-<meta property="og:updated_time" content="2018-09-12T11:33:03.986Z">
+<meta property="og:updated_time" content="2018-11-14T01:40:21.397Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Mac OSX 鼠标键盘事件的监听和模拟">
 <meta name="twitter:description" content="最近完成了 Mac OSX 平台下的远程控制功能，期间找了不少资料，这里做个总结，主要涉及到一下知识点：  OSX 的事件机制 OSX/iOS 响应链者链 鼠标事件的监听及模拟（鼠标单击、双击、拖动、滚动等事件） 键盘事件的监听及模拟（包括组合键的模拟） Keycode 键盘编码（统一 Windows、OSX、浏览器端键盘按键的编码值）  事件分发机制在 OSX 系统中鼠标和键盘的活动事件都会产生">
@@ -398,9 +398,9 @@
 <li>Keycode 键盘编码（统一 Windows、OSX、浏览器端键盘按键的编码值）</li>
 </ol>
 <h3 id="事件分发机制"><a href="#事件分发机制" class="headerlink" title="事件分发机制"></a>事件分发机制</h3><p>在 OSX 系统中鼠标和键盘的活动事件都会产生底层的系统事件，首先传递到 IOKit 框架处理后存储到队列中，通知 Window Server 服务层处理。Window Server 存储到 FIFO 优先队列中，然后逐一转发到当前活动窗口或者能响应这个事件的应用程序去处理。</p>
+<a id="more"></a>
 <p>在 OSX 或者 iOS 程序中，都会有一个 Main Run Loop 的线程，RunLoop 循环中会遍历 event 消息队列，逐一分发这些事件到应用中合适的对象去处理。具体来说就是调用 <code>NSApp</code> 的 <em><code>sendEvent:</code></em> 方法发送消息到<code>NSWindow</code>，<code>NSWindow</code> 再分发到 <code>NSView</code> 视图对象，由其鼠标或键盘事件响应方法去处理。</p>
 <p><img src="/uploads/EventDispatch.png" alt="Alt text"></p>
-<a id="more"></a>
 <h3 id="事件响应链"><a href="#事件响应链" class="headerlink" title="事件响应链"></a>事件响应链</h3><p>在 OSX 和 iOS 程序中响应者链是 Application Kit 事件处理架构的中心机制，它由一系列链接在一起的响应者对象组成，事件或者动作消息可以沿着这些对象进行传递。如果一个响应者对象不能处理某个事件或动作，也就是说，它不响应那个消息，或者不认识那个事件，则将该消息重新发送给链中的下一个响应者。消息沿着响应者链向上、向更高级别的对象传递，直到最终被处理（如果最终还是没有被处理，就会被抛弃）。</p>
 <p>事件响应者 <code>Responders</code> 类为核心应用程序架构的三个主要模式或机制定义了一个接口：</p>
 <ul>

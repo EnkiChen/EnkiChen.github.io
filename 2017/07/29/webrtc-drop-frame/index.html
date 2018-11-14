@@ -97,7 +97,7 @@
 <meta property="og:site_name" content="Enki's Notes">
 <meta property="og:description" content="最近在弄一个 Android 平台下远程桌面项目，是基于 WebRTC 框架实现的，由于平台限制，芯片是用的特定厂商的芯片，桌面采集以及 H264 硬编码都是芯片厂商提供方案，能够有很好性能表现。在将桌面的采集以及 H264 的编码库整合到 WebRTC 框架中时，发现的存在画面延时的问题，于是对 WebRTC 的编解码框架的源码进行了分析，了解到 WebRTC 的两个特性。  在 WebRTC">
 <meta property="og:image" content="http://enkichen.com/uploads/webrtc_class_drop.png">
-<meta property="og:updated_time" content="2017-08-11T00:57:21.000Z">
+<meta property="og:updated_time" content="2018-11-14T01:41:09.989Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="WebRTC 的丢帧策略">
 <meta name="twitter:description" content="最近在弄一个 Android 平台下远程桌面项目，是基于 WebRTC 框架实现的，由于平台限制，芯片是用的特定厂商的芯片，桌面采集以及 H264 硬编码都是芯片厂商提供方案，能够有很好性能表现。在将桌面的采集以及 H264 的编码库整合到 WebRTC 框架中时，发现的存在画面延时的问题，于是对 WebRTC 的编解码框架的源码进行了分析，了解到 WebRTC 的两个特性。  在 WebRTC">
@@ -392,9 +392,8 @@
         <blockquote>
 <p>最近在弄一个 Android 平台下远程桌面项目，是基于 WebRTC 框架实现的，由于平台限制，芯片是用的特定厂商的芯片，桌面采集以及 H264 硬编码都是芯片厂商提供方案，能够有很好性能表现。在将桌面的采集以及 H264 的编码库整合到 WebRTC 框架中时，发现的存在画面延时的问题，于是对 WebRTC 的编解码框架的源码进行了分析，了解到 WebRTC 的两个特性。</p>
 </blockquote>
-<p>在 WebRTC 中有很多可以控制视频帧率和码率的行为，这里介绍一下当视频采集过快以及编码器输出码率过高时，WebRTC 主动丢帧的策略。这里采集过快是指视频采集的速度大于编码器处理的速度。例如视频采集线程每秒采集 30 帧，而编码线程每秒只能处理 15 帧，这时候就出现了采集过快或者说是编码器太慢。编码器输出码率过高，是指编码器的输出码率大于设定的最高输出码率值，例如设置编码器码率为 1024kbps，而实际产生的码率是 1500kbps 这时候就出现了输出码率过高的情况。本文主要介绍上述两种情况下 WebRTC 是如何实现丢帧行为的。</p>
-<p>下图是这次涉及到一些类的结构图，如果要在 WebRTC 源码中找对对应的文件，直接搜索类名称即可。WebRTC 的源码由于在墙外，我这里为了后续方便拷贝了一份到我的 GitHub 空间中，<a href="https://github.com/EnkiChen/webrtc" target="_blank" rel="external">点击这里</a> 可以找到源码。</p>
-<p><img src="/uploads/webrtc_class_drop.png" alt="Example"><br><a id="more"></a></p>
+<p>在 WebRTC 中有很多可以控制视频帧率和码率的行为，这里介绍一下当视频采集过快以及编码器输出码率过高时，WebRTC 主动丢帧的策略。这里采集过快是指视频采集的速度大于编码器处理的速度。例如视频采集线程每秒采集 30 帧，而编码线程每秒只能处理 15 帧，这时候就出现了采集过快或者说是编码器太慢。编码器输出码率过高，是指编码器的输出码率大于设定的最高输出码率值，例如设置编码器码率为 1024kbps，而实际产生的码率是 1500kbps 这时候就出现了输出码率过高的情况。本文主要介绍上述两种情况下 WebRTC 是如何实现丢帧行为的。<br><a id="more"></a><br>下图是这次涉及到一些类的结构图，如果要在 WebRTC 源码中找对对应的文件，直接搜索类名称即可。WebRTC 的源码由于在墙外，我这里为了后续方便拷贝了一份到我的 GitHub 空间中，<a href="https://github.com/EnkiChen/webrtc" target="_blank" rel="external">点击这里</a> 可以找到源码。</p>
+<p><img src="/uploads/webrtc_class_drop.png" alt="Example"></p>
 <h3 id="采集过快时的丢帧策略"><a href="#采集过快时的丢帧策略" class="headerlink" title="采集过快时的丢帧策略"></a>采集过快时的丢帧策略</h3><p>在 WebRTC 中视频或者桌面图像的采集和图像的编码线程各自是独立线程进行工作的，采集线程会将采集好的图像打包成 <code>VideoFrame</code> 对象，这里的 <code>VideoFrame</code> 封装了经过转换的 <code>YUV</code> 数据而非 <code>RGB</code> 数据， <code>VideoFrame</code> 在经过一系列的周转后，最终会在 <em><code>ViEEncoder</code></em> 类中得到处理，在 <em><code>ViEEncoder</code></em> 类一部分工作是将数据从采集线程 <code>post</code> 到编码线程中，这里就会涉及到多线程间协作的问题。</p>
 <p>这里用的是 <code>rtc::TaskQueue</code> 队列类，在 <em><code>ViEEncoder</code></em> 类内部，会将所有跟编码器相关的操作都将打包成一个 <code>Task</code> 扔到队列中，确保所有的操作都是顺序执行的。在 <em><code>onFrame()</code></em> 方法中接收到采集线程传进来的 <code>VideoFrame</code> 对象，并将其打包成一个 <code>EncodeTask</code> 对象放入队列中。代码片段如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">void ViEEncoder::OnFrame(const VideoFrame&amp; video_frame) &#123;</div><div class="line"></div><div class="line">    ...</div><div class="line"></div><div class="line">    last_captured_timestamp_ = incoming_frame.ntp_time_ms();</div><div class="line">    encoder_queue_.PostTask(std::unique_ptr&lt;rtc::QueuedTask&gt;(new EncodeTask(</div><div class="line">      incoming_frame, this, rtc::TimeMicros(), log_stats)));</div><div class="line">&#125;</div></pre></td></tr></table></figure>
