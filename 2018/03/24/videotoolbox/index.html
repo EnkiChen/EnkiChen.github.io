@@ -96,13 +96,13 @@
 <meta property="og:url" content="http://enkichen.com/2018/03/24/videotoolbox/index.html">
 <meta property="og:site_name" content="Enki's Notes">
 <meta property="og:description" content="VideoToolBox 是一个低级的框架，可直接访问硬件的编解码器。它能够为视频提供压缩和解压缩的服务，同时也提供存储在 CoreVideo 像素缓冲区的图像进行格式的转换。该框架在 iOS(8.0)/macOS(10.8)/tvOS(10.2) 以后才被开放出来，在这之前都是不能使用的。 VideoToolBox 框架为我们提供的接口都是以 C 语言函数形式提供的，并且以会话 Session">
-<meta property="og:image" content="http://enkichen.com/2018/03/24/videotoolbox/CMSampleBuffer.png">
 <meta property="og:image" content="http://enkichen.com/uploads/CMSampleBuffer.png">
-<meta property="og:updated_time" content="2018-03-24T05:23:06.384Z">
+<meta property="og:image" content="http://enkichen.com/uploads/CMSampleBuffer.png">
+<meta property="og:updated_time" content="2018-11-29T01:01:56.722Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Apple 平台下的 VideoToolBox 框架">
 <meta name="twitter:description" content="VideoToolBox 是一个低级的框架，可直接访问硬件的编解码器。它能够为视频提供压缩和解压缩的服务，同时也提供存储在 CoreVideo 像素缓冲区的图像进行格式的转换。该框架在 iOS(8.0)/macOS(10.8)/tvOS(10.2) 以后才被开放出来，在这之前都是不能使用的。 VideoToolBox 框架为我们提供的接口都是以 C 语言函数形式提供的，并且以会话 Session">
-<meta name="twitter:image" content="http://enkichen.com/2018/03/24/videotoolbox/CMSampleBuffer.png">
+<meta name="twitter:image" content="http://enkichen.com/uploads/CMSampleBuffer.png">
 
 
 
@@ -542,7 +542,7 @@
 <li>CMSampleBuffer：存放编解码前后的视频图像的容器数据结构。</li>
 <li>CMTime：时间戳相关。时间以 64-bit/32-bit 的形式出现。</li>
 </ul>
-<p><img src="./CMSampleBuffer.png" alt="Alt text"></p>
+<p><img src="/uploads/CMSampleBuffer.png" alt="Alt text"></p>
 <h4 id="CVPixelBuffer"><a href="#CVPixelBuffer" class="headerlink" title="CVPixelBuffer"></a>CVPixelBuffer</h4><p><code>CVPixelBufferRef</code> 是 <code>Core Video</code> 框架中定义的数据类型，用来描述一张图片的内存空间，它的定义可以从 <a href="https://developer.apple.com/documentation/corevideo/cvpixelbuffer?language=objc" target="_blank" rel="external">API 文档</a> 或者头文件中可以查找到定义如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">typedef CVImageBufferRef CVPixelBufferRef;</div><div class="line">typedef CVBufferRef CVImageBufferRef;</div></pre></td></tr></table></figure>
 <p>而 <code>CVBufferRef</code> 本质上就是一个 <code>void *</code> 的指针，至于 <code>void *</code> 具体是什么样的数据类型，则只有系统才知道，我们则不需要关心。<code>CVPixelBufferRef</code> 描述了一张图片的内存空间，对于该图片的属性可以通过对应的 C 语言函数来获得，例如图片的宽、高、图片的格式通过以下函数来获取：</p>
