@@ -2,6 +2,27 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://enkichen.com/2018/12/14/standard-deviation/</loc>
+    
+    <lastmod>2018-12-14T03:26:54.218Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://enkichen.com/2018/11/14/clone-webrtc/</loc>
+    
+    <lastmod>2018-12-14T01:00:15.903Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://enkichen.com/2018/05/23/H264-SVC-Temporal-Scalability/</loc>
+    
+    <lastmod>2018-12-14T00:57:02.325Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://enkichen.com/2018/03/24/videotoolbox/</loc>
     
     <lastmod>2018-11-29T01:01:56.722Z</lastmod>
@@ -23,23 +44,9 @@
   </url>
   
   <url>
-    <loc>http://enkichen.com/2018/11/14/clone-webrtc/</loc>
-    
-    <lastmod>2018-11-14T01:35:37.600Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://enkichen.com/2017/11/26/image-h264-encode/</loc>
     
     <lastmod>2018-10-23T09:06:01.510Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://enkichen.com/2018/05/23/H264-SVC-Temporal-Scalability/</loc>
-    
-    <lastmod>2018-05-23T10:44:17.617Z</lastmod>
     
   </url>
   

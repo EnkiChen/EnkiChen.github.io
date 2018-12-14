@@ -97,7 +97,7 @@
 <meta property="og:site_name" content="Enki's Notes">
 <meta property="og:description" content="在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、Wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 Temporal Scalability 机制来优化该">
 <meta property="og:image" content="http://enkichen.com/uploads/SVC_Temporal_Scalability.png">
-<meta property="og:updated_time" content="2018-05-23T10:44:17.617Z">
+<meta property="og:updated_time" content="2018-12-14T00:57:02.325Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="H264/SVC Temporal Scalability">
 <meta name="twitter:description" content="在多人远程会议或直播系统中，参与的用户可能处于不同的网络环境（有线、Wifi、3G、4G）中，网络质量各不一致，为了所有用户可进行远程会议或者直播的观看，简单的做法就是降低发送端的视频码流，这样不管网络质量好坏，参与的用户都将观看低码率的视频流。这种方案缺点在于大部分网络较好的用户会被少数的网络较差的用户给拖累。这里介绍 H264 编码器中的 Temporal Scalability 机制来优化该">
@@ -396,13 +396,13 @@
 </blockquote>
 <p>在具体应用中便可以根据用户的网络质量来分配不同码率的视频流，这样网络质量较好的用户能看到高帧率的视频流，而网络较差的用户则看到低帧率的视频流。如下图所示：</p>
 <p><img src="/uploads/SVC_Temporal_Scalability.png" alt="Alt text"></p>
-<p>编码器进行了分层编码，例如上图描述编码端同时将所有的码流层发送至服务器，如果用户网络质量非常好，服务器将所有层的码流数据转发至该用户例如 Receiver2；如果用户网络非常差，则只需要将低层级码流数据转发给该用户例如 Receiver1。</p>
+<p>在 H264/SVC 编码器中进行了分层编码，例如上图描述编码端同时将所有的码流层发送至服务器，如果用户网络质量非常好，服务器将所有层的码流数据转发至该用户例如 Receiver2；如果用户网络非常差，则只需要将低层级码流数据转发给该用户例如 Receiver1。实际项目中可根据接收端带宽情况，转发对应码率的流即可。</p>
 <h3 id="编码器的支持"><a href="#编码器的支持" class="headerlink" title="编码器的支持"></a>编码器的支持</h3><p>Temporal Scalability 机制并不是所有的编码都支持的，Apple 平台下（包括iOS和MacOS）的硬件编解码框架 <code>VideoToolbox</code> 是不支持的该特性的，因为没有看到任何的可设置的参数或者 API 接口。Android 平台下硬件编解码框架 <code>MediaCodec</code> 在 API 21 一下是不支持的，在 API 21 时添加了对 <code>KEY_TEMPORAL_LAYERING</code> 编码属性的配置，但只支持 VP8 编码格式 H264 编码格式不支持（毕竟 Android 和 VPx 都是属于 Google 的产品）。Android 下有需要了解详情的可以查看 <a href="https://developer.android.google.cn/reference/android/media/MediaFormat.html#KEY_TEMPORAL_LAYERING" target="_blank" rel="external">MediaFormat</a> 类的说明。</p>
 <p>在两大主流的移动平台上，硬件编码器都是不支持 H264/SVC Temporal Scalability 特性，如果要在移动平台上使用该特性只能使用软编码器，可以使用开源的 openh264 编解码库，代码托管在 GitHub 上对应的地址为 <a href="https://github.com/cisco/openh264" target="_blank" rel="external">openh264</a> ，其中有该项目的介绍和使用方法。</p>
 <blockquote>
 <p>x264 编码器当前还不支持 Temporal Scalability 特性。</p>
 </blockquote>
-<p>在 openh264 中使用 <code>SEncParamExt</code> 结构体来对编码进行参数的配置，Temporal Scalability 的特性使用 <code>iTemporalLayerNum</code> 字段来配置，用来指定输出多少层最大只支持 4 层。</p>
+<p>在 openh264 中使用 <code>SEncParamExt</code> 结构体来对编码进行参数的配置，Temporal Scalability 的特性使用 <code>iTemporalLayerNum</code> 字段来配置，用来指定输出多少层，这里最大只支持 4 层。</p>
 <p>使用 <em><code>EncodeFrame</code></em> 方法进行 H264 的编码后可以得到 <code>SFrameBSInfo</code> 的输出结果，该结构体以及关联的结构体的定义如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">typedef struct &#123;</div><div class="line">  int           iLayerNum;</div><div class="line">  SLayerBSInfo  sLayerInfo[MAX_LAYER_NUM_OF_FRAME];</div><div class="line">  EVideoFrameType eFrameType;</div><div class="line">  int iFrameSizeInBytes;</div><div class="line">  long long uiTimeStamp;</div><div class="line">&#125; SFrameBSInfo, *PFrameBSInfo;</div><div class="line"></div><div class="line">typedef struct &#123;</div><div class="line">  unsigned char uiTemporalId;</div><div class="line">  unsigned char uiSpatialId;</div><div class="line">  unsigned char uiQualityId;</div><div class="line">  EVideoFrameType eFrameType;</div><div class="line">  unsigned char uiLayerType;</div><div class="line">  int   iSubSeqId;</div><div class="line">  int   iNalCount;</div><div class="line">  int*  pNalLengthInByte;</div><div class="line">  unsigned char*  pBsBuf;</div><div class="line">&#125; SLayerBSInfo, *PLayerBSInfo;</div></pre></td></tr></table></figure>
 <p>在 <code>SLayerBSInfo</code> 结构体的 <code>uiTemporalId</code> 字段用来描述当前编码后的数据流属于哪一层。openh264 的使用可查看其它文档。</p>
@@ -600,7 +600,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-count">26</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -611,7 +611,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -622,7 +622,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-count">35</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
