@@ -71,7 +71,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="UIWindow,旋转," />
+  <meta name="keywords" content="Hexo, NexT, Enki, EnkiChen, enkichen, xc120313778" />
 
 
 
@@ -89,17 +89,15 @@
 
 
 
-<meta name="description" content="项目中一直用了两个UIWindow，一个是框架默认的，另一个是用来显示调试信息的UIWindow。至于为什么要用一个UIWindow，而不是用UIView呢，是因为UIView旋转控制太麻烦了，如果用UIView加一个UIViewController会方便很多，而且也不用考虑系统版本的区别。">
-<meta name="keywords" content="UIWindow,旋转">
-<meta property="og:type" content="article">
-<meta property="og:title" content="无法旋转的UIWindow子类">
-<meta property="og:url" content="http://enkichen.com/2016/01/05/UIWindow-cannot-rotate/index.html">
+<meta name="description" content="说过很多潇洒的话，做过很多打脸的事">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Enki's Notes">
+<meta property="og:url" content="http://enkichen.com/archives/2019/06/index.html">
 <meta property="og:site_name" content="Enki's Notes">
-<meta property="og:description" content="项目中一直用了两个UIWindow，一个是框架默认的，另一个是用来显示调试信息的UIWindow。至于为什么要用一个UIWindow，而不是用UIView呢，是因为UIView旋转控制太麻烦了，如果用UIView加一个UIViewController会方便很多，而且也不用考虑系统版本的区别。">
-<meta property="og:updated_time" content="2016-01-07T02:08:00.000Z">
+<meta property="og:description" content="说过很多潇洒的话，做过很多打脸的事">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="无法旋转的UIWindow子类">
-<meta name="twitter:description" content="项目中一直用了两个UIWindow，一个是框架默认的，另一个是用来显示调试信息的UIWindow。至于为什么要用一个UIWindow，而不是用UIView呢，是因为UIView旋转控制太麻烦了，如果用UIView加一个UIViewController会方便很多，而且也不用考虑系统版本的区别。">
+<meta name="twitter:title" content="Enki's Notes">
+<meta name="twitter:description" content="说过很多潇洒的话，做过很多打脸的事">
 
 
 
@@ -127,13 +125,13 @@
 
 
 
-  <link rel="canonical" href="http://enkichen.com/2016/01/05/UIWindow-cannot-rotate/"/>
+  <link rel="canonical" href="http://enkichen.com/archives/2019/06/"/>
 
 
 
 
 
-  <title> 无法旋转的UIWindow子类 | Enki's Notes </title>
+  <title> 归档 | Enki's Notes </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -158,7 +156,7 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail ">
+  <div class="container sidebar-position-left  page-archive  ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -262,253 +260,66 @@
           <div id="content" class="content">
             
 
-  <div id="posts" class="posts-expand">
-    
+  <section id="posts" class="posts-collapse">
+    <span class="archive-move-on"></span>
 
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2016/01/05/UIWindow-cannot-rotate/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Enki">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Enki's Notes">
+    <span class="archive-page-counter">
+      
+      
+      
+        
+      
+      嗯..! 目前共计 27 篇日志。 继续努力。
     </span>
 
     
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                无法旋转的UIWindow子类
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-01-05T10:36:34+08:00">
-                2016-01-05
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/开发笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">开发笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a class="cloud-tie-join-count" href="/2016/01/05/UIWindow-cannot-rotate/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count join-count" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2016/01/05/UIWindow-cannot-rotate/" class="leancloud_visitors" data-flag-title="无法旋转的UIWindow子类">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
 
       
       
-
       
-        <p>项目中一直用了两个<strong>UIWindow</strong>，一个是框架默认的，另一个是用来显示调试信息的<strong>UIWindow</strong>。至于为什么要用一个<strong>UIWindow</strong>，而不是用<strong>UIView</strong>呢，是因为<strong>UIView</strong>旋转控制太麻烦了，如果用<strong>UIView</strong>加一个<strong>UIViewController</strong>会方便很多，而且也不用考虑系统版本的区别。<br><a id="more"></a><br>最近一个同事用同样的方法使用<strong>UIWindow</strong>子类做一个提示框的公用组件，但发现<code>rootViewController</code>无法自动旋转。于是我对比了两个<strong>UIWindow</strong>的子类，发现代码并没什么区别，只是多了一些公用方法和一个<code>delegate</code>。但就是不能支持旋转，而我的都正常，试过好多方法，都没找到原因。最后只好一部分一部分注释掉一些代码。当我把一个<code>delegate</code>的属性注释掉以后，神奇的事情发生了，竟然可以旋转了！！！！ 于是把所有改动都还原了，然后只注释掉<code>delegate</code>属性（改一个名称也一样），发现旋转一切正常了。于是在我之前的<strong>UIWindow</strong>子类中添加<code>delegate</code>属性，发现也不能进行旋转。  </p>
-<p>猜想是不是子类<code>delegate</code>属性覆盖了父类的<code>delegate</code>属性，而<strong>UIWindow</strong>在控制旋转的逻辑跟<code>delegate</code>属性有关。至少有一下两种方式进行调试：  </p>
-<ul>
-<li>子类<strong>UIWindow</strong>中添加<code>delegate</code>属性，然后在setDelegate方法中添加日志。</li>
-<li>使用Category为<strong>UIWindow</strong>添加一个<code>delegate</code>属性声明，然后打印<code>delegate</code>属性</li>
-</ul>
-<p>通过上述方法可以发现，<strong>UIWindow</strong>内部实现是存在一个<code>delegate</code>属性的，根据日志可以确定该属性是指向<code>rootViewController</code>对象。也就是说如果我们在<strong>UIWindow</strong>子类添加<code>delegate</code>属性就会影响到<strong>UIWindow</strong>对旋转的控制。  </p>
-<p>后续调试发现旋转的相关方法在<code>rootViewController</code>中都会正常被调用，但就是没办法进行旋转，也就是说在<strong>UIWindow</strong>子类中添加<code>delegate</code>属性和没有添加该属性，对应我们应用来说，该走的方法都会按照正常流程跑完，但就是不能进行旋转。具体原因还未知，后续有新发现将会更新，如果有人知道，还请告知，谢谢，以下我的调试环境：  </p>
-<blockquote>
-<p>OSX版本为：10.10.5 (14F27)<br>Xcode 版本为：7.2 (7C68)<br>SDK：iOS 9.2  </p>
-</blockquote>
 
-      
-    </div>
-
-    <div>
       
         
-
-      
-    </div>
-
-    <div>
-      
-        
-
-      
-    </div>
-
-    <div>
-      
-        
-  <ul class="post-copyright">
-    <li class="post-copyright-author">
-      <strong>本文作者：</strong>
-      Enki
-    </li>
-    <li class="post-copyright-link">
-      <strong>本文链接：</strong>
-      <a href="http://enkichen.com/2016/01/05/UIWindow-cannot-rotate/" title="无法旋转的UIWindow子类">http://enkichen.com/2016/01/05/UIWindow-cannot-rotate/</a>
-    </li>
-    <li class="post-copyright-license">
-      <strong>版权声明： </strong>
-      本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
-    </li>
-  </ul>
-
-
-      
-    </div>
-
-    <footer class="post-footer">
-      
-        <div class="post-tags">
-          
-            <a href="/tags/UIWindow/" rel="tag"># UIWindow</a>
-          
-            <a href="/tags/旋转/" rel="tag"># 旋转</a>
-          
+        <div class="collection-title">
+          <h2 class="archive-year motion-element" id="archive-year-2019">2019</h2>
         </div>
       
+      
 
       
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <h1 class="post-title">
         
-      
+            <a class="post-title-link" href="/2019/06/05/git-automatic-completion/" itemprop="url">
+              
+                <span itemprop="name">mac 平台 git 命令自动补全</span>
+              
+            </a>
+        
+      </h1>
 
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2016/01/15/ios-certification-and-code-sign-note/" rel="next" title="iOS开发者证书以及代码签名学习笔记">
-                <i class="fa fa-chevron-left"></i> iOS开发者证书以及代码签名学习笔记
-              </a>
-            
-          </div>
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2019-06-05T09:19:37+08:00"
+              content="2019-06-05" >
+          06-05
+        </time>
+      </div>
 
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2015/12/29/ios-xia-opengl-xu-yao-zhu-yi-de-ji-dian/" rel="prev" title="iOS下使用OpenGL要注意的几点">
-                iOS下使用OpenGL要注意的几点 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
-      
-
-      
-      
-    </footer>
+    </header>
   </article>
 
 
 
-    <div class="post-spread">
-      
-        <!-- JiaThis Button BEGIN -->
-<div class="jiathis_style">
-  <a class="jiathis_button_tsina"></a>
-  <a class="jiathis_button_tqq"></a>
-  <a class="jiathis_button_weixin"></a>
-  <a class="jiathis_button_cqq"></a>
-  <a class="jiathis_button_douban"></a>
-  <a class="jiathis_button_renren"></a>
-  <a class="jiathis_button_qzone"></a>
-  <a class="jiathis_button_kaixin001"></a>
-  <a class="jiathis_button_copy"></a>
-  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
-  <a class="jiathis_counter_style"></a>
-</div>
-<script type="text/javascript" >
-  var jiathis_config={
-    hideMore:false
-  }
-</script>
-<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
-<!-- JiaThis Button END -->
+    
 
-      
-    </div>
-  </div>
+  </section>
+
+  
+
 
 
           </div>
@@ -516,12 +327,6 @@
 
 
           
-  <div class="comments" id="comments">
-    
-      <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
-    
-  </div>
-
 
         </div>
         
@@ -739,9 +544,11 @@
   
 
   
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
-
+  
+    <script type="text/javascript" id="motion.page.archive">
+      $('.archive-year').velocity('transition.slideLeftIn');
+    </script>
+  
 
 
   

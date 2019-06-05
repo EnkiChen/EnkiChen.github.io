@@ -2,9 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://enkichen.com/2019/06/05/git-automatic-completion/</loc>
+    
+    <lastmod>2019-06-05T01:23:26.090Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://enkichen.com/2015/12/19/First-blog/</loc>
+    
+    <lastmod>2019-04-11T09:23:23.009Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://enkichen.com/2018/12/14/standard-deviation/</loc>
     
-    <lastmod>2018-12-14T03:26:54.218Z</lastmod>
+    <lastmod>2018-12-14T04:16:41.795Z</lastmod>
     
   </url>
   
@@ -75,13 +89,6 @@
     <loc>http://enkichen.com/2017/09/13/ios-static-library-categories/</loc>
     
     <lastmod>2017-09-13T03:52:05.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://enkichen.com/2015/12/19/First-blog/</loc>
-    
-    <lastmod>2017-06-06T12:41:10.000Z</lastmod>
     
   </url>
   

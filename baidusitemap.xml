@@ -4,8 +4,46 @@
 
     
   <url>
+    <loc>http://enkichen.com/2019/06/05/git-automatic-completion/</loc>
+    <lastmod>2019-06-05T01:23:26.090Z</lastmod>
+    <data>
+        <display>
+        <title>mac 平台 git 命令自动补全</title>
+        <pubTime>2019-06-05T01:19:37.000Z</pubTime>
+        
+        <tag>Git</tag>
+         
+         
+           
+             
+              <breadCrumb title="知识整理/总结" url="http://enkichen.com/categories/%E7%9F%A5%E8%AF%86%E6%95%B4%E7%90%86-%E6%80%BB%E7%BB%93/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://enkichen.com/2015/12/19/First-blog/</loc>
+    <lastmod>2019-04-11T09:23:23.009Z</lastmod>
+    <data>
+        <display>
+        <title>你好 Hexo</title>
+        <pubTime>2015-12-19T01:02:51.000Z</pubTime>
+        
+         
+           
+             
+              <breadCrumb title="default" url="http://enkichen.com/categories/default/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://enkichen.com/2018/12/14/standard-deviation/</loc>
-    <lastmod>2018-12-14T03:26:54.218Z</lastmod>
+    <lastmod>2018-12-14T04:16:41.795Z</lastmod>
     <data>
         <display>
         <title>方差、标准差、均方差、均方误差</title>
@@ -200,24 +238,6 @@
            
              
               <breadCrumb title="开发笔记" url="http://enkichen.com/categories/%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://enkichen.com/2015/12/19/First-blog/</loc>
-    <lastmod>2017-06-06T12:41:10.000Z</lastmod>
-    <data>
-        <display>
-        <title>你好 Hexo</title>
-        <pubTime>2015-12-19T01:02:51.000Z</pubTime>
-        
-         
-           
-             
-              <breadCrumb title="default" url="http://enkichen.com/categories/default/"/>
           
         </display>
     </data>
