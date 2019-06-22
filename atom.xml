@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://enkichen.com/"/>
-  <updated>2019-06-05T01:23:26.090Z</updated>
+  <updated>2019-06-05T02:30:13.536Z</updated>
   <id>http://enkichen.com/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://enkichen.com/2019/06/05/git-automatic-completion/"/>
     <id>http://enkichen.com/2019/06/05/git-automatic-completion/</id>
     <published>2019-06-05T01:19:37.000Z</published>
-    <updated>2019-06-05T01:23:26.090Z</updated>
+    <updated>2019-06-05T02:30:13.536Z</updated>
     
     <content type="html"><![CDATA[<h4 id="安装-brew"><a href="#安装-brew" class="headerlink" title="安装 brew"></a>安装 brew</h4><p>如果有安装 brew 则跳过该步骤，执行如下命令进行安装：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ ruby -e &quot;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;</div></pre></td></tr></table></figure>
