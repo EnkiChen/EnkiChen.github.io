@@ -71,7 +71,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Category," />
+  <meta name="keywords" content="Hexo, NexT, Enki, EnkiChen, enkichen, xc120313778" />
 
 
 
@@ -89,17 +89,17 @@
 
 
 
-<meta name="description" content="最近在弄 iOS 下的音视频 SDK 的移植和适配，该 SDK 是基于 WebRTC 项目但并未使用官方的 ninja 编译脚本，而是使用的 cmake 作为编译工具。在 WebRTC 的音频模块中引用了一个 UIDevice 的 Category 来做设备类型的判断，编译和链接都没有出现问题，但在运行时出现了 selector not recognized 的异常。该异常可以从我之前的  《iO">
-<meta name="keywords" content="Category">
+<meta name="description" content="macOS 系统下自带了 Apache 和 PHP 环境，如果有需要的话，以下命令来控制服务器的启动、重启与停止： 12345678# 启动 Apache 服务器$sudo apachectl start# 重启 Apache 服务器$sudo apachectl restart# 停止 Apache 服务器$sudo apachectl stop Apache 服务一些信息：  Web 跟目录在">
+<meta name="keywords">
 <meta property="og:type" content="article">
-<meta property="og:title" content="iOS 静态库中的 Category 运行时错误">
-<meta property="og:url" content="http://enkichen.com/2017/09/13/ios-static-library-categories/index.html">
+<meta property="og:title" content="macOS 开启 Web 服务器">
+<meta property="og:url" content="http://enkichen.com/2019/07/11/macos-web-server/index.html">
 <meta property="og:site_name" content="Enki's Notes">
-<meta property="og:description" content="最近在弄 iOS 下的音视频 SDK 的移植和适配，该 SDK 是基于 WebRTC 项目但并未使用官方的 ninja 编译脚本，而是使用的 cmake 作为编译工具。在 WebRTC 的音频模块中引用了一个 UIDevice 的 Category 来做设备类型的判断，编译和链接都没有出现问题，但在运行时出现了 selector not recognized 的异常。该异常可以从我之前的  《iO">
-<meta property="og:updated_time" content="2017-09-13T03:52:05.000Z">
+<meta property="og:description" content="macOS 系统下自带了 Apache 和 PHP 环境，如果有需要的话，以下命令来控制服务器的启动、重启与停止： 12345678# 启动 Apache 服务器$sudo apachectl start# 重启 Apache 服务器$sudo apachectl restart# 停止 Apache 服务器$sudo apachectl stop Apache 服务一些信息：  Web 跟目录在">
+<meta property="og:updated_time" content="2019-07-12T00:18:07.957Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="iOS 静态库中的 Category 运行时错误">
-<meta name="twitter:description" content="最近在弄 iOS 下的音视频 SDK 的移植和适配，该 SDK 是基于 WebRTC 项目但并未使用官方的 ninja 编译脚本，而是使用的 cmake 作为编译工具。在 WebRTC 的音频模块中引用了一个 UIDevice 的 Category 来做设备类型的判断，编译和链接都没有出现问题，但在运行时出现了 selector not recognized 的异常。该异常可以从我之前的  《iO">
+<meta name="twitter:title" content="macOS 开启 Web 服务器">
+<meta name="twitter:description" content="macOS 系统下自带了 Apache 和 PHP 环境，如果有需要的话，以下命令来控制服务器的启动、重启与停止： 12345678# 启动 Apache 服务器$sudo apachectl start# 重启 Apache 服务器$sudo apachectl restart# 停止 Apache 服务器$sudo apachectl stop Apache 服务一些信息：  Web 跟目录在">
 
 
 
@@ -127,13 +127,13 @@
 
 
 
-  <link rel="canonical" href="http://enkichen.com/2017/09/13/ios-static-library-categories/"/>
+  <link rel="canonical" href="http://enkichen.com/2019/07/11/macos-web-server/"/>
 
 
 
 
 
-  <title> iOS 静态库中的 Category 运行时错误 | Enki's Notes </title>
+  <title> macOS 开启 Web 服务器 | Enki's Notes </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -272,7 +272,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2017/09/13/ios-static-library-categories/">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2019/07/11/macos-web-server/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Enki">
@@ -293,7 +293,7 @@
             
             
               
-                iOS 静态库中的 Category 运行时错误
+                macOS 开启 Web 服务器
               
             
           </h1>
@@ -308,8 +308,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-13T11:49:24+08:00">
-                2017-09-13
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-11T15:46:25+08:00">
+                2019-07-11
               </time>
             
 
@@ -331,8 +331,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/开发笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">开发笔记</span>
+                  <a href="/categories/知识整理-总结/" itemprop="url" rel="index">
+                    <span itemprop="name">知识整理/总结</span>
                   </a>
                 </span>
 
@@ -349,7 +349,7 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a class="cloud-tie-join-count" href="/2017/09/13/ios-static-library-categories/#comments" itemprop="discussionUrl">
+                <a class="cloud-tie-join-count" href="/2019/07/11/macos-web-server/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count join-count" itemprop="commentCount"></span>
                 </a>
               </span>
@@ -358,7 +358,7 @@
 
           
           
-             <span id="/2017/09/13/ios-static-library-categories/" class="leancloud_visitors" data-flag-title="iOS 静态库中的 Category 运行时错误">
+             <span id="/2019/07/11/macos-web-server/" class="leancloud_visitors" data-flag-title="macOS 开启 Web 服务器">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -387,29 +387,20 @@
       
 
       
-        <p>最近在弄 iOS 下的音视频 SDK 的移植和适配，该 SDK 是基于 WebRTC 项目但并未使用官方的 <code>ninja</code> 编译脚本，而是使用的 <code>cmake</code> 作为编译工具。在 WebRTC 的音频模块中引用了一个 <code>UIDevice</code> 的 <code>Category</code> 来做设备类型的判断，编译和链接都没有出现问题，但在运行时出现了 <code>selector not recognized</code> 的异常。该异常可以从我之前的  <a href="http://www.enkichen.com/2017/04/21/ios-message-forwarding/" target="_blank" rel="external">《iOS 运行时之消息转发机制》</a> 文章中了解到，由于对象接收到了一个无法处理该 <code>selector</code> ，经过消息转发后还未得到处理，会在 <code>doesNotRecognizeSelector</code> 方法中抛出的异常。</p>
-<p><code>Category</code> 以及一些其他的工具类被编译在一个基础的静态库中，在音频模块中引用该静态库，除了 <code>Category</code> 代码其他所有的代码都能正常编译、链接以及运行，但唯独 <code>Category</code> 在运行时出现了错误，由于 <code>Category</code> 的 Objective-C 语言的特性，最开始我以为需要为编译器添加针对 <code>Category</code> 的参数，找了很久也没找到针对 <code>Category</code> 特性的编译参数，无奈之下只好求助 <code>stackoverflow</code> ，最终找到了根本原因和解决方法。<br><a id="more"></a> </p>
-<h3 id="编译-链接过程"><a href="#编译-链接过程" class="headerlink" title="编译/链接过程"></a>编译/链接过程</h3><p>编译器在编译的过程中首先会将 <code>.c/.cc/.cpp/.m/.mm</code> 的源文件编译成后缀为 <code>.o</code> 的对象文件 ，源文件与对象文件是一一对应的，对象文件中包含了符号、代码以及数据，对象文件是不能被系统加载并使用的。当在编译生成静态库时，这些所有的对象文件，都会被封装到 <code>.a(archive)</code> 文件，可以理解为一个归档文件，也就是我们平常使用的静态库。</p>
-<p>当需要生产二进制文件或是动态库时，编译器会对静态库 <code>.a(archive)</code> 文件进行处理；编译器将获取静态库中所以的符号表，并检查哪些符号被引用，只有被引用的对象文件才会被链接器真正的加载并处理。例如在静态库中有 10 个对象文件，但被引用到只有 2 个，则链接器只加载被引用的 2 个对象文件，未被使用到的 8 个对象文件则会被忽略。</p>
-<p>在 C/C++ 语言中，这种机制可以很好的工作，因为 C/C++ 语言会尽可能的在编译期去做这些事。在 Objective-C 语言中非常依赖运行时特性，<code>Category</code> 就是基于运行时实现，但它并不会像类或者函数一样被创建链接符号，编译器在检查符号表时便不能检查到 <code>Category</code> 对应的符号表，从而 <code>Category</code> 的对象文件就不能被正常的加载，在运行时便无法找到对应的 <code>selector</code> 。</p>
-<h3 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h3><p>基于上述的原因，网上存在 5 种解决方法：</p>
-<ol>
-<li>在编译选项 <code>Other Linker Flags</code> 中添加 <code>-all_load</code>，用于会告诉编译器 <strong>对于所有静态库中的所有对象文件，不管里面的符号有没有被用到，全部都载入</strong>，这种方法可以解决问题，但是会产生比较大的二进制文件。</li>
-<li>添加编译选项 <code>-force_load</code> 并指定路径，<code>-force_load $(BUILT_PRODUCTS_DIR)/&lt;library_name.a&gt;</code> 这种方法和 <code>-all_load</code> 类似，不同的是它只载入指定的静态库。</li>
-<li>在编译选项 <code>Other Linker Flags</code> 中添加 <code>-ObjC</code>，这个标识告诉编译器 <strong>如果在静态库的对象文件中发现了 Objective-C 代码，就把它载入</strong>，<code>Category</code>  中肯定会存在 Objective-C 代码。该方法与前两张类似，只是将加载的范围减少了。</li>
-<li>另一种解决方法是新版本 Xcode 里 <code>build setting</code> 中的 <code>Perform Single-Object PreLink</code>，如果启用这个选项，所有的对象文件都会被合并成一个单文件（这不是真正的链接，所以叫做预链接），这个对象文件（有时被称做主对象文件 <code>master object file</code>）被添加到静态库中。现在如果主对象文件中的任何符号被认为是在使用，整个主对象文件都会被认为在使用，这样它里面的 Objective-C  部分就会被载入了，当然也包括 <code>Category</code> 对应的对象文件。</li>
-<li>最后一种解决方法是在 <code>Category</code> 的源文件里添加 <code>Fake symbol</code>，并确保以某种方法在编译时引用了该 <code>Fake symbol</code>，这会使得 <code>Fake symbol</code> 对象文件被加载时它里面 <code>Category</code>  代码也会被载入。该方法可以控制哪些 <code>Category</code> 可以被正常加载，同时也不需要添加编译参数做特殊处理。</li>
-</ol>
-<blockquote>
-<p>在 64 位的 Mac 系统或者 iOS 系统下，链接器有一个 bug，会导致只包含有 Category 的静态库无法使用 -ObjC 标志来加载  Objective-C 对象文件。</p>
-</blockquote>
-<h3 id="问题的处理"><a href="#问题的处理" class="headerlink" title="问题的处理"></a>问题的处理</h3><p>我这里用的是最后一种方法来解决该问题，原因在于前 4 种都会增加二进制文件的体积，在第三方使用当前 SDK 时需要手动设置编译参数，会给第三方带来不好的使用体验。为了使用方便可定义一下宏：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">#define FIX_CATEGORY_BUG_H(name) \</div><div class="line">@interface FIX_CATEGORY_BUG_##name : NSObject \</div><div class="line">+(void)print; \</div><div class="line">@end</div><div class="line"></div><div class="line">#define FIX_CATEGORY_BUG_M(name) \</div><div class="line">@implementation FIX_CATEGORY_BUG_##name \</div><div class="line">+ (void)print &#123;&#125; \</div><div class="line">@end</div><div class="line"></div><div class="line">#define ENABLE_CATEGORY(name) [FIX_CATEGORY_BUG_##name print]</div></pre></td></tr></table></figure>
-<p>在 <code>Category</code> 的头文件中使用 <code>FIX_CATEGORY_BUG_H()</code> 宏来声明一个 <code>Fake symbol</code> ，在 <code>Category</code> 的实现文件中使用 <code>FIX_CATEGORY_BUG_M()</code> 宏来实现该 <code>Fake symbol</code>。最后在找一处运行 <code>ENABLE_CATEGORY()</code> 宏，可以是初始化方法中，也可以是其他任何地方，只要确保它能被正常调用，目的在于该 <code>Fake symbol</code> 确保编译器能正常加载它。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>在 iOS/Mac 平台下，包含 <code>Category</code> 的静态库无法被正常加载，原因在于 <code>Category</code> 是 Objective-C 语言的特性，编译器并不会为它生成链接符号，在链接过程中便无法找到该对象文件的引用关系，链接器将会直接忽略掉 <code>Category</code>  对应的对象文件，从而在运行时无法找到相应的 <code>selector</code>。解决该问题的目标就是让链接器加载 <code>Category</code> 对应的对象文件，一种方法是添加编译参数让编译器加载所有的对象文件或是加载指定的对象文件；另一种方法是在 <code>Category</code>  的对象文件中添加 <code>Fake symbol</code> ，当 <code>Fake symbol</code> 被加载时 <code>Category</code> 的对象文件便一同被加载。</p>
-<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
-<li><a href="https://stackoverflow.com/questions/2567498/objective-c-categories-in-static-library" target="_blank" rel="external">Objective-C categories in static library</a></li>
-<li><a href="http://www.dreamingwish.com/frontui/article/default/the-create-the-static-the-library-containing-the-category.html" target="_blank" rel="external">创建含有category的静态库,selector not recognized的解决方案</a></li>
+        <p>macOS 系统下自带了 Apache 和 PHP 环境，如果有需要的话，以下命令来控制服务器的启动、重启与停止：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 启动 Apache 服务器</span></div><div class="line"><span class="variable">$sudo</span> apachectl start</div><div class="line"></div><div class="line"><span class="comment"># 重启 Apache 服务器</span></div><div class="line"><span class="variable">$sudo</span> apachectl restart</div><div class="line"></div><div class="line"><span class="comment"># 停止 Apache 服务器</span></div><div class="line"><span class="variable">$sudo</span> apachectl stop</div></pre></td></tr></table></figure>
+<p>Apache 服务一些信息：</p>
+<ul>
+<li>Web 跟目录在： <code>/Library/WebServer/Documents</code></li>
+<li>配置文件路径：<code>/etc/apache2</code></li>
+</ul>
+<p>将文件放至 Web 根目录下用户即可方法，服务的运行端口的配置都可以在 <code>httpd.conf</code> 找到配置项。</p>
+<p>开启 PHP 模块：</p>
+<ul>
+<li>找到并打开配置文件 <code>/etc/apache2/httpd.conf</code> </li>
+<li>搜索 <code>libphp</code> 字样找到类似 <code>#LoadModule php7_module libexec/apache2/libphp7.so</code> 的配置项</li>
+<li>去除前面的 <code>#</code> 字样来开启 PHP 模块</li>
+<li>执行 <code>sudo apachectl restart</code> 命令来重启 Apache 服务器</li>
 </ul>
 
       
@@ -439,7 +430,7 @@
     </li>
     <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="http://enkichen.com/2017/09/13/ios-static-library-categories/" title="iOS 静态库中的 Category 运行时错误">http://enkichen.com/2017/09/13/ios-static-library-categories/</a>
+      <a href="http://enkichen.com/2019/07/11/macos-web-server/" title="macOS 开启 Web 服务器">http://enkichen.com/2019/07/11/macos-web-server/</a>
     </li>
     <li class="post-copyright-license">
       <strong>版权声明： </strong>
@@ -453,12 +444,6 @@
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/Category/" rel="tag"># Category</a>
-          
-        </div>
-      
 
       
         
@@ -468,18 +453,14 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/11/26/image-h264-encode/" rel="next" title="图像编码与 H264 基础知识">
-                <i class="fa fa-chevron-left"></i> 图像编码与 H264 基础知识
-              </a>
-            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/07/29/webrtc-drop-frame/" rel="prev" title="WebRTC 的丢帧策略">
-                WebRTC 的丢帧策略 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/06/05/git-automatic-completion/" rel="prev" title="mac 平台 git 命令自动补全">
+                mac 平台 git 命令自动补全 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -552,17 +533,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <section class="site-overview sidebar-panel">
+      <section class="site-overview sidebar-panel sidebar-panel-active">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/uploads/avatar.jpg"
@@ -642,22 +614,6 @@
 
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#编译-链接过程"><span class="nav-number">1.</span> <span class="nav-text">编译/链接过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方案"><span class="nav-number">2.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题的处理"><span class="nav-number">3.</span> <span class="nav-text">问题的处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       
