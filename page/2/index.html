@@ -272,7 +272,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2016/04/14/git-basic-commands/">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2017/09/13/ios-static-library-categories/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Enki">
@@ -294,8 +294,8 @@
             
               
                 
-                <a class="post-title-link" href="/2016/04/14/git-basic-commands/" itemprop="url">
-                  常用的Git命令
+                <a class="post-title-link" href="/2017/09/13/ios-static-library-categories/" itemprop="url">
+                  iOS 静态库中的 Category 运行时错误
                 </a>
               
             
@@ -311,8 +311,328 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-04-14T09:19:04+08:00">
-                2016-04-14
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-13T11:49:24+08:00">
+                2017-09-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">开发笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/09/13/ios-static-library-categories/" class="leancloud_visitors" data-flag-title="iOS 静态库中的 Category 运行时错误">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>最近在弄 iOS 下的音视频 SDK 的移植和适配，该 SDK 是基于 WebRTC 项目但并未使用官方的 <code>ninja</code> 编译脚本，而是使用的 <code>cmake</code> 作为编译工具。在 WebRTC 的音频模块中引用了一个 <code>UIDevice</code> 的 <code>Category</code> 来做设备类型的判断，编译和链接都没有出现问题，但在运行时出现了 <code>selector not recognized</code> 的异常。该异常可以从我之前的  <a href="http://www.enkichen.com/2017/04/21/ios-message-forwarding/">《iOS 运行时之消息转发机制》</a> 文章中了解到，由于对象接收到了一个无法处理该 <code>selector</code> ，经过消息转发后还未得到处理，会在 <code>doesNotRecognizeSelector</code> 方法中抛出的异常。</p>
+<p><code>Category</code> 以及一些其他的工具类被编译在一个基础的静态库中，在音频模块中引用该静态库，除了 <code>Category</code> 代码其他所有的代码都能正常编译、链接以及运行，但唯独 <code>Category</code> 在运行时出现了错误，由于 <code>Category</code> 的 Objective-C 语言的特性，最开始我以为需要为编译器添加针对 <code>Category</code> 的参数，找了很久也没找到针对 <code>Category</code> 特性的编译参数，无奈之下只好求助 <code>stackoverflow</code> ，最终找到了根本原因和解决方法。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/09/13/ios-static-library-categories/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2017/07/29/webrtc-drop-frame/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Enki">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Enki's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/07/29/webrtc-drop-frame/" itemprop="url">
+                  WebRTC 的丢帧策略
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-29T17:35:15+08:00">
+                2017-07-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/音视频-WebRTC/" itemprop="url" rel="index">
+                    <span itemprop="name">音视频/WebRTC</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/07/29/webrtc-drop-frame/" class="leancloud_visitors" data-flag-title="WebRTC 的丢帧策略">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <blockquote>
+<p>最近在弄一个 Android 平台下远程桌面项目，是基于 WebRTC 框架实现的，由于平台限制，芯片是用的特定厂商的芯片，桌面采集以及 H264 硬编码都是芯片厂商提供方案，能够有很好性能表现。在将桌面的采集以及 H264 的编码库整合到 WebRTC 框架中时，发现的存在画面延时的问题，于是对 WebRTC 的编解码框架的源码进行了分析，了解到 WebRTC 的两个特性。</p>
+</blockquote>
+<p>在 WebRTC 中有很多可以控制视频帧率和码率的行为，这里介绍一下当视频采集过快以及编码器输出码率过高时，WebRTC 主动丢帧的策略。这里采集过快是指视频采集的速度大于编码器处理的速度。例如视频采集线程每秒采集 30 帧，而编码线程每秒只能处理 15 帧，这时候就出现了采集过快或者说是编码器太慢。编码器输出码率过高，是指编码器的输出码率大于设定的最高输出码率值，例如设置编码器码率为 1024kbps，而实际产生的码率是 1500kbps 这时候就出现了输出码率过高的情况。本文主要介绍上述两种情况下 WebRTC 是如何实现丢帧行为的。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/07/29/webrtc-drop-frame/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2017/06/06/iperf-introduce/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Enki">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Enki's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/06/06/iperf-introduce/" itemprop="url">
+                  iperf 的介绍和使用
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-06T20:31:58+08:00">
+                2017-06-06
               </time>
             
 
@@ -351,7 +671,7 @@
 
           
           
-             <span id="/2016/04/14/git-basic-commands/" class="leancloud_visitors" data-flag-title="常用的Git命令">
+             <span id="/2017/06/06/iperf-introduce/" class="leancloud_visitors" data-flag-title="iperf 的介绍和使用">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -381,822 +701,345 @@
 
       
         
-          <p>1年多以前从SVN阵营转向Git，SVN用的最多就是图行化工具，刚转到Git时也是喜欢用图形化工具和XCode自带Git管理工具的，但是在使用XCode自带Git管理工具出过几次问题后，逐渐转向使用命令。现在基本上是使用<code>SourceTree</code>来做一些浏览性的工作比如commit改动、分支走向等，其他的基本上使用命令来操作。Git的好我就不多说，先看下面一张图了解一下Git的一些名词，在看看常用的Git命令。</p>
-<h3 id="Git图解"><a href="#Git图解" class="headerlink" title="Git图解"></a>Git图解</h3><p><img src="/uploads/gitframe.png" alt=""></p>
-<ul>
-<li><strong>Workspace</strong>：工作区</li>
-<li><strong>Index / Stage</strong>：暂存区</li>
-<li><strong>Repository</strong>：仓库区（或本地仓库）</li>
-<li><strong>Remote</strong>：远程仓库</li>
+          <p><code>iperf</code> 是一个网络性能测试工具，做服务开发或者测试的同学，接触的可能比较多。因为最近有用到这个工具，并且这个工具做的非常不错，这里记录一下工具的使用方法。<code>iperf</code> 是个开源并且跨平台的软件，代码托管在 <a href="https://github.com/esnet/iperf">GitHub</a> 上，可以从 <a href="https://github.com/esnet/iperf/releases">Releases</a> 找到各个发行版本，也可以去 <a href="https://iperf.fr/iperf-download.php">官网</a> 下载各个平台的版本。 使用 <code>iperf</code> 时，需要分别运行服务端和客户端，在测试是最好保证两个端的软件版本一致，这样会免去一些没必要的麻烦。</p>
+<p>下载好后，可以先在本机做一个简单的回环测试，结果如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"># 运行服务端</div><div class="line">$ ./iperf -s</div><div class="line">------------------------------------------------------------</div><div class="line">Server listening on TCP port 5001</div><div class="line">TCP window size:  128 KByte (default)</div><div class="line">------------------------------------------------------------</div><div class="line">[  4] local 127.0.0.1 port 5001 connected with 127.0.0.1 port 54817</div><div class="line">[ ID] Interval       Transfer     Bandwidth</div><div class="line">[  4]  0.0-10.0 sec  35.1 GBytes  30.1 Gbits/sec</div><div class="line"></div><div class="line"># 运行客户端</div><div class="line">$ ./iperf -c 127.0.0.1</div><div class="line">------------------------------------------------------------</div><div class="line">Client connecting to 127.0.0.1, TCP port 5001</div><div class="line">TCP window size:  144 KByte (default)</div><div class="line">------------------------------------------------------------</div><div class="line">[  4] local 127.0.0.1 port 54817 connected with 127.0.0.1 port 5001</div><div class="line">[ ID] Interval       Transfer     Bandwidth</div><div class="line">[  4]  0.0-10.0 sec  35.1 GBytes  30.1 Gbits/sec</div></pre></td></tr></table></figure>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/06/06/iperf-introduce/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2017/05/23/dnsmasq-introduce/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Enki">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Enki's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/05/23/dnsmasq-introduce/" itemprop="url">
+                  Dnsmasq 介绍与使用
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-23T14:06:00+08:00">
+                2017-05-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/知识整理-总结/" itemprop="url" rel="index">
+                    <span itemprop="name">知识整理/总结</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/05/23/dnsmasq-introduce/" class="leancloud_visitors" data-flag-title="Dnsmasq 介绍与使用">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <blockquote>
+<p>上一个星期在查找一个设备无法解析公司内部域名的问题，最终查出来问题是在网关设备上运行的 <code>Dnsmasq</code> 服务没有正确的配置上游 DNS 服务器，导致内网域名无法被正常的解析。在这期间对 <code>DNS协议</code> 又重新学习了一番，并且对 <code>Dnsmasq</code> 服务有了一些了解，结合网上一些资料，对 <code>Dnsmasq</code> 提供的 DNS 和 DHCP 服务的配置做一些总结和备忘。</p>
+</blockquote>
+<p><code>Dnsmasq</code>  是一个开源的项目，可以在 <a href="http://www.thekelleys.org.uk/dnsmasq/doc.html">thekelleys</a> 上找到最新版本和源码，它能提供 DNS 、DHCP、TFTP、PXE 等功能。<code>Dnsmasq</code> 的 DNS 服务工作原理是，当接收到一个 DNS 请求是， <code>Dnsmasq</code> 首先会查找 <code>/etc/hosts</code> 文件，如果没有查找到，会查询本地 DNS 缓存记录，如果还是未找到对应的记录，则会将请求装发到 <code>/etc/resolv.conf</code> 文件中定义的上游 DNS 服务器中，从而实现对域名的解析。</p>
+<p>基于上述原理，我们可以在 <code>/etc/hosts</code> 文件中添加本地内网的域名解析，从而实现本地内网的域名解析。同时我们还可以使用 <code>Dnsmasq</code> 来为一些特定的域名指定 DNS 服务器，或者阻止某些域名的访问。由于 <code>Dnsmasq</code> 会缓存上游 DNS 服务的查询记录，从而可以提高访问过的网址的连接速度。</p>
+<p>默认情况下，<code>Dnsmasq</code> 会从 <code>/etc/dnsmasq.conf</code> 读取配置项，我们也可以使用 <code>-C</code> 的启动参数来指定配置文件。下面介绍一下常用的 DNS 和 DHCP 服务的配置参数。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/05/23/dnsmasq-introduce/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2017/05/12/webrtc-ios-build/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Enki">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Enki's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/05/12/webrtc-ios-build/" itemprop="url">
+                  WebRTC iOS&OSX 库的编译
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-12T13:04:36+08:00">
+                2017-05-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/知识整理-总结/" itemprop="url" rel="index">
+                    <span itemprop="name">知识整理/总结</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/05/12/webrtc-ios-build/" class="leancloud_visitors" data-flag-title="WebRTC iOS&OSX 库的编译">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h3 id="安装-Depot-tools"><a href="#安装-Depot-tools" class="headerlink" title="安装 Depot_tools"></a>安装 Depot_tools</h3><ul>
+<li>git 命令获取 depot_tools：</li>
 </ul>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/04/14/git-basic-commands/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2016/04/12/certification-and-pki/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Enki">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Enki's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/04/12/certification-and-pki/" itemprop="url">
-                  PKI系统与数字证书结构
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-04-12T21:24:29+08:00">
-                2016-04-12
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/知识整理-总结/" itemprop="url" rel="index">
-                    <span itemprop="name">知识整理/总结</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2016/04/12/certification-and-pki/" class="leancloud_visitors" data-flag-title="PKI系统与数字证书结构">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <blockquote>
-<p>在上一篇<a href="http://www.enkichen.com/2016/02/26/digital-certificate-based/">《数字证书的基础知识》</a>中介绍了数字证书的一些基础知识以及数字证书的作用，但是并没有提到数字证书的管理，比如数字证书的申请，数字证书的文件格式等知识。这里为大家整理和总结这些相关知识点。</p>
-</blockquote>
-<p>PKI（Public Key Infrastructure）翻译过来就是公钥基础设施，可以理解为利用公钥技术为网络应用提供加密和数字签名等密码服务以及必需的密钥和证书管理体系。它是一个提供安全服务的基础设施，PKI技术是信息安全技术的核心，同时也是电子商务的关键和基础技术。</p>
-<blockquote>
-<p>PKI既不是一个协议，也不是一个软件，它是一个标准，在这个标准之下发展出的为了实现安全基础服务目的的技术统称为PKI。  </p>
-</blockquote>
-<h3 id="PKI的组成"><a href="#PKI的组成" class="headerlink" title="PKI的组成"></a>PKI的组成</h3>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/04/12/certification-and-pki/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2016/02/26/digital-certificate-based/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Enki">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Enki's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/02/26/digital-certificate-based/" itemprop="url">
-                  数字证书的基础知识
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-02-26T20:38:53+08:00">
-                2016-02-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/知识整理-总结/" itemprop="url" rel="index">
-                    <span itemprop="name">知识整理/总结</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2016/02/26/digital-certificate-based/" class="leancloud_visitors" data-flag-title="数字证书的基础知识">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <blockquote>
-<p>在之前的<a href="http://www.enkichen.com/2016/01/15/ios-certification-and-code-sign-note/">《iOS开发者证书以及代码签名学习笔记》</a>博文中介绍了iOS开发证书以及代码签名相关的知识点，为了更好理解其中证书的特性，这里对数字证书以及相关的知识进行了整理和总结。</p>
-</blockquote>
-<p>在讲数字证书之前必须要讲<strong>非对称加密算法</strong>和<strong>摘要算法</strong>，因为数字证书的基础就是各种加解密算法（非对称加密、摘要算法），而其中的核心就是非对称加密算法了。目前而言加密方法可以分为两大类。一类是<strong>单钥加密</strong>（private key cryptography）也可以称为对称加密，还有一类叫做<strong>双钥加密</strong>（public key cryptography）也可称为非对称加密。前者的加密和解密过程都用同一套密码，后者的加密和解密过程用的是不同的密码。下面来看看对称加密、非对称加密以及摘要算法，他们是怎样应用在数字证书中的。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/02/26/digital-certificate-based/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2016/01/15/ios-certification-and-code-sign-note/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Enki">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Enki's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/01/15/ios-certification-and-code-sign-note/" itemprop="url">
-                  iOS开发者证书以及代码签名学习笔记
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-01-15T17:47:06+08:00">
-                2016-01-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/知识整理-总结/" itemprop="url" rel="index">
-                    <span itemprop="name">知识整理/总结</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2016/01/15/ios-certification-and-code-sign-note/" class="leancloud_visitors" data-flag-title="iOS开发者证书以及代码签名学习笔记">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <blockquote>
-<p>最近需要给iOS开发团队做一次关于iOS开发证书以及代码签名的分享，于是花了点时间把这一块的知识重新学习和整理了一遍，从而有了这篇学习笔记。其中很多一些文字都是从网站或者博客上摘抄过来，为了阅读方便也做了一些调整，说白了我只是做了一些知识的梳理和整合。  </p>
-<p>该笔记涉及到内容有：开发者账号、签名证书、标识符（Identifiers）、设备（Devices）、APP授权机制、配置文件、ipa文件的签名和安全验证。</p>
-</blockquote>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/01/15/ios-certification-and-code-sign-note/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2016/01/05/UIWindow-cannot-rotate/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Enki">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Enki's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/01/05/UIWindow-cannot-rotate/" itemprop="url">
-                  无法旋转的UIWindow子类
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-01-05T10:36:34+08:00">
-                2016-01-05
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/开发笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">开发笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2016/01/05/UIWindow-cannot-rotate/" class="leancloud_visitors" data-flag-title="无法旋转的UIWindow子类">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>项目中一直用了两个<strong>UIWindow</strong>，一个是框架默认的，另一个是用来显示调试信息的<strong>UIWindow</strong>。至于为什么要用一个<strong>UIWindow</strong>，而不是用<strong>UIView</strong>呢，是因为<strong>UIView</strong>旋转控制太麻烦了，如果用<strong>UIView</strong>加一个<strong>UIViewController</strong>会方便很多，而且也不用考虑系统版本的区别。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/01/05/UIWindow-cannot-rotate/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2015/12/29/ios-xia-opengl-xu-yao-zhu-yi-de-ji-dian/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Enki">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Enki's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/12/29/ios-xia-opengl-xu-yao-zhu-yi-de-ji-dian/" itemprop="url">
-                  iOS下使用OpenGL要注意的几点
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-29T16:59:49+08:00">
-                2015-12-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/开发笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">开发笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2015/12/29/ios-xia-opengl-xu-yao-zhu-yi-de-ji-dian/" class="leancloud_visitors" data-flag-title="iOS下使用OpenGL要注意的几点">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>因为项目中使用到了OpenGL ES做绘图，记录一下一些要注意的点：  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git</div></pre></td></tr></table></figure>
 <ul>
-<li><em>glGenTextures()</em>方法申请到的纹理对象ID，会由系统控制其对象的释放（也可以使用<em>glDeleteTextures()</em>进行手动释放），所以在使用之前需要使用<em>glIsTexture()</em>来检测该纹理ID是否可用，当为false时，需要重新生成纹理对象ID，如果继续使用该纹理ID，会无法绘制从而导致绘制时为纯白色。
+<li>配置坏境变量</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ echo &quot;export PATH=$PWD/depot_tools:$PATH&quot; &gt; $HOME/.bash_profile</div><div class="line">$ source $HOME/.bash_profile</div></pre></td></tr></table></figure>
+<ul>
+<li>检测配置是否成功</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ echo $PATH</div></pre></td></tr></table></figure>
+<h3 id="安装-ninja"><a href="#安装-ninja" class="headerlink" title="安装 ninja"></a>安装 ninja</h3>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2015/12/29/ios-xia-opengl-xu-yao-zhu-yi-de-ji-dian/#more" rel="contents">
+            <a class="btn" href="/2017/05/12/webrtc-ios-build/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1242,7 +1085,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2015/12/22/sdwebimage-issues/">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2017/04/21/ios-message-forwarding/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Enki">
@@ -1264,8 +1107,8 @@
             
               
                 
-                <a class="post-title-link" href="/2015/12/22/sdwebimage-issues/" itemprop="url">
-                  优化APP时发现的SDWebImage的问题
+                <a class="post-title-link" href="/2017/04/21/ios-message-forwarding/" itemprop="url">
+                  iOS 运行时之消息转发机制
                 </a>
               
             
@@ -1281,8 +1124,498 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-22T19:34:17+08:00">
-                2015-12-22
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-21T14:49:54+08:00">
+                2017-04-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/知识整理-总结/" itemprop="url" rel="index">
+                    <span itemprop="name">知识整理/总结</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/04/21/ios-message-forwarding/" class="leancloud_visitors" data-flag-title="iOS 运行时之消息转发机制">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>今天写一篇老生常谈的话题 —— Objective-C 的消息转发机制。Objective-C 下所有的方法调用都可以理解为，给一个对象发送一个消息。一个对象接收到消息后，会从当前类的方法列表或者父类的方法列表查找到对应的方法实现（IMP）来处理该消息。大致流程如下：</p>
+<ol>
+<li>通过 <code>NSObject</code> 的 <em>isa</em> 指针找到对应的 Class</li>
+<li>在 Class 的方法列表中找到对应的 <em>selector</em></li>
+<li>如果在当前 Class 中未能找到 <em>selector</em> 则往父类的方法列表中继续查找</li>
+<li>如果能找到对应的 <em>selector</em> 则去执行对象的方法实现（IMP）</li>
+</ol>
+<p>在上述流程中如果不能找对对应的 <em>selector</em> 时，这时候就会进入消息转发机制。消息转发机制可分为两个阶段，在这两个阶段中，有 3 次机会来处理之前未能处理 <em>selector</em>，越往后所花费的代价将越大，处理的灵活程度也就越高。如下图所示：</p>
+<p><img src="/uploads/forwardflow.png" alt="消息转发流程"><br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/04/21/ios-message-forwarding/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2017/02/18/ios-associative/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Enki">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Enki's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/02/18/ios-associative/" itemprop="url">
+                  iOS 运行时之 Associative(关联)
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-02-18T12:42:00+08:00">
+                2017-02-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/知识整理-总结/" itemprop="url" rel="index">
+                    <span itemprop="name">知识整理/总结</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/02/18/ios-associative/" class="leancloud_visitors" data-flag-title="iOS 运行时之 Associative(关联)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>iOS 下有很多运行时特性，这里介绍一下 <code>Associative(关联)</code> 这个运行时特性，以及它一些使用场景。<code>Associative</code> 意思为关联，能够将两个对象建立一种关系。这种关系是一种 <code>从属</code> 关系，也就是说有一个 <code>关联者</code> 和一个 <code>被关联者</code>。比如说我们可以将一个 <code>NSString</code> 对象关联到一个 <code>UIView</code> 对象上。这里的 <code>NSString</code> 对象就是 <code>被关联者</code>, <code>UIView</code> 对象就是 <code>关联者</code>。</p>
+<p>在 <code>objc/runtime.h</code> 文件中，找到 <code>Associative</code> 相关的 API 定义，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line">/** </div><div class="line"> * Sets an associated value for a given object using a given key and association policy.</div><div class="line"> * </div><div class="line"> * @param object The source object for the association.</div><div class="line"> * @param key The key for the association.</div><div class="line"> * @param value The value to associate with the key key for object. Pass nil to clear an existing association.</div><div class="line"> * @param policy The policy for the association. For possible values, see “Associative Object Behaviors.”</div><div class="line"> * </div><div class="line"> * @see objc_setAssociatedObject</div><div class="line"> * @see objc_removeAssociatedObjects</div><div class="line"> */</div><div class="line">OBJC_EXPORT void objc_setAssociatedObject(id object, const void *key, id value, objc_AssociationPolicy policy)</div><div class="line">    OBJC_AVAILABLE(10.6, 3.1, 9.0, 1.0);</div><div class="line"></div><div class="line">/** </div><div class="line"> * Returns the value associated with a given object for a given key.</div><div class="line"> * </div><div class="line"> * @param object The source object for the association.</div><div class="line"> * @param key The key for the association.</div><div class="line"> * </div><div class="line"> * @return The value associated with the key \e key for \e object.</div><div class="line"> * </div><div class="line"> * @see objc_setAssociatedObject</div><div class="line"> */</div><div class="line">OBJC_EXPORT id objc_getAssociatedObject(id object, const void *key)</div><div class="line">    OBJC_AVAILABLE(10.6, 3.1, 9.0, 1.0);</div><div class="line"></div><div class="line">/** </div><div class="line"> * Removes all associations for a given object.</div><div class="line"> * </div><div class="line"> * @param object An object that maintains associated objects.</div><div class="line"> * </div><div class="line"> * @note The main purpose of this function is to make it easy to return an object </div><div class="line"> *  to a &quot;pristine state”. You should not use this function for general removal of</div><div class="line"> *  associations from objects, since it also removes associations that other clients</div><div class="line"> *  may have added to the object. Typically you should use \c objc_setAssociatedObject </div><div class="line"> *  with a nil value to clear an association.</div><div class="line"> * </div><div class="line"> * @see objc_setAssociatedObject</div><div class="line"> * @see objc_getAssociatedObject</div><div class="line"> */</div><div class="line">OBJC_EXPORT void objc_removeAssociatedObjects(id object)</div><div class="line">    OBJC_AVAILABLE(10.6, 3.1, 9.0, 1.0);</div></pre></td></tr></table></figure>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/02/18/ios-associative/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2017/02/17/protobuf-introduce/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Enki">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Enki's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/02/17/protobuf-introduce/" itemprop="url">
+                  Protocol Buffer 简介与使用
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-02-17T14:58:27+08:00">
+                2017-02-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/知识整理-总结/" itemprop="url" rel="index">
+                    <span itemprop="name">知识整理/总结</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/02/17/protobuf-introduce/" class="leancloud_visitors" data-flag-title="Protocol Buffer 简介与使用">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>Protocol Buffer(简称Protobuf或PB)是由 Google 开发的，原本用来解决索引服务器的请求、响应协议，后面才对外使用和开源的，它是一种数据交换格式，与 XML 和 JSON 相比 ，它是一种二进制格式，避免了各种文本格式转换的问题，并且更体积更小、速度更快使用更简单方便，还自带部分数据压缩功能，在网络传输时可以减少数据流量。同时它也是与平台和语言无关的，尤其在网络数据交换方面，使得它越来越流行。</p>
+<p>Protobuf 是一个开源项目，项目托管在 GitHub 上，链接为:<a href="https://github.com/google/protobuf">https://github.com/google/protobuf</a>，源码包含两部分内容：</p>
+<ul>
+<li><strong>PB基础库</strong>：用来完成对象模型与数据模型之前的转换</li>
+<li><strong>PB编译器</strong>：源码生成器，用来将 <em>.proto</em> 文件转换成对应语言的对象模型的源码</li>
+</ul>
+<p>Protobuf 截止目前最新版本为 <code>3.2.0-alpha-1</code> 版本，在 <code>3.0.0</code> 版本之前也就是 <code>2.6.1</code> 版本时官方只支持 <code>C++/Java/Python</code> 三种语言，<code>3.0.0</code> 版本之后才逐步支持其他语言。在这之前如果其他语言需要用到 Protobuf 都是通过第三方扩展来实现的，目前官方以及支持以下编程语言：</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/02/17/protobuf-introduce/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2016/08/29/http-Content-Type/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Enki">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Enki's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/08/29/http-Content-Type/" itemprop="url">
+                  HTTP 之 Content-Type
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-08-29T20:27:25+08:00">
+                2016-08-29
               </time>
             
 
@@ -1321,7 +1654,7 @@
 
           
           
-             <span id="/2015/12/22/sdwebimage-issues/" class="leancloud_visitors" data-flag-title="优化APP时发现的SDWebImage的问题">
+             <span id="/2016/08/29/http-Content-Type/" class="leancloud_visitors" data-flag-title="HTTP 之 Content-Type">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1351,10 +1684,12 @@
 
       
         
-          <h3 id="起因-旋转了的图片"><a href="#起因-旋转了的图片" class="headerlink" title="起因 旋转了的图片"></a>起因 旋转了的图片</h3><p>前段时间在对程序的绘图逻辑进行了使用OpenGL做优化，但是在使用OpenGL进行绘制时发现一些图片会莫名其妙的旋转，在细看了代码之后发现问题发生在<strong>UIImage</strong>对象的<strong>imageOrientation</strong>属性。该属性为枚举类型可以有以下取值：<br>
+          <p>在移动端开发中 HTTP 协议经常被用到，但是在面试或者工作中问到客户端和服务器传输业务数据，使用的数据的封装格式是什么以及怎么被封装到 HTTP 协议中时，很少有人能讲明白。</p>
+<p>在移动开发中 HTTP 协议为客户端到服务器端，提供了一条数据通道，能够将我们的业务数据传输到服务器，并且从服务器上获取响应数据。在 HTTP 协议头中的 <strong>Content-Type</strong> 字段描述了 <strong>HTTP</strong> 的 <strong>BODY</strong> 体的数据格式，而在 <strong>BODY</strong> 中可以定义我们业务数据的数据格式。<strong>Content-Type</strong> 字段可以用很多种类型，具体有哪些可以看 <a href="http://tool.oschina.net/commons"><strong>这里</strong></a>，并且也可以根据自身业务来自定义，不过这种做法比较少。这次我主要讲解三种格式分别为 <strong>application/x-www-form-urlencoded</strong>、<strong>application/json</strong> 以及 <strong>multipart/form-data</strong>，其他的格式可以自己理解。</p>
+<p>下面给各位吃瓜群众介绍上述三种格式在 <strong>GET</strong> 和 <strong>POST</strong> 两种请求方法中的区别，为了更直观的看到我们的数据的组织方式，我使用了 <strong>Charles</strong> 来进行抓包分析。<br>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2015/12/22/sdwebimage-issues/#more" rel="contents">
+            <a class="btn" href="/2016/08/29/http-Content-Type/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1400,7 +1735,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2015/12/19/First-blog/">
+    <link itemprop="mainEntityOfPage" href="http://enkichen.com/2016/07/22/development-of-small-notes/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Enki">
@@ -1422,8 +1757,8 @@
             
               
                 
-                <a class="post-title-link" href="/2015/12/19/First-blog/" itemprop="url">
-                  你好 Hexo
+                <a class="post-title-link" href="/2016/07/22/development-of-small-notes/" itemprop="url">
+                  两则开发小笔记
                 </a>
               
             
@@ -1439,8 +1774,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-19T09:02:51+08:00">
-                2015-12-19
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-07-22T14:22:53+08:00">
+                2016-07-22
               </time>
             
 
@@ -1462,8 +1797,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/default/" itemprop="url" rel="index">
-                    <span itemprop="name">default</span>
+                  <a href="/categories/开发笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">开发笔记</span>
                   </a>
                 </span>
 
@@ -1479,7 +1814,7 @@
 
           
           
-             <span id="/2015/12/19/First-blog/" class="leancloud_visitors" data-flag-title="你好 Hexo">
+             <span id="/2016/07/22/development-of-small-notes/" class="leancloud_visitors" data-flag-title="两则开发小笔记">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1509,10 +1844,16 @@
 
       
         
-          
-            <p>折腾了几天总算把博客搭建成功了，心情大好，本博客是基于 <a href="https://github.com/" target="_blank" rel="external"><strong>GitHub</strong></a> 和 <a href="https://hexo.io/" target="_blank" rel="external"><strong>Hexo</strong></a> 搭建，使用了 <a href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="external"><strong>NexT.Mist</strong></a> 主题，在万网购买的域名，两个域名分别为 <a href="http://www.enkichen.com" target="_blank" rel="external"><strong>www.enkichen.com</strong></a> 和 <a href="http://www.enkichen.cn" target="_blank" rel="external"><strong>www.enkichen.cn</strong></a>，5 年 400 多点大洋，个人觉得价格还算合适。</p>
-
-          
+          <p>好久没有写博客了，介绍一下项目中一个 Core Graphics 绘制图片时的效率优化方法，以及记录一下 GCDAsyncSocket 框架在读取网络数据要注意的一个点。</p>
+<h3 id="Core-Graphics-绘图性能对比"><a href="#Core-Graphics-绘图性能对比" class="headerlink" title="Core Graphics 绘图性能对比"></a>Core Graphics 绘图性能对比</h3><p>Core Graphics 框架为我们提供了 2D 绘图能力，在使用 Core Graphics 绘制图片时，不同的实现方法使得渲染图片的效率有很大差异，下面是提供两种不同实现方式的对比，看看 Core Graphics 在绘制图片时效率上的差异。</p>
+<p>测试方法为自定义一个 <code>UIView</code>，重写<code>- (void)drawRect:(CGRect)rect</code> 方法，在该方法中使用 Core Graphics 方式绘制图片。然后在开启一个定时器不断的调用 <code>- (void)setNeedsDisplay;</code> 方法来计算绘图所使用的时间。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/07/22/development-of-small-notes/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1549,7 +1890,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1616,7 +1957,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">36</span>
+                <span class="site-state-item-count">35</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
