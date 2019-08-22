@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://enkichen.com/2018/11/14/clone-webrtc/</loc>
+    
+    <lastmod>2019-08-22T13:47:08.419Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://enkichen.com/2019/07/11/macos-web-server/</loc>
     
     <lastmod>2019-07-27T00:06:25.886Z</lastmod>
@@ -26,13 +33,6 @@
     <loc>http://enkichen.com/2018/12/14/standard-deviation/</loc>
     
     <lastmod>2018-12-14T04:16:41.795Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://enkichen.com/2018/11/14/clone-webrtc/</loc>
-    
-    <lastmod>2018-12-14T01:00:15.903Z</lastmod>
     
   </url>
   
